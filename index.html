@@ -1513,12 +1513,15 @@
         <div id="m-bulk" class="modal-wrap hidden">
             <div class="modal">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-                    <div style="font-size:18px;font-weight:700">رفع بيانات المتدربين (Excel)</div>
+                    <div style="font-size:18px;font-weight:700">رفع المتدربين من فورم Excel</div>
                     <button class="icon-btn" onclick="closeModal('m-bulk')"><i class="ti ti-x"></i></button>
                 </div>
                 <div style="background:var(--color-background-info);border:1px solid rgba(26,115,232,0.2);border-radius:var(--border-radius-md);padding:12px;margin-bottom:16px;font-size:13px;color:var(--color-text-info);line-height:1.6;">
-                    <strong>ملاحظة:</strong> الأعمدة بالترتيب:<br>
-                    <span style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.5);padding:2px 4px;border-radius:4px;color:#333;" dir="ltr">employee_id | full_name | email | password | job_description | phone | title | supervisor | region | region_manager | branch | group | role</span>
+                    <strong>استخدم الفورم دي:</strong> حمل ملف Excel، اكتب بيانات المتدربين تحت الأعمدة، وارفعه هنا.<br>
+                    النظام بيتجاهل أول صف العناوين تلقائياً وبيقرأ الصفوف اللي بعده فقط.
+                    <div style="margin-top:10px;">
+                        <button class="sm primary" type="button" onclick="downloadTraineeTemplate()"><i class="ti ti-file-spreadsheet"></i>تحميل فورم المتدربين Excel</button>
+                    </div>
                 </div>
                 <div class="field"><label>اختر ملف (xlsx, xls, csv)</label><input type="file" id="bulk-file" accept=".xlsx,.xls,.csv" style="padding:6px;"></div>
                 <div id="bulk-preview" style="font-size:12px;color:var(--color-text-secondary);margin-top:6px;"></div>
@@ -1943,6 +1946,17 @@
                     <button onclick="closeModal('m-survey-trainee')">لاحقا</button>
                     <button class="primary" onclick="submitCourseSurvey()"><i class="ti ti-send"></i>إرسال التقييم</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Course Complete -->
+        <div id="m-course-complete" class="modal-wrap hidden">
+            <div class="modal" style="max-width:680px;text-align:center;">
+                <div style="font-size:64px;color:var(--color-text-success);margin-bottom:12px;"><i class="ti ti-confetti"></i></div>
+                <div style="font-size:24px;font-weight:800;margin-bottom:8px;">مبروك، انتهيت من الدورة</div>
+                <div style="font-size:15px;color:var(--color-text-secondary);margin-bottom:16px;">انتظر القادم من فريق التدريب والتطوير.</div>
+                <div id="course-complete-cert" style="margin:16px 0;"></div>
+                <button class="primary" onclick="finishCourseAndGoHome()"><i class="ti ti-home"></i>العودة للصفحة الرئيسية</button>
             </div>
         </div>
 
@@ -2587,7 +2601,12 @@
                 }
                 if (action === 'unenrollUser') {
                     const email = p.userEmail.trim().toLowerCase();
-                    await deleteDoc(doc(db, 'enrollments', `${email}_${p.courseId}`));
+                    const batch = writeBatch(db);
+                    batch.delete(doc(db, 'enrollments', `${email}_${p.courseId}`));
+                    const progSnap = await getDocs(query(collection(db, 'progress'), where('userEmail', '==', email), where('courseId', '==', p.courseId)));
+                    progSnap.forEach(d => batch.delete(d.ref));
+                    batch.delete(doc(db, 'certificates', `${email}_${p.courseId}`));
+                    await batch.commit();
                     return { success: true };
                 }
                 if (action === 'enrollUsers') {
@@ -3496,6 +3515,32 @@
                 loadUsers(); } else toast(r.error, 'error');
         }
 
+        function downloadTraineeTemplate() {
+            if (!window.XLSX) return toast('جاري تحميل مكتبة Excel، جرب تاني بعد ثواني', 'warning');
+            const headers = [[
+                'الرقم الوظيفي',
+                'الاسم الكامل',
+                'البريد الإلكتروني',
+                'كلمة المرور',
+                'وصف الوظيفة',
+                'رقم الهاتف',
+                'المسمى الوظيفي',
+                'المدير المباشر',
+                'الإقليم',
+                'مدير الإقليم',
+                'الفرع',
+                'الجروب',
+                'الصلاحية trainee / trainer / admin'
+            ]];
+            const blankRows = Array.from({ length: 100 }, () => Array(headers[0].length).fill(''));
+            const ws = window.XLSX.utils.aoa_to_sheet([...headers, ...blankRows]);
+            ws['!cols'] = headers[0].map((h, i) => ({ wch: i === 1 || i === 2 ? 26 : 18 }));
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, 'trainees_upload_form');
+            window.XLSX.writeFile(wb, 'deraah_trainees_upload_form.xlsx');
+            toast('تم تحميل فورم المتدربين');
+        }
+
         async function submitBulk() {
             const file = document.getElementById('bulk-file').files[0];
             if (!file) return toast('اختر ملف أولاً', 'warning');
@@ -3504,6 +3549,7 @@
             const wb = window.XLSX.read(data);
             const ws = wb.Sheets[wb.SheetNames[0]];
             const rows = window.XLSX.utils.sheet_to_json(ws, { header: 1 });
+            // أول صف عناوين الفورم، نسيبه ونقرأ البيانات من الصف الثاني.
             const users = rows.slice(1).map(r => ({
                 employee_id: r[0] || '',
                 full_name: r[1] || '',
@@ -4995,6 +5041,16 @@
             // Actually get enrollments from a separate call
             const enrSnaps = await getDocs(query(collection(db, 'enrollments'), where('userEmail', '==', email)));
             const enrolledCourses = enrSnaps.docs.map(d => d.data().courseId);
+            const adminProfileProgress = {};
+            for (const cid of enrolledCourses) {
+                const [courseProgress, courseItems] = await Promise.all([
+                    call({ action: 'getProgress', userEmail: email, courseId: cid }),
+                    call({ action: 'getVideos', courseId: cid })
+                ]);
+                const total = courseItems.success ? courseItems.videos.length : 0;
+                const done = courseProgress.success ? Object.values(courseProgress.progress).filter(x => x.completed === 'yes').length : 0;
+                adminProfileProgress[cid] = { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
+            }
 
             document.getElementById('ap-title').textContent = `ملف: ${u.full_name || u.email}`;
             const content = document.getElementById('admin-profile-content');
@@ -5024,13 +5080,11 @@
               <div style="font-weight:700;font-size:16px;margin-bottom:12px;"><i class="ti ti-book"></i> الدورات المسجلة (${enrolledCourses.length})</div>
               ${enrolledCourses.length ? enrolledCourses.map(cid => {
                 const course = CCACHE.find(c => c.course_id === cid);
-                const p = prog.success ? Object.values(prog.progress).filter(x => x.courseId === cid) : [];
-                const done = p.filter(x => x.completed === 'yes').length;
-                const total = p.length || 1;
+                const p = adminProfileProgress[cid] || { done: 0, total: 0, pct: 0 };
                 return `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--color-border-tertiary);border-radius:8px;margin-bottom:6px;">
                   <span style="font-weight:500;flex:1;">${course ? course.course_name : cid}</span>
-                  <span style="font-size:13px;color:var(--color-text-secondary);">${done}/${total} مكتمل</span>
-                  <div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:${total ? (done/total)*100 : 0}%;"></div></div>
+                  <span style="font-size:13px;color:${p.pct === 100 ? 'var(--color-text-success)' : 'var(--color-text-info)'};font-weight:700;">${p.pct}%</span>
+                  <div class="progress-bar" style="width:120px;"><div class="progress-fill" style="width:${p.pct}%;background:${p.pct === 100 ? '#0f9d58' : '#1a73e8'};"></div></div>
                 </div>`;
               }).join('') : '<div style="color:var(--color-text-secondary);">غير مسجل في أي دورة</div>'}
             </div>
@@ -5095,18 +5149,18 @@
 
         async function loadTraineeCourses() {
             const email = CU.email.trim().toLowerCase();
-            const [cr, enr] = await Promise.all([
-                call({ action: 'getCourses', userEmail: email, userRole: 'trainee' }),
-                call({ action: 'getProgress', userEmail: email, courseId: '_all' })
-            ]);
+            const enrSnaps = await getDocs(query(collection(db, 'enrollments'), where('userEmail', '==', email)));
+            const enrolledIds = enrSnaps.docs.map(d => d.data().courseId);
+            const cr = await call({ action: 'getCourses' });
+            const myCourses = cr.success ? cr.courses.filter(c => enrolledIds.includes(c.course_id) && effectiveCourseStatus(c) === 'active') : [];
             const grid = document.getElementById('tr-courses-grid');
-            if (!cr.success || !cr.courses.length) {
+            if (!cr.success || !myCourses.length) {
                 grid.innerHTML =
                     '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--color-text-secondary);"><i class="ti ti-books-off" style="font-size:64px;display:block;margin-bottom:16px;opacity:0.3;"></i><h3 style="font-size:20px;font-weight:700;">أنت غير مسجل في أي دورة</h3><p style="margin-top:8px;">تصفح الدورات المتاحة للالتحاق بها</p></div>';
                 return;
             }
             const progCache = {};
-            for (const c of cr.courses) {
+            for (const c of myCourses) {
                 const [pRes, vRes] = await Promise.all([
                     call({ action: 'getProgress', userEmail: email, courseId: c.course_id }),
                     call({ action: 'getVideos', courseId: c.course_id })
@@ -5118,7 +5172,7 @@
                     progCache[c.course_id] = { pct: Math.round((done / total) * 100), done, total };
                 } else progCache[c.course_id] = { pct: 0, done: 0, total: 0 };
             }
-            grid.innerHTML = cr.courses.map(c => {
+            grid.innerHTML = myCourses.map(c => {
                 const p = progCache[c.course_id] || { pct: 0 };
                 return `<div class="course-card" onclick="openPlayer('${c.course_id}')" style="display:flex;flex-direction:column;">
               <div class="course-thumb">
@@ -5207,6 +5261,14 @@
             const course = await call({ action: 'getCourse', courseId });
             document.getElementById('player-title').textContent = course.success ? course.course.course_name : '';
             const email = CU.email.trim().toLowerCase();
+            if (!isTraineeView) {
+                const enrollmentSnap = await getDoc(doc(db, 'enrollments', `${email}_${courseId}`));
+                if (!enrollmentSnap.exists()) {
+                    toast('أنت غير مسجل في هذه الدورة حالياً', 'warning');
+                    showTraineeTab('available');
+                    return;
+                }
+            }
             const [vr, pr] = await Promise.all([
                 call({ action: 'getVideos', courseId }),
                 call({ action: 'getProgress', userEmail: email, courseId })
@@ -5254,7 +5316,9 @@
             document.getElementById('v-title-lbl').textContent = v.title;
             document.getElementById('v-counter').textContent = `${contentTypeLabel(v)} ${idx+1} من ${CVV.length}`;
             document.getElementById('btn-prev').disabled = idx === 0;
-            document.getElementById('btn-next').disabled = idx === CVV.length - 1;
+            const nextBtn = document.getElementById('btn-next');
+            nextBtn.disabled = false;
+            nextBtn.innerHTML = idx === CVV.length - 1 ? '<i class="ti ti-flag-check"></i>إنهاء الدورة' : '<i class="ti ti-player-track-next"></i>الدرس التالي';
             const savedPct = prog && prog[v.video_id] ? parseFloat(prog[v.video_id].progressPercent) || 0 : 0;
             updatePBar(savedPct);
             document.getElementById('yt-frame').innerHTML = (v.content_type && v.content_type !== 'video') ? renderAssessmentItem(v, prog?.[v.video_id]) : renderDriveVideo(v);
@@ -5306,9 +5370,7 @@
                     updateCoursePBar(prog2);
                     const allDone = CVV.every(vi => prog2[vi.video_id] && prog2[vi.video_id].completed === 'yes');
                     if (allDone) {
-                        toast('🎓 مبروك! أتممت الدورة بالكامل!', 'success');
-                        checkAndShowCert();
-                        openCourseSurveyIfNeeded();
+                        await showCourseCompletePopup();
                     }
                 }
             }, 3000);
@@ -5373,7 +5435,7 @@
             renderPlaylist(prog);
             updateCoursePBar(prog);
             const allDone = CVV.every(vi => prog[vi.video_id] && prog[vi.video_id].completed === 'yes');
-            if (allDone) openCourseSurveyIfNeeded();
+            if (allDone) await showCourseCompletePopup();
             playAt(CVI, prog);
         }
 
@@ -5388,7 +5450,7 @@
             renderPlaylist(prog);
             updateCoursePBar(prog);
             const allDone = CVV.every(vi => prog[vi.video_id] && prog[vi.video_id].completed === 'yes');
-            if (allDone) openCourseSurveyIfNeeded();
+            if (allDone) await showCourseCompletePopup();
             toast('تم إكمال الدرس');
         }
 
@@ -5402,6 +5464,15 @@
 
         async function navVideo(dir) {
             const ni = CVI + dir;
+            if (dir === 1 && CVI === CVV.length - 1) {
+                const email = CU.email.trim().toLowerCase();
+                const pr = await call({ action: 'getProgress', userEmail: email, courseId: CCI });
+                const prog = pr.success ? pr.progress : {};
+                const cur = prog[CVV[CVI].video_id];
+                if (!cur || cur.completed !== 'yes') { toast('أكمل المحتوى الأخير أولاً', 'warning'); return; }
+                await showCourseCompletePopup();
+                return;
+            }
             if (ni < 0 || ni >= CVV.length) return;
             const email = CU.email.trim().toLowerCase();
             const pr = await call({ action: 'getProgress', userEmail: email, courseId: CCI });
@@ -5414,6 +5485,33 @@
             }
             if (PROG_INT) clearInterval(PROG_INT);
             playAt(ni, prog);
+        }
+
+        async function showCourseCompletePopup() {
+            const certBox = document.getElementById('course-complete-cert');
+            if (certBox) certBox.innerHTML = '';
+            const course = CCACHE.find(c => c.course_id === CCI) || (await call({ action: 'getCourse', courseId: CCI })).course;
+            if (course && course.certificate_enabled === 'yes') {
+                const cr = await call({ action: 'getUserCertificates', userEmail: CU.email });
+                const cert = cr.success ? cr.certificates.find(c => c.courseId === CCI || c.course_id === CCI) : null;
+                if (cert && certBox) {
+                    certBox.innerHTML = `
+                        <div class="glass-panel" style="padding:12px;">
+                            <div style="font-weight:700;margin-bottom:8px;"><i class="ti ti-certificate"></i>شهادتك جاهزة</div>
+                            <button class="primary sm" onclick="viewCert('${cert.certificate_image_url || ''}','${(cert.user_name || CU.full_name || CU.email).replace(/'/g,'\\\'')}','${(cert.course_name || course.course_name || '').replace(/'/g,'\\\'')}','${(cert.certificate_body || '').replace(/'/g,'\\\'')}','${encodeURIComponent(JSON.stringify(cert.certificate_builder || null))}')"><i class="ti ti-eye"></i>عرض الشهادة</button>
+                        </div>`;
+                } else if (certBox) {
+                    certBox.innerHTML = '<div style="color:var(--color-text-secondary);font-size:13px;">الشهادة سيتم إصدارها من الأدمن عند مراجعة الإكمال.</div>';
+                }
+            }
+            openModal('m-course-complete');
+        }
+
+        function finishCourseAndGoHome() {
+            closeModal('m-course-complete');
+            backToHome();
+            showTraineeTab('home');
+            setTimeout(openCourseSurveyIfNeeded, 500);
         }
 
         function updatePBar(pct) {
@@ -5429,7 +5527,7 @@
             const done = CVV.filter(v => prog[v.video_id] && prog[v.video_id].completed === 'yes').length;
             const pct = total ? Math.round((done / total) * 100) : 0;
             const badge = document.getElementById('player-progress-badge');
-            badge.textContent = `نسبة الإنجاز: ${pct}% (${done}/${total})`;
+            badge.textContent = `نسبة الإنجاز: ${pct}%`;
             badge.style.background = pct === 100 ? 'var(--color-background-success)' : 'var(--color-background-info)';
             badge.style.color = pct === 100 ? 'var(--color-text-success)' : 'var(--color-text-info)';
         }
@@ -5594,6 +5692,16 @@
             if (coursesRes.success) CCACHE = coursesRes.courses;
             const enrSnaps = await getDocs(query(collection(db, 'enrollments'), where('userEmail', '==', u.email.trim().toLowerCase())));
             const enrolledCourses = enrSnaps.docs.map(d => d.data().courseId);
+            const profileProgress = {};
+            for (const cid of enrolledCourses) {
+                const [courseProgress, courseItems] = await Promise.all([
+                    call({ action: 'getProgress', userEmail: u.email, courseId: cid }),
+                    call({ action: 'getVideos', courseId: cid })
+                ]);
+                const total = courseItems.success ? courseItems.videos.length : 0;
+                const done = courseProgress.success ? Object.values(courseProgress.progress).filter(x => x.completed === 'yes').length : 0;
+                profileProgress[cid] = { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
+            }
             content.innerHTML = `
             <div class="profile-header">
               <div class="big-avatar">
@@ -5630,13 +5738,11 @@
               <div style="font-weight:700;font-size:16px;margin-bottom:12px;"><i class="ti ti-book"></i> دوراتي</div>
               ${enrolledCourses.length ? enrolledCourses.map(cid => {
                 const c = CCACHE.find(x => x.course_id === cid) || { course_name: cid, course_id: cid };
-                const p = prog.success ? Object.values(prog.progress).filter(x => x.courseId === c.course_id) : [];
-                const done = p.filter(x => x.completed === 'yes').length;
-                const total = p.length || 1;
+                const p = profileProgress[cid] || { done: 0, total: 0, pct: 0 };
                 return `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--color-border-tertiary);border-radius:8px;margin-bottom:6px;">
                   <span style="font-weight:500;flex:1;">${c.course_name}</span>
-                  <span style="font-size:13px;color:var(--color-text-secondary);">${done}/${total}</span>
-                  <div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:${total ? (done/total)*100 : 0}%;"></div></div>
+                  <span style="font-size:13px;color:${p.pct === 100 ? 'var(--color-text-success)' : 'var(--color-text-info)'};font-weight:700;">${p.pct}%</span>
+                  <div class="progress-bar" style="width:120px;"><div class="progress-fill" style="width:${p.pct}%;background:${p.pct === 100 ? '#0f9d58' : '#1a73e8'};"></div></div>
                 </div>`;
               }).join('') : '<div style="color:var(--color-text-secondary);">غير مسجل في أي دورة</div>'}
             </div>
@@ -5770,6 +5876,7 @@
             submitAddUser,
             openEditUser,
             submitEditUser,
+            downloadTraineeTemplate,
             submitBulk,
             loadCourses,
             openAddCourseModal,
@@ -5863,6 +5970,8 @@
             playAt,
             playFromPlaylist,
             submitAssessmentItem,
+            showCourseCompletePopup,
+            finishCourseAndGoHome,
             markCurrentVideoComplete,
             navVideo,
             updatePBar,
