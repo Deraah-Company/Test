@@ -1071,28 +1071,28 @@
         <div id="login-screen" style="display:flex;align-items:center;justify-content:center;flex:1;background:var(--color-background-tertiary)">
             <div style="width:100%; max-width:400px; padding:20px;">
                 <div style="text-align:center;margin-bottom:2rem">
-                    <div style="width:64px;height:64px;background:var(--accent-gradient);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 12px rgba(26,115,232,0.3);">
+                    <div data-logo-box data-logo-size="32" style="width:64px;height:64px;background:var(--accent-gradient);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 12px rgba(26,115,232,0.3);overflow:hidden;">
                         <i class="ti ti-school" style="font-size:32px;color:#fff"></i>
                     </div>
                     <div data-academy-name style="font-size:24px;font-weight:700;color:var(--color-text-primary)">Deraah Academy</div>
                     <div style="font-size:14px;color:var(--color-text-secondary);margin-top:4px;">Training Academy</div>
-                    <div style="font-size:12px;color:var(--color-text-success);margin-top:8px;">نظام متكامل مع نقاط وشهادات وتفاعل</div>
                 </div>
                 <div class="card">
-                    <div class="field"><label>البريد الإلكتروني</label><input id="l-email" type="email" value="admin@academy.com" dir="ltr" style="text-align:left;"></div>
-                    <div class="field"><label>كلمة المرور</label><input id="l-pass" type="password" value="admin123" dir="ltr" style="text-align:left;"></div>
+                    <div class="field"><label>البريد الإلكتروني</label><input id="l-email" type="email" value="" dir="ltr" style="text-align:left;"></div>
+                    <div class="field"><label>كلمة المرور</label><input id="l-pass" type="password" value="" dir="ltr" style="text-align:left;"></div>
                     <button class="primary" style="width:100%;margin-top:10px;justify-content:center;padding:12px;font-size:15px;" onclick="doLogin()">
                         <i class="ti ti-login"></i> تسجيل الدخول
                     </button>
                     <div id="l-err" style="color:var(--color-text-danger);font-size:13px;margin-top:12px;text-align:center;font-weight:500;"></div>
                 </div>
+                <div style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin-top:14px;">جميع الحقوق محفوظة لفريق التدريب والتطوير درعه</div>
             </div>
         </div>
 
         <!-- ═══ ADMIN ═══ -->
         <div id="admin-screen" class="hidden" style="display:flex;flex-direction:column;flex:1;">
             <div class="topbar academy-bg" id="admin-topbar">
-                <div style="width:32px;height:32px;background:var(--accent-gradient);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div data-logo-box data-logo-size="18" style="width:32px;height:32px;background:var(--accent-gradient);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
                     <i class="ti ti-school" style="font-size:18px;color:#fff"></i>
                 </div>
                 <span data-academy-name style="font-size:16px;font-weight:700;flex:1">Deraah Academy</span>
@@ -1319,7 +1319,7 @@
         <!-- ═══ TRAINEE ═══ -->
         <div id="trainee-screen" class="hidden" style="display:flex;flex-direction:column;flex:1;">
             <div class="topbar academy-bg" id="trainee-topbar">
-                <div style="width:32px;height:32px;background:#0f9d58;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <div data-logo-box data-logo-size="18" style="width:32px;height:32px;background:#0f9d58;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
                     <i class="ti ti-school" style="font-size:18px;color:#fff"></i>
                 </div>
                 <span data-academy-name style="font-size:16px;font-weight:700;flex:1">Deraah Academy</span>
@@ -2147,6 +2147,10 @@
             return 'متدرب';
         }
 
+        function defaultLogoMarkup(size = 18) {
+            return `<i class="ti ti-school" style="font-size:${size}px;color:#fff"></i>`;
+        }
+
         function safeJson(v, fallback = null) {
             if (!v) return fallback;
             if (typeof v === 'object') return v;
@@ -2230,6 +2234,61 @@
             }
 
             return null;
+        }
+
+        async function hardDeleteUser(email) {
+            const normalizedEmail = email.trim().toLowerCase();
+            let batch = writeBatch(db);
+            let ops = 0;
+            const queueDelete = async (ref) => {
+                batch.delete(ref);
+                ops++;
+                if (ops >= 430) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    ops = 0;
+                }
+            };
+            const queueSet = async (ref, data) => {
+                batch.set(ref, data, { merge: true });
+                ops++;
+                if (ops >= 430) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    ops = 0;
+                }
+            };
+
+            const foundUser = await findUserByEmail(normalizedEmail);
+            if (foundUser) await queueDelete(foundUser.ref);
+            else await queueDelete(doc(db, 'users', normalizedEmail));
+
+            const userEmailCollections = [
+                'enrollments',
+                'progress',
+                'certificates',
+                'notifications',
+                'comments',
+                'video_likes',
+                'qa',
+                'survey_answers',
+                'points_log'
+            ];
+            for (const col of userEmailCollections) {
+                const snaps = await getDocs(query(collection(db, col), where('userEmail', '==', normalizedEmail)));
+                for (const d of snaps.docs) await queueDelete(d.ref);
+            }
+
+            const groupsSnap = await getDocs(collection(db, 'groups'));
+            for (const d of groupsSnap.docs) {
+                const data = d.data();
+                const members = Array.isArray(data.members) ? data.members : [];
+                if (members.includes(normalizedEmail)) {
+                    await queueSet(d.ref, { members: members.filter(m => m !== normalizedEmail) });
+                }
+            }
+
+            if (ops > 0) await batch.commit();
         }
 
         function driveId(url) {
@@ -2324,17 +2383,21 @@
                         error: 'الحساب غير مفعل، برجاء التواصل مع قسم التدريب' };
                         return { success: true, user };
                     }
-                    if (email === 'admin@academy.com' && p.password === 'admin123') {
-                        const admin = { email: 'admin@academy.com', password: 'admin123', role: 'admin',
-                            full_name: 'مدير النظام', status: 'active', points: 0 };
-                        await setDoc(doc(db, 'users', 'admin@academy.com'), admin);
-                        return { success: true, user: admin };
-                    }
                     return { success: false, error: 'بيانات الدخول غير صحيحة' };
                 }
                 if (action === 'getUsers') {
                     const snaps = await getDocs(collection(db, 'users'));
-                    return { success: true, users: snaps.docs.map(d => ({ ...d.data(), email: (d.data().email || d.id || '').trim().toLowerCase() })) };
+                    const roleRank = { trainee: 1, trainer: 2, admin: 3 };
+                    const byEmail = {};
+                    snaps.docs.map(d => ({ ...d.data(), email: (d.data().email || d.id || '').trim().toLowerCase() }))
+                        .filter(u => u.email && u.status !== 'deleted')
+                        .forEach(u => {
+                            const old = byEmail[u.email];
+                            if (!old || (roleRank[u.role || 'trainee'] || 1) >= (roleRank[old.role || 'trainee'] || 1)) {
+                                byEmail[u.email] = { ...old, ...u };
+                            }
+                        });
+                    return { success: true, users: Object.values(byEmail) };
                 }
                 if (action === 'addUser') {
                     const email = p.user.email.trim().toLowerCase();
@@ -2366,11 +2429,16 @@
                 }
                 if (action === 'deleteUser') {
                     const email = p.email.trim().toLowerCase();
-                    const foundUser = await findUserByEmail(email);
-                    await setDoc(foundUser ? foundUser.ref : doc(db, 'users', email), { status: 'deleted' }, { merge: true });
+                    await hardDeleteUser(email);
                     return { success: true };
                 }
                 if (action === 'setUsersStatus') {
+                    if (p.status === 'deleted') {
+                        for (const rawEmail of p.emails || []) {
+                            await hardDeleteUser(rawEmail);
+                        }
+                        return { success: true, message: `تم حذف ${p.emails.length} مستخدم نهائياً` };
+                    }
                     const batch = writeBatch(db);
                     for (const rawEmail of p.emails || []) {
                         const email = rawEmail.trim().toLowerCase();
@@ -3001,11 +3069,12 @@
             document.querySelectorAll('[data-academy-name]').forEach(el => el.textContent = academyName);
             PROMO_BANNERS = Array.isArray(s.promo_banners) ? s.promo_banners.filter(Boolean) : [];
             renderPromoCarousel();
-            if (s.logo_url) {
-                document.querySelectorAll('.topbar > div:first-child').forEach(el => {
-                    el.innerHTML = `<img src="${s.logo_url}" style="width:100%;height:100%;object-fit:contain;">`;
-                });
-            }
+            document.querySelectorAll('[data-logo-box]').forEach(el => {
+                const iconSize = parseInt(el.dataset.logoSize || '18', 10);
+                el.innerHTML = s.logo_url ?
+                    `<img src="${s.logo_url}" style="width:100%;height:100%;object-fit:contain;">` :
+                    defaultLogoMarkup(iconSize);
+            });
             if (s.background_image) {
                 const opacity = Math.max(0, Math.min(100, parseInt(s.background_opacity ?? 100))) / 100;
                 const overlay = 1 - opacity;
