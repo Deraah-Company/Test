@@ -1235,13 +1235,13 @@
                     <i class="ti ti-school" style="font-size:18px;color:#fff"></i>
                 </div>
                 <span data-academy-name style="font-size:16px;font-weight:700;flex:1">Deraah Academy</span>
-                <span class="badge badge-admin"><i class="ti ti-shield-check"></i>أدمن</span>
+                <span class="badge badge-admin" id="admin-role-badge"><i class="ti ti-shield-check"></i>أدمن</span>
                 <div class="avatar" id="adm-av" onclick="viewCurrentProfile()" style="cursor:pointer;">A</div>
                 <span style="font-size:14px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;" id="adm-name" onclick="viewCurrentProfile()">Admin</span>
                 <button class="icon-btn notif-btn" onclick="openNotifications()" title="الإشعارات"><i class="ti ti-bell"></i><span id="adm-notif-count" class="notif-dot-badge hidden">0</span></button>
                 <button class="icon-btn" onclick="toggleDarkMode()" title="Dark mode"><i class="ti ti-moon"></i></button>
                 <button class="icon-btn" onclick="toggleTraineeView()" title="عرض كمتدرِب"><i class="ti ti-eye"></i></button>
-                <button class="icon-btn" onclick="loadSettingsModal()" title="إعدادات الأكاديمية"><i class="ti ti-settings"></i></button>
+                <button class="icon-btn" id="top-settings-btn" onclick="loadSettingsModal()" title="إعدادات الأكاديمية"><i class="ti ti-settings"></i></button>
                 <button class="icon-btn" onclick="logout()" title="تسجيل الخروج"><i class="ti ti-logout"></i></button>
             </div>
             <div style="display:flex;flex:1;min-height:0">
@@ -1250,7 +1250,8 @@
                     <div class="nav-item" id="nav-users" onclick="toggleUsersMenu()"><i class="ti ti-users"></i><span>المستخدمون</span><i class="ti ti-chevron-down" style="margin-right:auto;"></i></div>
                     <div id="users-submenu" class="submenu-panel hidden">
                         <button onclick="openUsersRole('trainee')"><i class="ti ti-user"></i>المتدربين</button>
-                        <button onclick="openUsersRole('staff')"><i class="ti ti-shield"></i>المدربين / الأدمن</button>
+                        <button onclick="openUsersRole('trainer')"><i class="ti ti-chalkboard"></i>المدربين</button>
+                        <button onclick="openUsersRole('admin')"><i class="ti ti-shield"></i>الأدمن</button>
                     </div>
                     <div class="nav-item" id="nav-courses" onclick="showTab('courses')"><i class="ti ti-book"></i><span>الدورات</span></div>
                     <div class="nav-item" id="nav-paths" onclick="showTab('paths')"><i class="ti ti-route"></i><span>المسارات</span></div>
@@ -1288,7 +1289,8 @@
                             <div style="font-size:22px;font-weight:700;flex:1">إدارة المستخدمين</div>
                             <div class="seg-tabs">
                                 <button id="user-tab-trainee" class="active" onclick="setUserRoleView('trainee')">المتدربين</button>
-                                <button id="user-tab-staff" onclick="setUserRoleView('staff')">المدربين / الأدمن</button>
+                                <button id="user-tab-trainer" onclick="setUserRoleView('trainer')">المدربين</button>
+                                <button id="user-tab-admin" onclick="setUserRoleView('admin')">الأدمن</button>
                             </div>
                             <div style="position:relative;">
                                 <i class="ti ti-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);"></i>
@@ -1941,7 +1943,7 @@
                 </div>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-add-course')">إلغاء</button>
-                    <button class="primary" onclick="submitAddCourse()"><i class="ti ti-plus"></i>إنشاء الدورة</button>
+                    <button class="primary" id="course-save-btn" onclick="submitAddCourse()"><i class="ti ti-plus"></i>إنشاء الدورة</button>
                 </div>
             </div>
         </div>
@@ -2017,7 +2019,7 @@
                     <button class="icon-btn" onclick="closeModal('m-course-actions')"><i class="ti ti-x"></i></button>
                 </div>
                 <div id="course-actions-meta" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;"></div>
-                <div style="display:grid;gap:10px;">
+                <div id="course-actions-body" style="display:grid;gap:10px;">
                     <button class="primary" style="justify-content:flex-start;padding:14px;" onclick="openCoursePreviewFromActions()"><i class="ti ti-eye"></i> محتوى الدورة</button>
                     <button style="justify-content:flex-start;padding:14px;" onclick="openCourseEditFromActions()"><i class="ti ti-edit"></i> إدارة وتعديل الدورة</button>
                     <button style="justify-content:flex-start;padding:14px;" onclick="openManualProgressModal()"><i class="ti ti-progress-check"></i> تقدم يدوي / Mark Complete</button>
@@ -3336,6 +3338,68 @@
             return String(v || '').trim().toLowerCase();
         }
 
+        function isTrainer() {
+            return (CU?.role || '').toLowerCase() === 'trainer';
+        }
+
+        function isAdmin() {
+            return (CU?.role || '').toLowerCase() === 'admin';
+        }
+
+        function courseOwnerEmail(course) {
+            return normalizeEmail(course?.created_by || course?.createdBy || course?.trainer_email || course?.trainerEmail || '');
+        }
+
+        function trainerOwnsCourse(course) {
+            if (!isTrainer()) return true;
+            return courseOwnerEmail(course) === normalizeEmail(CU?.email);
+        }
+
+        function approvalStatus(course) {
+            if (!course) return 'approved';
+            return course.approval_status || course.approvalStatus || (effectiveCourseStatus(course) === 'active' ? 'approved' : 'draft');
+        }
+
+        function approvalBadge(course) {
+            const st = approvalStatus(course);
+            if (st === 'pending_review') return '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد مراجعة الأدمن</span>';
+            if (st === 'rejected') return '<span class="badge" style="background:#fde8e8;color:#b42318;"><i class="ti ti-circle-x"></i> مرفوضة</span>';
+            if (st === 'approved') return '<span class="badge" style="background:#e6f4ea;color:#188038;"><i class="ti ti-circle-check"></i> معتمدة</span>';
+            return '<span class="badge" style="background:#f1f3f4;color:#5f6368;"><i class="ti ti-file-pencil"></i> مسودة</span>';
+        }
+
+        function applyRoleShell() {
+            const trainer = isTrainer();
+            const badge = document.getElementById('admin-role-badge');
+            if (badge) {
+                badge.className = `badge ${trainer ? 'badge-trainee' : 'badge-admin'}`;
+                badge.innerHTML = trainer ? '<i class="ti ti-chalkboard"></i>مدرب' : '<i class="ti ti-shield-check"></i>أدمن';
+            }
+            document.getElementById('top-settings-btn')?.classList.toggle('hidden', trainer);
+            const trainerHidden = ['nav-dash', 'nav-users', 'nav-paths', 'nav-progress', 'nav-groups', 'nav-certs', 'nav-points', 'nav-activity', 'nav-announcements', 'nav-settings'];
+            trainerHidden.forEach(id => document.getElementById(id)?.classList.toggle('hidden', trainer));
+            ['nav-courses', 'nav-qa', 'nav-question-bank'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+            const menu = document.getElementById('users-submenu');
+            if (trainer && menu) {
+                menu.classList.add('hidden');
+                menu.style.display = 'none';
+            }
+        }
+
+        async function notifyAdminsCourseReview(course, edited = false) {
+            try {
+                const ur = await call({ action: 'getUsers' });
+                if (!ur.success) return;
+                const trainerName = CU?.full_name || CU?.email || 'مدرب';
+                const message = `${trainerName} ${edited ? 'عدّل دورة وينتظر المراجعة' : 'أرسل دورة جديدة للمراجعة'}: ${course.course_name || 'دورة بدون اسم'}`;
+                await Promise.all((ur.users || [])
+                    .filter(u => u.role === 'admin' && normalizeEmail(u.email) !== normalizeEmail(CU?.email))
+                    .map(u => call({ action: 'addNotification', userEmail: u.email, message, type: 'course_review', link: 'courses' })));
+            } catch (e) {
+                console.warn('course review notification failed', e);
+            }
+        }
+
         function toggleLearningPathAudience(type, value) {
             const key = type === 'group' ? 'LP_SELECTED_GROUPS' : type === 'region' ? 'LP_SELECTED_REGIONS' : 'LP_SELECTED_USERS';
             const current = key === 'LP_SELECTED_GROUPS' ? LP_SELECTED_GROUPS : key === 'LP_SELECTED_REGIONS' ? LP_SELECTED_REGIONS : LP_SELECTED_USERS;
@@ -4307,7 +4371,9 @@
                     // Load settings
                     const s = await call({ action: 'getSettings' });
                     if (s.success) applySettings(s.settings);
-                    r.user.role === 'admin' ? initAdmin() : initTrainee();
+                    if (r.user.role === 'admin') initAdmin();
+                    else if (r.user.role === 'trainer') initTrainer();
+                    else initTrainee();
                 } else document.getElementById('l-err').textContent = r.error;
             } catch (e) { document.getElementById('l-err').textContent = 'خطأ في الاتصال'; } finally { btn.innerHTML =
                     orig;
@@ -4414,12 +4480,32 @@
             if (CU.avatar_url) {
                 document.getElementById('adm-av').innerHTML = `<img src="${CU.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
             }
+            applyRoleShell();
             showTab('dash');
             loadGroupOptions();
             startNotificationPolling();
         }
 
+        function initTrainer() {
+            hide('login-screen');
+            const s = document.getElementById('admin-screen');
+            s.classList.remove('hidden');
+            s.style.display = 'flex';
+            document.getElementById('adm-name').textContent = CU.full_name || CU.email;
+            document.getElementById('adm-av').textContent = (CU.full_name || 'T')[0].toUpperCase();
+            if (CU.avatar_url) {
+                document.getElementById('adm-av').innerHTML = `<img src="${CU.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
+            }
+            applyRoleShell();
+            showTab('courses');
+            startNotificationPolling();
+        }
+
         function showTab(t) {
+            if (isTrainer()) {
+                const allowed = ['courses', 'course-detail', 'qa', 'question-bank'];
+                if (!allowed.includes(t)) t = 'courses';
+            }
             const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
             tabs.forEach(x => { const el = document.getElementById('tab-' + x); if (el) el.classList.add('hidden'); });
             const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
@@ -4553,7 +4639,8 @@
             USER_ROLE_VIEW = view;
             SELECTED_USERS.clear();
             document.getElementById('user-tab-trainee')?.classList.toggle('active', view === 'trainee');
-            document.getElementById('user-tab-staff')?.classList.toggle('active', view === 'staff');
+            document.getElementById('user-tab-trainer')?.classList.toggle('active', view === 'trainer');
+            document.getElementById('user-tab-admin')?.classList.toggle('active', view === 'admin');
             filterUsers();
         }
 
@@ -4581,7 +4668,9 @@
             const status = val('u-filter-status');
             return UCACHE.filter(u => {
                 const role = u.role || 'trainee';
-                const matchesRole = USER_ROLE_VIEW === 'trainee' ? role === 'trainee' : role !== 'trainee';
+                const matchesRole = USER_ROLE_VIEW === 'admin' ? role === 'admin' :
+                    USER_ROLE_VIEW === 'trainer' ? role === 'trainer' :
+                    role === 'trainee';
                 const matchesSearch = !q || (u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || (u.employee_id || '').toLowerCase().includes(q);
                 return matchesRole && matchesSearch &&
                     (!region || u.region === region) &&
@@ -4610,7 +4699,7 @@
               <td style="font-size:12px;font-family:monospace;direction:ltr;text-align:right;">${esc(u.password || '—')}</td>
               <td style="font-size:13px;">${esc(u.region || '—')}</td>
               <td style="font-size:13px;">${esc(u.group || '—')}</td>
-              <td><span class="badge badge-${u.role === 'admin' ? 'admin' : 'trainee'}">${roleLabel(u.role)}</span></td>
+              <td><span class="badge badge-${u.role === 'admin' ? 'admin' : u.role === 'trainer' ? 'active' : 'trainee'}">${roleLabel(u.role)}</span></td>
               <td><span class="badge badge-${u.status}">${u.status === 'active' ? 'نشط' : u.status === 'suspended' ? 'موقوف' : 'محذوف'}</span></td>
               <td>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
@@ -4986,6 +5075,7 @@
             const grid = document.getElementById('courses-grid');
             let courses = [...CCACHE];
             const q = (val('course-search') || '').trim().toLowerCase();
+            if (isTrainer()) courses = courses.filter(trainerOwnsCourse);
             if (CURRENT_COURSE_FILTER === 'public') courses = courses.filter(c => c.visibility === 'public');
             if (CURRENT_COURSE_FILTER === 'private') courses = courses.filter(c => c.visibility !== 'public');
             if (CURRENT_COURSE_FILTER === 'active') courses = courses.filter(c => effectiveCourseStatus(c) === 'active');
@@ -5011,6 +5101,8 @@
                 <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                   <span class="badge badge-${effectiveCourseStatus(c) === 'active' ? 'active' : 'suspended'}">${effectiveCourseStatus(c) === 'active' ? 'مفتوحة' : 'مسودة'}</span>
                   <span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>
+                  ${approvalBadge(c)}
+                  ${c.created_by_name ? `<span class="badge" style="background:#eef2ff;color:#3730a3;"><i class="ti ti-chalkboard"></i> ${esc(c.created_by_name)}</span>` : ''}
                   ${hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}
                 </div>
               </div>
@@ -5033,12 +5125,15 @@
             await loadCourseCertTemplateOptions('');
             toggleCertImg();
             updateCourseThumbPreview();
+            const saveBtn = document.getElementById('course-save-btn');
+            if (saveBtn) saveBtn.innerHTML = isTrainer() ? '<i class="ti ti-send"></i>إرسال للمراجعة' : '<i class="ti ti-plus"></i>إنشاء الدورة';
             openModal('m-add-course');
         }
 
         async function openEditCourse() {
             const c = CCACHE.find(x => x.course_id === CCI);
             if (!c) return toast('الدورة غير موجودة', 'error');
+            if (isTrainer() && !trainerOwnsCourse(c)) return toast('هذه الدورة ليست ضمن صلاحياتك', 'warning');
             EDITING_COURSE_ID = c.course_id;
             set('nc-name', c.course_name || '');
             set('nc-desc', c.description || '');
@@ -5054,6 +5149,8 @@
             await loadCourseCertTemplateOptions(c.certificate_template_id || '');
             toggleCertImg();
             updateCourseThumbPreview();
+            const saveBtn = document.getElementById('course-save-btn');
+            if (saveBtn) saveBtn.innerHTML = isTrainer() ? '<i class="ti ti-send"></i>إرسال التعديل للمراجعة' : '<i class="ti ti-device-floppy"></i>حفظ التعديل';
             openModal('m-add-course');
         }
 
@@ -5087,6 +5184,7 @@
         async function submitAddCourse() {
             const certTemplateId = val('nc-cert-template');
             const certTemplate = CERT_TEMPLATE_CACHE.find(t => t.id === certTemplateId);
+            const existingCourse = EDITING_COURSE_ID ? CCACHE.find(c => c.course_id === EDITING_COURSE_ID) : null;
             const course = {
                 course_name: val('nc-name'),
                 description: val('nc-desc'),
@@ -5104,11 +5202,23 @@
                 prerequisite: val('nc-prereq') || ''
             };
             if (!course.course_name) return toast('اسم الدورة مطلوب', 'warning');
+            if (isTrainer()) {
+                course.status = 'draft';
+                course.approval_status = 'pending_review';
+                course.submitted_for_review_at = Date.now();
+                course.created_by = courseOwnerEmail(existingCourse) || normalizeEmail(CU.email);
+                course.created_by_name = existingCourse?.created_by_name || CU.full_name || CU.email;
+            } else {
+                course.approval_status = course.status === 'active' ? 'approved' : (existingCourse?.approval_status || 'draft');
+                course.reviewed_by = normalizeEmail(CU.email);
+                course.reviewed_at = Date.now();
+            }
             const r = EDITING_COURSE_ID ?
                 await call({ action: 'updateCourse', courseId: EDITING_COURSE_ID, updates: course }) :
                 await call({ action: 'addCourse', course });
             if (r.success) { closeModal('m-add-course');
-                toast(EDITING_COURSE_ID ? 'تم تعديل الدورة' : 'تم إنشاء الدورة');
+                if (isTrainer()) await notifyAdminsCourseReview(course, !!EDITING_COURSE_ID);
+                toast(isTrainer() ? 'تم إرسال الدورة للأدمن للمراجعة' : (EDITING_COURSE_ID ? 'تم تعديل الدورة' : 'تم إنشاء الدورة'));
                 const edited = EDITING_COURSE_ID;
                 EDITING_COURSE_ID = null;
                 await loadCourses();
@@ -5118,6 +5228,7 @@
 
         async function deleteCourse() {
             if (!CCI) return toast('افتح دورة أولا', 'warning');
+            if (!isAdmin()) return toast('حذف الدورات متاح للأدمن فقط', 'warning');
             const c = CCACHE.find(x => x.course_id === CCI);
             if (!confirm(`حذف الدورة "${c?.course_name || CCI}" بكل المحتوى والالتحاقات؟`)) return;
             const r = await call({ action: 'deleteCourse', courseId: CCI });
@@ -5266,12 +5377,29 @@
             COURSE_ACTION_ID = courseId;
             CCI = courseId;
             const c = CCACHE.find(x => x.course_id === courseId);
+            if (isTrainer() && c && !trainerOwnsCourse(c)) return toast('هذه الدورة ليست ضمن صلاحياتك', 'warning');
             document.getElementById('course-actions-title').textContent = c ? c.course_name : 'اختيارات الدورة';
             html('course-actions-meta', c ? `
                 <span class="badge ${effectiveCourseStatus(c) === 'active' ? 'badge-active' : 'badge-suspended'}">${effectiveCourseStatus(c) === 'active' ? 'مفتوحة' : 'مسودة'}</span>
                 <span class="badge">${c.visibility === 'public' ? 'عامة' : 'خاصة'}</span>
                 <span class="badge"><i class="ti ti-users"></i> ${c._enrolled_count || 0} مسجل</span>
+                ${approvalBadge(c)}
             ` : '');
+            const buttons = [
+                `<button class="primary" style="justify-content:flex-start;padding:14px;" onclick="openCoursePreviewFromActions()"><i class="ti ti-eye"></i> محتوى الدورة</button>`,
+                `<button style="justify-content:flex-start;padding:14px;" onclick="openCourseEditFromActions()"><i class="ti ti-edit"></i> إدارة وتعديل الدورة</button>`
+            ];
+            if (isAdmin() && approvalStatus(c) === 'pending_review') {
+                buttons.push(`<button class="success" style="justify-content:flex-start;padding:14px;" onclick="approveCourseFromActions()"><i class="ti ti-circle-check"></i> اعتماد ونشر الدورة</button>`);
+                buttons.push(`<button class="danger" style="justify-content:flex-start;padding:14px;" onclick="rejectCourseFromActions()"><i class="ti ti-circle-x"></i> رفض وإرجاع كمسودة</button>`);
+            }
+            if (isAdmin()) {
+                buttons.push(`<button style="justify-content:flex-start;padding:14px;" onclick="openManualProgressModal()"><i class="ti ti-progress-check"></i> تقدم يدوي / Mark Complete</button>`);
+                buttons.push(`<button class="danger" style="justify-content:flex-start;padding:14px;" onclick="deleteCourseFromActions()"><i class="ti ti-trash"></i> حذف الدورة</button>`);
+            } else if (isTrainer()) {
+                buttons.push(`<div style="font-size:12px;color:var(--color-text-secondary);padding:10px 4px;">أي تعديل من المدرب يرجع الدورة لقيد مراجعة الأدمن قبل النشر.</div>`);
+            }
+            html('course-actions-body', buttons.join(''));
             openModal('m-course-actions');
         }
 
@@ -5284,6 +5412,46 @@
             closeModal('m-course-actions');
             CCI = COURSE_ACTION_ID || CCI;
             await openAdminCourseContentPreview();
+        }
+
+        async function approveCourseFromActions() {
+            const courseId = COURSE_ACTION_ID || CCI;
+            if (!courseId) return;
+            const c = CCACHE.find(x => x.course_id === courseId);
+            askConfirm('اعتماد الدورة', `سيتم نشر دورة "${c?.course_name || courseId}" وإتاحتها حسب إعدادات الرؤية. هل تريد المتابعة؟`, async () => {
+                const r = await call({ action: 'updateCourse', courseId, updates: {
+                    approval_status: 'approved',
+                    status: 'active',
+                    reviewed_by: normalizeEmail(CU.email),
+                    reviewed_at: Date.now()
+                }});
+                if (r.success) {
+                    closeModal('m-course-actions');
+                    if (c?.created_by) await call({ action: 'addNotification', userEmail: c.created_by, message: `تم اعتماد ونشر دورتك: ${c.course_name || 'دورة'}`, type: 'course_review', link: 'courses' });
+                    toast('تم اعتماد الدورة ونشرها');
+                    await loadCourses();
+                } else toast(r.error, 'error');
+            });
+        }
+
+        async function rejectCourseFromActions() {
+            const courseId = COURSE_ACTION_ID || CCI;
+            if (!courseId) return;
+            const c = CCACHE.find(x => x.course_id === courseId);
+            askConfirm('رفض الدورة', `سيتم إرجاع دورة "${c?.course_name || courseId}" كمسودة للمدرب. هل تريد المتابعة؟`, async () => {
+                const r = await call({ action: 'updateCourse', courseId, updates: {
+                    approval_status: 'rejected',
+                    status: 'draft',
+                    reviewed_by: normalizeEmail(CU.email),
+                    reviewed_at: Date.now()
+                }});
+                if (r.success) {
+                    closeModal('m-course-actions');
+                    if (c?.created_by) await call({ action: 'addNotification', userEmail: c.created_by, message: `تم رفض دورتك وإرجاعها للتعديل: ${c.course_name || 'دورة'}`, type: 'course_review', link: 'courses' });
+                    toast('تم رفض الدورة وإرجاعها للمدرب');
+                    await loadCourses();
+                } else toast(r.error, 'error');
+            });
         }
 
         async function openAdminCourseContentPreview() {
@@ -5509,12 +5677,14 @@
         }
 
         async function deleteCourseFromActions() {
+            if (!isAdmin()) return toast('حذف الدورات متاح للأدمن فقط', 'warning');
             closeModal('m-course-actions');
             CCI = COURSE_ACTION_ID || CCI;
             await deleteCourse();
         }
 
         async function openManualProgressModal() {
+            if (!isAdmin()) return toast('التقدم اليدوي متاح للأدمن فقط', 'warning');
             CCI = COURSE_ACTION_ID || CCI;
             const pr = await call({ action: 'getCourseProgress', courseId: CCI });
             const sel = document.getElementById('manual-progress-user');
@@ -5626,6 +5796,11 @@
         async function openCourseDetail(courseId) {
             CCI = courseId;
             const course = CCACHE.find(c => c.course_id === courseId);
+            if (isTrainer() && course && !trainerOwnsCourse(course)) {
+                CCI = null;
+                showTab('courses');
+                return toast('هذه الدورة ليست ضمن صلاحياتك', 'warning');
+            }
             document.getElementById('cd-title').textContent = course ? course.course_name : 'تفاصيل الدورة';
             html('cd-meta', course ? `
                 <span class="badge"><i class="ti ti-calendar-play"></i>بداية: ${course.start_date || 'غير محدد'}</span>
@@ -7088,7 +7263,11 @@
             if (!r.success) return;
             const courseRes = await call({ action: 'getCourses' });
             if (courseRes.success) CCACHE = courseRes.courses;
-            const qa = r.qa;
+            let qa = r.qa;
+            if (isTrainer()) {
+                const trainerCourseIds = new Set(CCACHE.filter(trainerOwnsCourse).map(c => c.course_id));
+                qa = qa.filter(q => trainerCourseIds.has(q.courseId));
+            }
             const ordered = [...qa].sort((a, b) => {
                 const bp = qaPinned(b) ? 1 : 0;
                 const ap = qaPinned(a) ? 1 : 0;
@@ -8823,6 +9002,8 @@
             openCourseActions,
             openCourseEditFromActions,
             openCoursePreviewFromActions,
+            approveCourseFromActions,
+            rejectCourseFromActions,
             openAdminCourseContentPreview,
             playAdminPreviewItem,
             deleteCourseFromActions,
