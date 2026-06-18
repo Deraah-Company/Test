@@ -258,6 +258,64 @@
             background: #fce4ec;
             color: #c62828;
         }
+        .presence-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #9aa0a6;
+            box-shadow: 0 0 0 2px var(--color-background-primary);
+            flex-shrink: 0;
+        }
+        .presence-dot.online {
+            background: #0f9d58;
+            box-shadow: 0 0 0 2px var(--color-background-primary), 0 0 0 5px rgba(15, 157, 88, .12);
+        }
+        .chat-layout {
+            display: grid;
+            grid-template-columns: minmax(260px, 360px) 1fr;
+            gap: 16px;
+            min-height: 560px;
+        }
+        .chat-user-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--color-border-tertiary);
+            cursor: pointer;
+        }
+        .chat-user-row:hover,
+        .chat-user-row.active {
+            background: var(--color-background-info);
+        }
+        .chat-message {
+            max-width: 78%;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: var(--color-background-secondary);
+            border: 1px solid var(--color-border-tertiary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .chat-message.mine {
+            margin-right: auto;
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #fff;
+        }
+        .chat-unread-badge {
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 99px;
+            background: #e53935;
+            color: #fff;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .progress-bar {
             height: 8px;
@@ -1259,6 +1317,7 @@
                     <div class="nav-item" id="nav-groups" onclick="showTab('groups')"><i class="ti ti-users-group"></i><span>الجروبات</span></div>
                     <div class="nav-item" id="nav-certs" onclick="showTab('certs')"><i class="ti ti-certificate"></i><span>الشهادات</span></div>
                     <div class="nav-item" id="nav-qa" onclick="showTab('qa')"><i class="ti ti-messages"></i><span>الأسئلة</span></div>
+                    <div class="nav-item" id="nav-chat" onclick="showTab('chat')"><i class="ti ti-message-circle"></i><span>الشات</span><span id="adm-chat-count" class="chat-unread-badge hidden">0</span></div>
                     <div class="nav-item" id="nav-question-bank" onclick="showTab('question-bank')"><i class="ti ti-database"></i><span>بنك الأسئلة</span></div>
                     <div class="nav-item" id="nav-points" onclick="showTab('points')"><i class="ti ti-star"></i><span>النقاط</span></div>
                     <div class="nav-item" id="nav-activity" onclick="showTab('activity')"><i class="ti ti-activity"></i><span>User Activity</span></div>
@@ -1482,6 +1541,25 @@
                         <div id="qa-list"></div>
                     </div>
 
+                    <!-- CHAT -->
+                    <div id="tab-chat" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">الشات والدعم</div>
+                            <button onclick="loadChatTab()"><i class="ti ti-refresh"></i>تحديث</button>
+                        </div>
+                        <div class="chat-layout">
+                            <div class="card" style="padding:0;overflow:hidden;">
+                                <div style="padding:12px;border-bottom:1px solid var(--color-border-tertiary);">
+                                    <input id="chat-search" placeholder="بحث بالاسم أو الإيميل..." oninput="renderChatUsers()">
+                                </div>
+                                <div id="chat-users-list" style="max-height:620px;overflow-y:auto;"></div>
+                            </div>
+                            <div class="card" style="display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);">
+                                اختر مستخدم من القائمة وافتح المحادثة
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- QUESTION BANK -->
                     <div id="tab-question-bank" class="hidden">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
@@ -1672,6 +1750,7 @@
                 <button id="admin-return-btn" class="icon-btn hidden" onclick="toggleTraineeView()" title="العودة للوحة الأدمن"><i class="ti ti-layout-dashboard"></i></button>
                 <button class="icon-btn" onclick="openModal('m-change-pw')" title="تغيير كلمة المرور"><i class="ti ti-key"></i></button>
                 <button class="icon-btn" onclick="showTraineeTab('my-certs')" title="شهاداتي"><i class="ti ti-certificate"></i></button>
+                <button class="icon-btn notif-btn" onclick="openSupportChat()" title="شات الدعم"><i class="ti ti-message-circle"></i><span id="tr-chat-count" class="notif-dot-badge hidden">0</span></button>
                 <button class="icon-btn" onclick="openQAHistoryOnly()" title="أسئلة المتدربين"><i class="ti ti-messages"></i></button>
                 <button class="icon-btn" onclick="openTraineeProfile()" title="ملفي الشخصي"><i class="ti ti-user"></i></button>
                 <button class="icon-btn notif-btn" onclick="openNotifications()" title="الإشعارات"><i class="ti ti-bell"></i><span id="tr-notif-count" class="notif-dot-badge hidden">0</span></button>
@@ -2414,6 +2493,39 @@
             </div>
         </div>
 
+        <!-- Chat Directory -->
+        <div id="m-chat-directory" class="modal-wrap hidden">
+            <div class="modal" style="width:min(760px,96vw);max-height:92vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800"><i class="ti ti-message-circle"></i> الشات</div>
+                    <button class="icon-btn" onclick="closeModal('m-chat-directory')"><i class="ti ti-x"></i></button>
+                </div>
+                <div style="position:relative;margin-bottom:12px;">
+                    <i class="ti ti-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);"></i>
+                    <input id="trainee-chat-search" placeholder="بحث بالاسم أو الإيميل..." style="padding-right:36px;" oninput="renderChatUsers()">
+                </div>
+                <div id="trainee-chat-users-list" class="card" style="padding:0;max-height:620px;overflow:auto;"></div>
+            </div>
+        </div>
+
+        <!-- Chat -->
+        <div id="m-chat" class="modal-wrap hidden">
+            <div class="modal" style="width:min(860px,96vw);max-height:92vh;display:flex;flex-direction:column;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:10px;">
+                    <div style="min-width:0;">
+                        <div style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;" id="chat-modal-title">الشات</div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);" id="chat-modal-status"></div>
+                    </div>
+                    <button class="icon-btn" onclick="closeChatModal()"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="chat-messages" style="height:430px;overflow-y:auto;border:1px solid var(--color-border-tertiary);border-radius:14px;padding:14px;background:var(--color-background-tertiary);display:flex;flex-direction:column;gap:10px;"></div>
+                <div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px;">
+                    <textarea id="chat-input" rows="2" placeholder="اكتب رسالتك..." onkeydown="chatInputKey(event)"></textarea>
+                    <button class="primary" onclick="sendChatMessage()"><i class="ti ti-send"></i>إرسال</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Announcement Popup -->
         <div id="m-announcement-popup" class="modal-wrap hidden">
             <div class="modal" style="max-width:760px;">
@@ -2620,13 +2732,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, addDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, addDoc, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref as rtdbRef, set as rtdbSet, onValue as rtdbOnValue, onDisconnect, serverTimestamp as rtdbServerTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgQyZl2mHqklShtPRVjKV-y_Sal3tk2ro",
             authDomain: "academy-test-d48be.firebaseapp.com",
             projectId: "academy-test-d48be",
             storageBucket: "academy-test-d48be.firebasestorage.app",
+            databaseURL: "https://academy-test-d48be-default-rtdb.firebaseio.com",
             messagingSenderId: "459504769433",
             appId: "1:459504769433:web:8032bfaa40a5b9b9459b08",
             measurementId: "G-JLL2LM94B2"
@@ -2635,6 +2749,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const rtdb = getDatabase(app);
         const authReady = signInAnonymously(auth).catch((err) => {
             console.error('Anonymous auth failed:', err);
             return null;
@@ -2655,6 +2770,14 @@
             CERT_TEMPLATE_CACHE = [],
             NOTIFS = [],
             NOTIF_TIMER = null,
+            PRESENCE = {},
+            PRESENCE_REF = null,
+            PRESENCE_CONNECTED_UNSUB = null,
+            PRESENCE_WATCH_UNSUB = null,
+            CHAT_UNSUB = null,
+            ACTIVE_CHAT_EMAIL = '',
+            ACTIVE_CHAT_ROWS = [],
+            CHAT_UNREAD_BY = {},
             USER_ROLE_VIEW = 'trainee',
             SELECTED_USERS = new Set(),
             VISIBLE_USERS = [],
@@ -3378,7 +3501,7 @@
             document.getElementById('top-settings-btn')?.classList.toggle('hidden', trainer);
             const trainerHidden = ['nav-dash', 'nav-users', 'nav-paths', 'nav-progress', 'nav-groups', 'nav-certs', 'nav-points', 'nav-activity', 'nav-announcements', 'nav-settings'];
             trainerHidden.forEach(id => document.getElementById(id)?.classList.toggle('hidden', trainer));
-            ['nav-courses', 'nav-qa', 'nav-question-bank'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
+            ['nav-courses', 'nav-qa', 'nav-chat', 'nav-question-bank'].forEach(id => document.getElementById(id)?.classList.remove('hidden'));
             const menu = document.getElementById('users-submenu');
             if (trainer && menu) {
                 menu.classList.add('hidden');
@@ -3398,6 +3521,295 @@
             } catch (e) {
                 console.warn('course review notification failed', e);
             }
+        }
+
+        function presenceKey(email) {
+            return normalizeEmail(email).replace(/[.#$/\[\]\s]/g, '_');
+        }
+
+        function getPresence(email) {
+            return PRESENCE[presenceKey(email)] || {};
+        }
+
+        function isUserOnline(email) {
+            return getPresence(email).state === 'online';
+        }
+
+        function presenceText(email) {
+            const p = getPresence(email);
+            if (p.state === 'online') return 'أونلاين الآن';
+            if (p.last_changed) return `آخر ظهور: ${new Date(p.last_changed).toLocaleString('ar-EG')}`;
+            return 'أوفلاين';
+        }
+
+        function presenceDotMarkup(email) {
+            const online = isUserOnline(email);
+            return `<span class="presence-dot ${online ? 'online' : ''}" data-presence-email="${esc(normalizeEmail(email))}" title="${esc(presenceText(email))}"></span>`;
+        }
+
+        function renderPresenceBadges() {
+            document.querySelectorAll('[data-presence-email]').forEach(el => {
+                const email = el.dataset.presenceEmail || '';
+                el.classList.toggle('online', isUserOnline(email));
+                el.title = presenceText(email);
+            });
+            if (!document.getElementById('tab-chat')?.classList.contains('hidden')) renderChatUsers();
+            renderChatModalHeader();
+        }
+
+        function currentPresencePayload(state) {
+            return {
+                email: normalizeEmail(CU?.email),
+                name: CU?.full_name || CU?.email || '',
+                role: CU?.role || 'trainee',
+                avatar: CU?.avatar_url || '',
+                state,
+                last_changed: rtdbServerTimestamp()
+            };
+        }
+
+        async function startPresence() {
+            if (!CU?.email) return;
+            try {
+                await authReady;
+                PRESENCE_REF = rtdbRef(rtdb, `presence/${presenceKey(CU.email)}`);
+                if (PRESENCE_CONNECTED_UNSUB) PRESENCE_CONNECTED_UNSUB();
+                const connectedRef = rtdbRef(rtdb, '.info/connected');
+                PRESENCE_CONNECTED_UNSUB = rtdbOnValue(connectedRef, snap => {
+                    if (snap.val() !== true || !PRESENCE_REF) return;
+                    onDisconnect(PRESENCE_REF)
+                        .set(currentPresencePayload('offline'))
+                        .then(() => rtdbSet(PRESENCE_REF, currentPresencePayload('online')))
+                        .catch(err => console.warn('presence onDisconnect failed', err));
+                });
+                startPresenceWatch();
+            } catch (e) {
+                console.warn('Realtime presence unavailable', e);
+            }
+        }
+
+        async function stopPresence() {
+            try {
+                if (PRESENCE_CONNECTED_UNSUB) {
+                    PRESENCE_CONNECTED_UNSUB();
+                    PRESENCE_CONNECTED_UNSUB = null;
+                }
+                if (PRESENCE_REF && CU?.email) await rtdbSet(PRESENCE_REF, currentPresencePayload('offline'));
+            } catch (e) {
+                console.warn('presence offline failed', e);
+            } finally {
+                PRESENCE_REF = null;
+            }
+        }
+
+        function startPresenceWatch() {
+            if (PRESENCE_WATCH_UNSUB) return;
+            try {
+                PRESENCE_WATCH_UNSUB = rtdbOnValue(rtdbRef(rtdb, 'presence'), snap => {
+                    PRESENCE = snap.val() || {};
+                    renderPresenceBadges();
+                });
+            } catch (e) {
+                console.warn('presence watch failed', e);
+            }
+        }
+
+        function stopPresenceWatch() {
+            if (PRESENCE_WATCH_UNSUB) {
+                PRESENCE_WATCH_UNSUB();
+                PRESENCE_WATCH_UNSUB = null;
+            }
+            PRESENCE = {};
+        }
+
+        function chatIdFor(a, b) {
+            return [normalizeEmail(a), normalizeEmail(b)].sort().join('__');
+        }
+
+        async function ensureUsersCache() {
+            if (UCACHE.length) return UCACHE;
+            const r = await call({ action: 'getUsers' });
+            if (r.success) UCACHE = r.users.map(u => ({ ...u, email: normalizeEmail(u.email) }));
+            return UCACHE;
+        }
+
+        function userByEmail(email) {
+            const clean = normalizeEmail(email);
+            return UCACHE.find(u => normalizeEmail(u.email) === clean) || getPresence(clean) || { email: clean };
+        }
+
+        function chatUserName(email) {
+            const u = userByEmail(email);
+            return u.full_name || u.name || u.email || email;
+        }
+
+        async function updateChatUnreadCount() {
+            if (!CU?.email) return;
+            try {
+                const snap = await getDocs(query(collection(db, 'chat_messages'), where('toEmail', '==', normalizeEmail(CU.email))));
+                CHAT_UNREAD_BY = {};
+                snap.docs.forEach(d => {
+                    const m = d.data();
+                    if (m.read) return;
+                    const from = normalizeEmail(m.fromEmail);
+                    CHAT_UNREAD_BY[from] = (CHAT_UNREAD_BY[from] || 0) + 1;
+                });
+                const total = Object.values(CHAT_UNREAD_BY).reduce((a, b) => a + b, 0);
+                ['adm-chat-count', 'tr-chat-count'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.textContent = total > 9 ? '9+' : total;
+                    el.classList.toggle('hidden', total === 0);
+                });
+                renderChatUsers();
+            } catch (e) {
+                console.warn('chat unread failed', e);
+            }
+        }
+
+        async function loadChatTab() {
+            await ensureUsersCache();
+            await updateChatUnreadCount();
+            renderChatUsers();
+        }
+
+        function chatVisibleUsers(searchValue = '') {
+            const q = String(searchValue || '').trim().toLowerCase();
+            return UCACHE
+                .filter(u => normalizeEmail(u.email) !== normalizeEmail(CU?.email))
+                .filter(u => (u.status || 'active') !== 'deleted')
+                .filter(u => !q || `${u.full_name || ''} ${u.email || ''} ${u.employee_id || ''}`.toLowerCase().includes(q))
+                .sort((a, b) => {
+                    const unread = (CHAT_UNREAD_BY[normalizeEmail(b.email)] || 0) - (CHAT_UNREAD_BY[normalizeEmail(a.email)] || 0);
+                    if (unread) return unread;
+                    const online = Number(isUserOnline(b.email)) - Number(isUserOnline(a.email));
+                    if (online) return online;
+                    return (a.full_name || a.email || '').localeCompare(b.full_name || b.email || '', 'ar');
+                });
+        }
+
+        function renderChatUsers() {
+            renderChatUsersInto('chat-users-list', 'chat-search');
+            renderChatUsersInto('trainee-chat-users-list', 'trainee-chat-search');
+        }
+
+        function renderChatUsersInto(boxId, searchId) {
+            const box = document.getElementById(boxId);
+            if (!box || !CU) return;
+            const users = chatVisibleUsers(document.getElementById(searchId)?.value || '');
+            box.innerHTML = users.length ? users.map(u => {
+                const email = normalizeEmail(u.email);
+                const unread = CHAT_UNREAD_BY[email] || 0;
+                return `<div class="chat-user-row ${ACTIVE_CHAT_EMAIL === email ? 'active' : ''}" onclick="openChatWith('${esc(email)}')">
+                    ${u.avatar_url ? `<img src="${esc(u.avatar_url)}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">` : `<div class="avatar" style="width:34px;height:34px;font-size:13px;">${esc((u.full_name || u.email || '?')[0]).toUpperCase()}</div>`}
+                    ${presenceDotMarkup(email)}
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(u.full_name || u.email)}</div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(roleLabel(u.role))} - ${esc(presenceText(email))}</div>
+                    </div>
+                    ${unread ? `<span class="chat-unread-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+                </div>`;
+            }).join('') : '<div style="padding:2rem;text-align:center;color:var(--color-text-secondary);">لا يوجد مستخدمون</div>';
+        }
+
+        function renderChatModalHeader() {
+            if (!ACTIVE_CHAT_EMAIL) return;
+            const title = document.getElementById('chat-modal-title');
+            const status = document.getElementById('chat-modal-status');
+            if (title) title.innerHTML = `${presenceDotMarkup(ACTIVE_CHAT_EMAIL)} ${esc(chatUserName(ACTIVE_CHAT_EMAIL))}`;
+            if (status) status.textContent = presenceText(ACTIVE_CHAT_EMAIL);
+        }
+
+        async function openSupportChat() {
+            await ensureUsersCache();
+            await updateChatUnreadCount();
+            renderChatUsers();
+            openModal('m-chat-directory');
+        }
+
+        async function openChatWith(email) {
+            if (!CU?.email || !email) return;
+            await ensureUsersCache();
+            ACTIVE_CHAT_EMAIL = normalizeEmail(email);
+            renderChatUsers();
+            renderChatModalHeader();
+            openModal('m-chat');
+            subscribeChatMessages();
+            setTimeout(() => document.getElementById('chat-input')?.focus(), 80);
+        }
+
+        function subscribeChatMessages() {
+            if (CHAT_UNSUB) CHAT_UNSUB();
+            const chatId = chatIdFor(CU.email, ACTIVE_CHAT_EMAIL);
+            const q = query(collection(db, 'chat_messages'), where('chatId', '==', chatId));
+            CHAT_UNSUB = onSnapshot(q, async snap => {
+                ACTIVE_CHAT_ROWS = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                renderChatMessages();
+                await markChatThreadRead(ACTIVE_CHAT_EMAIL);
+                updateChatUnreadCount();
+            }, err => console.warn('chat snapshot failed', err));
+        }
+
+        function renderChatMessages() {
+            const box = document.getElementById('chat-messages');
+            if (!box) return;
+            box.innerHTML = ACTIVE_CHAT_ROWS.length ? ACTIVE_CHAT_ROWS.map(m => {
+                const mine = normalizeEmail(m.fromEmail) === normalizeEmail(CU.email);
+                const time = m.createdAt ? new Date(m.createdAt).toLocaleString('ar-EG') : '';
+                return `<div style="display:flex;flex-direction:column;align-items:${mine ? 'flex-end' : 'flex-start'};gap:3px;">
+                    <div class="chat-message ${mine ? 'mine' : ''}">${esc(m.body || '')}</div>
+                    <div style="font-size:11px;color:var(--color-text-secondary);">${esc(m.fromName || m.fromEmail || '')} - ${time}</div>
+                </div>`;
+            }).join('') : '<div style="margin:auto;color:var(--color-text-secondary);">ابدأ المحادثة برسالة جديدة</div>';
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function markChatThreadRead(peerEmail) {
+            if (!CU?.email || !peerEmail) return;
+            const chatId = chatIdFor(CU.email, peerEmail);
+            const unread = ACTIVE_CHAT_ROWS.filter(m => m.chatId === chatId && normalizeEmail(m.toEmail) === normalizeEmail(CU.email) && !m.read);
+            if (!unread.length) return;
+            const batch = writeBatch(db);
+            unread.forEach(m => batch.update(doc(db, 'chat_messages', m.id), { read: true, readAt: Date.now() }));
+            await batch.commit();
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const body = (input?.value || '').trim();
+            if (!body || !ACTIVE_CHAT_EMAIL || !CU?.email) return;
+            input.value = '';
+            const msg = {
+                chatId: chatIdFor(CU.email, ACTIVE_CHAT_EMAIL),
+                fromEmail: normalizeEmail(CU.email),
+                fromName: CU.full_name || CU.email,
+                toEmail: normalizeEmail(ACTIVE_CHAT_EMAIL),
+                body,
+                read: false,
+                createdAt: Date.now()
+            };
+            await addDoc(collection(db, 'chat_messages'), msg);
+            await call({ action: 'addNotification', userEmail: ACTIVE_CHAT_EMAIL, message: `رسالة جديدة من ${CU.full_name || CU.email}`, type: 'chat', link: 'chat' });
+        }
+
+        function chatInputKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        function closeChatModal() {
+            if (CHAT_UNSUB) {
+                CHAT_UNSUB();
+                CHAT_UNSUB = null;
+            }
+            ACTIVE_CHAT_EMAIL = '';
+            ACTIVE_CHAT_ROWS = [];
+            closeModal('m-chat');
+            renderChatUsers();
+            updateChatUnreadCount();
         }
 
         function toggleLearningPathAudience(type, value) {
@@ -4381,11 +4793,20 @@
         }
 
         function logout() {
+            stopPresence();
+            if (CHAT_UNSUB) {
+                CHAT_UNSUB();
+                CHAT_UNSUB = null;
+            }
+            stopPresenceWatch();
             CU = null;
             if (PROG_INT) clearInterval(PROG_INT);
             if (NOTIF_TIMER) clearInterval(NOTIF_TIMER);
             NOTIFS = [];
-            ['adm-notif-count', 'tr-notif-count'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+            CHAT_UNREAD_BY = {};
+            ACTIVE_CHAT_EMAIL = '';
+            ACTIVE_CHAT_ROWS = [];
+            ['adm-notif-count', 'tr-notif-count', 'adm-chat-count', 'tr-chat-count'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
             hide('admin-screen');
             hide('trainee-screen');
             document.getElementById('admin-return-btn')?.classList.add('hidden');
@@ -4481,6 +4902,7 @@
                 document.getElementById('adm-av').innerHTML = `<img src="${CU.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
             }
             applyRoleShell();
+            startPresence();
             showTab('dash');
             loadGroupOptions();
             startNotificationPolling();
@@ -4497,18 +4919,19 @@
                 document.getElementById('adm-av').innerHTML = `<img src="${CU.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
             }
             applyRoleShell();
+            startPresence();
             showTab('courses');
             startNotificationPolling();
         }
 
         function showTab(t) {
             if (isTrainer()) {
-                const allowed = ['courses', 'course-detail', 'qa', 'question-bank'];
+                const allowed = ['courses', 'course-detail', 'qa', 'chat', 'question-bank'];
                 if (!allowed.includes(t)) t = 'courses';
             }
-            const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
+            const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'chat', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
             tabs.forEach(x => { const el = document.getElementById('tab-' + x); if (el) el.classList.add('hidden'); });
-            const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
+            const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'chat', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
             navs.forEach(x => { const el = document.getElementById('nav-' + x); if (el) el.classList.remove('active'); });
             const te = document.getElementById('tab-' + t);
             if (te) te.classList.remove('hidden');
@@ -4522,6 +4945,7 @@
             else if (t === 'groups') loadGroups();
             else if (t === 'certs') loadAllCerts();
             else if (t === 'qa') loadQA();
+            else if (t === 'chat') loadChatTab();
             else if (t === 'question-bank') loadQuestionBank();
             else if (t === 'points') loadPointsTab();
             else if (t === 'settings') loadSettingsModal(false);
@@ -4692,6 +5116,7 @@
               <td style="font-weight:700;">
                 <div style="display:flex;align-items:center;gap:6px;min-width:0;">
                   ${u.avatar_url ? `<img src="${esc(u.avatar_url)}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : ''}
+                  ${presenceDotMarkup(u.email)}
                   <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--color-text-info);" onclick="viewAdminProfile('${esc(u.email)}')">${esc(u.full_name || '—')}</span>
                 </div>
               </td>
@@ -4704,6 +5129,7 @@
               <td>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
                   <button class="icon-btn sm" style="background:#e8f0fe;color:#1a73e8;" onclick="openEditUser('${esc(u.email)}')"><i class="ti ti-edit"></i></button>
+                  <button class="icon-btn sm" style="background:#e8f0fe;color:#1a73e8;" onclick="openChatWith('${esc(u.email)}')"><i class="ti ti-message-circle"></i></button>
                   <button class="icon-btn sm" style="background:#e3f2fd;color:#0d47a1;" onclick="viewAdminProfile('${esc(u.email)}')"><i class="ti ti-user"></i></button>
                   ${u.status === 'active' ? `<button class="icon-btn sm" style="background:#fef7e0;color:#ea8600;" onclick="doAction('suspendUser','${esc(u.email)}')"><i class="ti ti-player-pause"></i></button>` : `<button class="icon-btn sm" style="background:#e6f4ea;color:#188038;" onclick="doAction('restoreUser','${esc(u.email)}')"><i class="ti ti-player-play"></i></button>`}
                   <button class="icon-btn sm danger" onclick="doDelete('${esc(u.email)}')"><i class="ti ti-trash"></i></button>
@@ -7796,7 +8222,11 @@
         function startNotificationPolling() {
             if (NOTIF_TIMER) clearInterval(NOTIF_TIMER);
             refreshNotifications();
-            NOTIF_TIMER = setInterval(refreshNotifications, 15000);
+            updateChatUnreadCount();
+            NOTIF_TIMER = setInterval(() => {
+                refreshNotifications();
+                updateChatUnreadCount();
+            }, 15000);
         }
 
         async function openNotifications() {
@@ -7874,6 +8304,7 @@
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
               <button class="sm" onclick="closeModal('m-admin-profile');openEditUser('${u.email}')"><i class="ti ti-edit"></i>تعديل البيانات/الباسورد</button>
               ${u.status === 'active' ? `<button class="sm" style="background:#fef7e0;color:#ea8600;border-color:#fef7e0;" onclick="doAction('suspendUser','${u.email}');closeModal('m-admin-profile')"><i class="ti ti-player-pause"></i>إيقاف التفعيل</button>` : `<button class="sm success" onclick="doAction('restoreUser','${u.email}');closeModal('m-admin-profile')"><i class="ti ti-player-play"></i>تفعيل</button>`}
+              <button class="sm primary" onclick="closeModal('m-admin-profile');openChatWith('${u.email}')"><i class="ti ti-message-circle"></i>شات</button>
               <button class="sm" onclick="enrollSingleFromProfile('${u.email}')"><i class="ti ti-book-upload"></i>إلحاق بدورة</button>
               <button class="sm danger" onclick="doDelete('${u.email}');closeModal('m-admin-profile')"><i class="ti ti-trash"></i>حذف</button>
             </div>
@@ -7914,6 +8345,7 @@
                     `<img src="${CU.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
             }
             updateTraineePoints();
+            startPresence();
             startNotificationPolling();
             showTraineeTab('home');
             loadTraineeLearningPaths();
@@ -8940,6 +9372,13 @@
             loadActivity,
             logActivity,
             loadAnnouncements,
+            loadChatTab,
+            renderChatUsers,
+            openChatWith,
+            openSupportChat,
+            sendChatMessage,
+            closeChatModal,
+            chatInputKey,
             openAnnouncementForm,
             hideAnnouncementForm,
             saveAnnouncement,
