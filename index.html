@@ -570,7 +570,7 @@
         .cert-stage {
             position: relative;
             width: min(100%, 960px);
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 297 / 210;
             margin: 0 auto;
             background: #fff;
             border-radius: 8px;
@@ -583,7 +583,7 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: fill;
             pointer-events: none;
         }
         .cert-el {
@@ -1142,14 +1142,65 @@
 
         /* Academy background */
         .academy-bg {
-            background-size: cover;
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             transition: background-image 0.5s ease;
         }
+        #print-root {
+            display: none;
+        }
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            body.print-certificate > *:not(#print-root) {
+                display: none !important;
+            }
+            body.print-certificate {
+                margin: 0 !important;
+                background: #fff !important;
+            }
+            body.print-certificate #print-root {
+                display: block !important;
+                width: 297mm;
+                min-height: 210mm;
+                background: #fff;
+            }
+            body.print-certificate .cert-print-page {
+                width: 297mm;
+                height: 210mm;
+                page-break-after: always;
+                break-after: page;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                background: #fff;
+            }
+            body.print-certificate .cert-print-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            body.print-certificate .cert-stage {
+                width: 297mm !important;
+                max-width: none !important;
+                height: 210mm !important;
+                aspect-ratio: auto !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+            }
+            body.print-certificate .cert-el {
+                border-color: transparent !important;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <div id="print-root"></div>
 
     <div id="app" style="min-height:100vh; display: flex; flex-direction: column;">
 
@@ -3129,7 +3180,7 @@
             const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             html('announcements-list', rows.length ? rows.map(a => `
                 <div class="card" style="display:flex;gap:12px;align-items:center;">
-                    ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:110px;height:70px;object-fit:cover;border-radius:8px;">` : '<div style="width:110px;height:70px;background:var(--color-background-secondary);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-speakerphone"></i></div>'}
+                    ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:110px;height:70px;object-fit:contain;background:var(--color-background-secondary);border-radius:8px;padding:4px;box-sizing:border-box;">` : '<div style="width:110px;height:70px;background:var(--color-background-secondary);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-speakerphone"></i></div>'}
                     <div style="flex:1;min-width:0;">
                         <div style="font-weight:800;">${esc(a.title || 'إعلان')}</div>
                         <div style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(a.body || '')}</div>
@@ -3203,7 +3254,7 @@
             const a = rows[0];
             document.getElementById('ann-popup-title').textContent = a.title || 'إعلان';
             html('ann-popup-body', `
-                ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-bottom:12px;">` : ''}
+                ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:100%;max-height:360px;object-fit:contain;background:var(--color-background-secondary);border-radius:12px;margin-bottom:12px;padding:6px;box-sizing:border-box;">` : ''}
                 <div style="font-size:15px;line-height:1.8;color:var(--color-text-secondary);white-space:pre-wrap;">${esc(a.body || '')}</div>
                 <input type="hidden" id="ann-popup-id" value="${esc(a.id)}">
             `);
@@ -6748,15 +6799,15 @@
             const name = c.user_name || c.userName || c.userEmail || '';
             const course = c.course_name || c.courseName || c.courseId || '';
             const builder = c.certificate_builder || null;
-            if (builder) return `<div style="page-break-after:always;break-after:page;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">${renderCertificateCanvas(builder, name, course)}</div>`;
+            if (builder) return `<div class="cert-print-page">${renderCertificateCanvas(builder, name, course)}</div>`;
             if (c.certificate_image_url) {
-                return `<div style="text-align:center;page-break-after:always;break-after:page;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                    <img src="${esc(c.certificate_image_url)}" style="max-width:100%;border-radius:8px;">
+                return `<div class="cert-print-page" style="text-align:center;flex-direction:column;">
+                    <img src="${esc(c.certificate_image_url)}" style="width:297mm;height:210mm;object-fit:cover;">
                     <div style="font-size:24px;font-weight:800;margin-top:16px;">${esc(name)}</div>
                     <div style="font-size:16px;color:var(--color-text-secondary);">${esc(course)}</div>
                 </div>`;
             }
-            return `<div style="background:#fff;border:8px solid #1a73e8;border-radius:16px;padding:4rem 2rem;text-align:center;page-break-after:always;break-after:page;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            return `<div class="cert-print-page" style="background:#fff;border:8px solid #1a73e8;padding:4rem 2rem;text-align:center;flex-direction:column;">
                 <i class="ti ti-military-award" style="font-size:80px;color:#f57f17;display:block;margin-bottom:24px;"></i>
                 <h2 style="font-size:32px;font-weight:700;margin-bottom:8px;color:#1a73e8;">شهادة إتمام دورة</h2>
                 <div style="font-size:28px;font-weight:700;margin:24px auto;padding-bottom:12px;border-bottom:2px dashed #ced4da;display:inline-block;min-width:60%;">${esc(name)}</div>
@@ -6764,17 +6815,34 @@
             </div>`;
         }
 
+        function printCertificateHtml(printHtml, restore = null) {
+            const root = document.getElementById('print-root');
+            if (!root) return window.print();
+            root.innerHTML = printHtml;
+            document.body.classList.add('print-certificate');
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.body.classList.remove('print-certificate');
+                    root.innerHTML = '';
+                    if (restore) restore();
+                }, 400);
+            }, 120);
+        }
+
         function printCurrentCertificateView() {
             if (CURRENT_CERT_GROUP_CERTS.length) {
                 const name = CURRENT_CERT_GROUP_NAME;
-                html('cert-view-content', CURRENT_CERT_GROUP_CERTS.map(certificatePrintHtml).join(''));
-                setTimeout(() => {
-                    window.print();
-                    setTimeout(() => viewCertificateGroup(name), 400);
-                }, 100);
+                printCertificateHtml(CURRENT_CERT_GROUP_CERTS.map(certificatePrintHtml).join(''), () => viewCertificateGroup(name));
                 return;
             }
-            window.print();
+            const stage = document.querySelector('#cert-view-content .cert-stage');
+            if (stage) {
+                printCertificateHtml(`<div class="cert-print-page">${stage.outerHTML}</div>`);
+                return;
+            }
+            const content = document.getElementById('cert-view-content')?.innerHTML || '';
+            printCertificateHtml(`<div class="cert-print-page">${content}</div>`);
         }
 
         // ─── QUESTION BANK ───
