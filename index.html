@@ -163,6 +163,64 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
+        .submenu-panel {
+            display: grid;
+            gap: 4px;
+            margin: -4px 10px 8px 0;
+            padding: 8px;
+            border: 1px solid var(--color-border-tertiary);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--color-background-info) 46%, var(--color-background-primary));
+            box-shadow: 0 10px 24px rgba(26, 115, 232, .12);
+        }
+        .submenu-panel button {
+            justify-content: flex-start;
+            border: none;
+            background: transparent;
+            padding: 9px 12px;
+            color: var(--color-text-secondary);
+        }
+        .submenu-panel button:hover {
+            background: var(--color-background-primary);
+            color: var(--color-text-primary);
+        }
+        .pick-list {
+            display: grid;
+            gap: 6px;
+            max-height: 240px;
+            overflow: auto;
+            padding: 6px;
+            border: 1px solid var(--color-border-tertiary);
+            border-radius: var(--border-radius-md);
+            background: var(--color-background-secondary);
+        }
+        .pick-chip {
+            width: 100%;
+            justify-content: flex-start;
+            text-align: right;
+            white-space: normal;
+            background: var(--color-background-primary);
+        }
+        .pick-chip.selected {
+            border-color: var(--accent-color);
+            background: var(--color-background-info);
+            color: var(--color-text-info);
+            box-shadow: 0 0 0 3px rgba(26,115,232,.12);
+        }
+        .form-shell {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 16px;
+        }
+        .form-shell.form-closed {
+            grid-template-columns: 1fr;
+        }
+        .date-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -275,6 +333,9 @@
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        #m-confirm {
+            z-index: 1200;
         }
         .modal h3 {
             font-size: 18px;
@@ -1037,11 +1098,38 @@
             font-size: 32px;
             font-weight: 700;
             color: var(--color-text-info);
+            position: relative;
+            cursor: pointer;
+            isolation: isolate;
         }
         .profile-header .big-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        .profile-header .big-avatar .avatar-upload-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: rgba(0, 0, 0, .52);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            opacity: .92;
+            transition: opacity .18s ease, background .18s ease;
+            text-align: center;
+        }
+        .profile-header .big-avatar:hover .avatar-upload-overlay {
+            opacity: 1;
+            background: rgba(0, 0, 0, .65);
+        }
+        .profile-header .big-avatar .avatar-upload-overlay i {
+            font-size: 22px;
         }
         .profile-header .info h2 {
             font-size: 22px;
@@ -1109,9 +1197,9 @@
                 <div class="sidebar">
                     <div class="nav-item active" id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard"></i><span>الرئيسية</span></div>
                     <div class="nav-item" id="nav-users" onclick="toggleUsersMenu()"><i class="ti ti-users"></i><span>المستخدمون</span><i class="ti ti-chevron-down" style="margin-right:auto;"></i></div>
-                    <div id="users-submenu" class="hidden" style="display:grid;gap:4px;margin:-4px 10px 8px 0;">
-                        <button style="justify-content:flex-start;border:none;background:transparent;padding:9px 14px;color:var(--color-text-secondary);" onclick="openUsersRole('trainee')"><i class="ti ti-user"></i>المتدربين</button>
-                        <button style="justify-content:flex-start;border:none;background:transparent;padding:9px 14px;color:var(--color-text-secondary);" onclick="openUsersRole('staff')"><i class="ti ti-shield"></i>المدربين / الأدمن</button>
+                    <div id="users-submenu" class="submenu-panel hidden">
+                        <button onclick="openUsersRole('trainee')"><i class="ti ti-user"></i>المتدربين</button>
+                        <button onclick="openUsersRole('staff')"><i class="ti ti-shield"></i>المدربين / الأدمن</button>
                     </div>
                     <div class="nav-item" id="nav-courses" onclick="showTab('courses')"><i class="ti ti-book"></i><span>الدورات</span></div>
                     <div class="nav-item" id="nav-paths" onclick="showTab('paths')"><i class="ti ti-route"></i><span>المسارات</span></div>
@@ -1119,6 +1207,7 @@
                     <div class="nav-item" id="nav-groups" onclick="showTab('groups')"><i class="ti ti-users-group"></i><span>الجروبات</span></div>
                     <div class="nav-item" id="nav-certs" onclick="showTab('certs')"><i class="ti ti-certificate"></i><span>الشهادات</span></div>
                     <div class="nav-item" id="nav-qa" onclick="showTab('qa')"><i class="ti ti-messages"></i><span>الأسئلة</span></div>
+                    <div class="nav-item" id="nav-question-bank" onclick="showTab('question-bank')"><i class="ti ti-database"></i><span>بنك الأسئلة</span></div>
                     <div class="nav-item" id="nav-points" onclick="showTab('points')"><i class="ti ti-star"></i><span>النقاط</span></div>
                     <div class="nav-item" id="nav-activity" onclick="showTab('activity')"><i class="ti ti-activity"></i><span>User Activity</span></div>
                     <div class="nav-item" id="nav-announcements" onclick="showTab('announcements')"><i class="ti ti-speakerphone"></i><span>الإعلانات</span></div>
@@ -1187,6 +1276,10 @@
                     <div id="tab-courses" class="hidden">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">الدورات التدريبية</div>
+                            <div style="position:relative;">
+                                <i class="ti ti-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);"></i>
+                                <input type="text" id="course-search" placeholder="بحث باسم الدورة..." style="width:240px;padding-right:36px;" oninput="renderCoursesGrid()">
+                            </div>
                             <button class="primary" onclick="openAddCourseModal()"><i class="ti ti-book-upload"></i>إضافة دورة جديدة</button>
                         </div>
                         <div class="course-filter-tabs">
@@ -1205,7 +1298,7 @@
                             <div style="font-size:22px;font-weight:700;flex:1">المسارات التعليمية</div>
                             <button class="primary" onclick="openLearningPathForm()"><i class="ti ti-plus"></i>مسار جديد</button>
                         </div>
-                        <div style="display:grid;grid-template-columns:380px 1fr;gap:16px;">
+                        <div id="paths-shell" class="form-shell form-closed">
                             <div id="path-form" class="card hidden">
                                 <input type="hidden" id="lp-id">
                                 <div class="field"><label>عنوان المسار</label><input id="lp-title"></div>
@@ -1224,12 +1317,16 @@
                                     <div class="field"><label>الحالة</label><select id="lp-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
                                     <div class="field"><label>الرؤية</label><select id="lp-visibility" onchange="togglePathAudience()"><option value="public">عام</option><option value="private">خاص</option></select></div>
                                 </div>
-                                <div class="field"><label>القاعدة</label><select id="lp-rule"><option value="open">مفتوح</option><option value="sequential">بالترتيب</option></select></div>
-                                <div class="field"><label>الدورات داخل المسار</label><div id="lp-course-picker" style="display:grid;gap:6px;max-height:240px;overflow:auto;"></div></div>
+                                <div class="field"><label>القاعدة</label><select id="lp-rule"><option value="open">مفتوح</option><option value="sequential">بالترتيب</option><option value="single">مفتوح - دورة واحدة في المرة</option></select></div>
+                                <div class="field"><label>الدورات داخل المسار</label><div id="lp-course-picker" class="pick-list"></div></div>
                                 <div id="lp-audience-fields" class="hidden">
-                                    <div class="field"><label>جروبات مسموحة</label><select id="lp-groups" multiple size="5"></select></div>
-                                    <div class="field"><label>أقاليم مسموحة</label><select id="lp-regions" multiple size="5"></select></div>
-                                    <div class="field"><label>أشخاص محددين</label><select id="lp-users" multiple size="6"></select></div>
+                                    <div style="display:grid;gap:10px;margin-bottom:10px;">
+                                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;"><input id="lp-use-groups" type="checkbox" style="width:auto;" onchange="renderLearningPathAudiencePickers()">استخدم الجروبات في السماح</label>
+                                        <div id="lp-groups-wrap" class="field hidden"><label>جروبات مسموحة</label><div id="lp-group-picker" class="pick-list"></div></div>
+                                        <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;"><input id="lp-use-regions" type="checkbox" style="width:auto;" onchange="renderLearningPathAudiencePickers()">استخدم الأقاليم في السماح</label>
+                                        <div id="lp-regions-wrap" class="field hidden"><label>أقاليم مسموحة</label><div id="lp-region-picker" class="pick-list"></div></div>
+                                    </div>
+                                    <div class="field"><label>أشخاص محددين</label><div id="lp-user-picker" class="pick-list"></div></div>
                                 </div>
                                 <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--color-border-tertiary);padding-top:12px;margin-top:12px;">
                                     <button onclick="hideLearningPathForm()">إلغاء</button>
@@ -1292,7 +1389,7 @@
                         <div id="progress-selected-title" style="font-size:18px;font-weight:700;margin-bottom:1rem;display:none;"></div>
                         <div class="card table-scroll" style="padding:0">
                             <table>
-                                <thead><tr><th>الاسم</th><th>الإيميل</th><th>الدورة</th><th>الإقليم</th><th>الجروب</th><th>المشرف</th><th>التقدم</th><th>الحالة</th></tr></thead>
+                                <thead><tr><th style="width:52px"></th><th>الاسم</th><th>الإيميل</th><th>الدورة</th><th>الإقليم</th><th>الجروب</th><th>المشرف</th><th>التقدم</th><th>الحالة</th></tr></thead>
                                 <tbody id="progress-tb"></tbody>
                             </table>
                         </div>
@@ -1318,7 +1415,7 @@
                         <div id="cert-template-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:1.5rem;"></div>
                         <div class="card" style="padding:0;overflow:hidden">
                             <table>
-                                <thead><tr><th>الشهادة / الدورة</th><th>عدد المستلمين</th><th>آخر إصدار</th><th>إجمالي النقاط</th><th>إجراءات</th></tr></thead>
+                                <thead><tr><th>الشهادة / الدورة</th><th>عدد المستلمين</th><th>آخر إصدار</th><th>إجراءات</th></tr></thead>
                                 <tbody id="certs-tb"></tbody>
                             </table>
                         </div>
@@ -1332,9 +1429,45 @@
                         <div id="qa-list"></div>
                     </div>
 
+                    <!-- QUESTION BANK -->
+                    <div id="tab-question-bank" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">بنك الأسئلة</div>
+                            <button onclick="downloadQuestionBankTemplate()"><i class="ti ti-download"></i>تحميل نموذج Excel</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:360px 1fr;gap:16px;">
+                            <div class="card">
+                                <input type="hidden" id="qb-id">
+                                <div class="field"><label>عنوان / تصنيف</label><input id="qb-title" placeholder="مثال: خدمة العملاء"></div>
+                                <div class="field"><label>السؤال</label><textarea id="qb-question" rows="4"></textarea></div>
+                                <div class="field"><label>النوع</label><select id="qb-type" onchange="renderQuestionBankOptions()"><option value="choice">اختيارات</option><option value="truefalse">صح وغلط</option><option value="text">إجابة نصية</option></select></div>
+                                <div id="qb-options-box"></div>
+                                <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--color-border-tertiary);padding-top:12px;">
+                                    <button onclick="clearQuestionBankForm()">تفريغ</button>
+                                    <button class="primary" onclick="saveQuestionBankItem()"><i class="ti ti-device-floppy"></i>حفظ السؤال</button>
+                                </div>
+                                <div class="glass-panel" style="padding:12px;margin-top:12px;">
+                                    <div style="font-weight:800;margin-bottom:8px;"><i class="ti ti-file-spreadsheet"></i>استيراد أسئلة Excel</div>
+                                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">الأعمدة: title, question, type, option1..option4, correct. أول صف عناوين يتم تجاهله.</div>
+                                    <input id="qb-import-file" type="file" accept=".xlsx,.xls,.csv" style="margin-bottom:8px;">
+                                    <button class="primary sm" onclick="importQuestionBankExcel()"><i class="ti ti-upload"></i>رفع الأسئلة</button>
+                                </div>
+                            </div>
+                            <div class="card table-scroll" style="padding:0;overflow:hidden;">
+                                <table>
+                                    <thead><tr><th>التصنيف</th><th>السؤال</th><th>النوع</th><th>الإجابة</th><th>إجراءات</th></tr></thead>
+                                    <tbody id="question-bank-tb"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- POINTS CONFIG -->
                     <div id="tab-points" class="hidden">
-                        <div style="font-size:22px;font-weight:700;margin-bottom:1.5rem">إعدادات نظام النقاط</div>
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">إعدادات نظام النقاط</div>
+                            <button onclick="openPointsHistory()"><i class="ti ti-history"></i>History</button>
+                        </div>
                         <div class="card">
                             <div class="field-row">
                                 <div class="field"><label>نقاط الاشتراك في دورة</label><input id="pt-enroll" type="number" value="5" min="0"></div>
@@ -1347,7 +1480,12 @@
                         <div class="card" style="margin-top:1rem;">
                             <div style="font-size:18px;font-weight:700;margin-bottom:12px"><i class="ti ti-coins"></i>منح / خصم نقاط</div>
                             <div class="field-row">
-                                <div class="field"><label>اختار المستخدمين</label><select id="pt-users" multiple size="7"></select></div>
+                                <div class="field">
+                                    <label>اختار المستخدمين</label>
+                                    <input id="pt-user-search" placeholder="بحث بالاسم أو الإيميل..." oninput="renderPointsUsersPicker()">
+                                    <select id="pt-group-filter" style="margin-top:8px;" onchange="selectPointGroup()"><option value="">اختيار جروب كامل</option></select>
+                                    <div id="pt-users-picker" class="pick-list" style="margin-top:8px;max-height:300px;"></div>
+                                </div>
                                 <div>
                                     <div class="field"><label>العملية</label><select id="pt-action"><option value="grant">منح نقاط</option><option value="deduct">خصم نقاط</option></select></div>
                                     <div class="field"><label>عدد النقاط</label><input id="pt-amount" type="number" min="1" value="10"></div>
@@ -1371,10 +1509,10 @@
                     <div id="tab-announcements" class="hidden">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">الإعلانات</div>
-                            <button class="primary" onclick="saveAnnouncement()"><i class="ti ti-speakerphone"></i>نشر / حفظ الإعلان</button>
+                            <button class="primary" onclick="openAnnouncementForm()"><i class="ti ti-plus"></i>إعلان جديد</button>
                         </div>
-                        <div style="display:grid;grid-template-columns:360px 1fr;gap:16px;">
-                            <div class="card">
+                        <div id="ann-shell" class="form-shell form-closed">
+                            <div id="announcement-form" class="card hidden">
                                 <input type="hidden" id="ann-id">
                                 <div class="field"><label>عنوان الإعلان</label><input id="ann-title"></div>
                                 <div class="field"><label>نص الإعلان</label><textarea id="ann-body" rows="5"></textarea></div>
@@ -1388,14 +1526,17 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="field-row">
+                                <div class="date-grid">
                                     <div class="field"><label>النشر من</label><input id="ann-start" type="datetime-local"></div>
                                     <div class="field"><label>النشر إلى</label><input id="ann-end" type="datetime-local"></div>
                                 </div>
                                 <div class="field"><label>الحالة</label><select id="ann-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
-                                <button onclick="clearAnnouncementForm()"><i class="ti ti-plus"></i>إعلان جديد</button>
+                                <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--color-border-tertiary);padding-top:12px;margin-top:12px;">
+                                    <button onclick="hideAnnouncementForm()">إلغاء</button>
+                                    <button class="primary" onclick="saveAnnouncement()"><i class="ti ti-speakerphone"></i>نشر / حفظ الإعلان</button>
+                                </div>
                             </div>
-                            <div id="announcements-list" style="display:grid;gap:10px;align-content:start;"></div>
+                            <div id="announcements-list" style="display:grid;gap:10px;align-content:start;grid-column:1/-1;"></div>
                         </div>
                     </div>
 
@@ -1478,6 +1619,7 @@
                 <button id="admin-return-btn" class="icon-btn hidden" onclick="toggleTraineeView()" title="العودة للوحة الأدمن"><i class="ti ti-layout-dashboard"></i></button>
                 <button class="icon-btn" onclick="openModal('m-change-pw')" title="تغيير كلمة المرور"><i class="ti ti-key"></i></button>
                 <button class="icon-btn" onclick="showTraineeTab('my-certs')" title="شهاداتي"><i class="ti ti-certificate"></i></button>
+                <button class="icon-btn" onclick="openQAHistoryOnly()" title="أسئلة المتدربين"><i class="ti ti-messages"></i></button>
                 <button class="icon-btn" onclick="openTraineeProfile()" title="ملفي الشخصي"><i class="ti ti-user"></i></button>
                 <button class="icon-btn notif-btn" onclick="openNotifications()" title="الإشعارات"><i class="ti ti-bell"></i><span id="tr-notif-count" class="notif-dot-badge hidden">0</span></button>
                 <button class="icon-btn" onclick="toggleDarkMode()" title="Dark mode"><i class="ti ti-moon"></i></button>
@@ -1489,10 +1631,10 @@
             <!-- Trainee Home -->
                 <div id="tr-home" style="flex:1;padding:2rem;background:var(--color-background-tertiary);overflow-y:auto;">
                 <div id="tr-home-content">
-                    <div id="promo-carousel" class="promo-carousel hidden"></div>
-                    <div id="learning-paths-section" style="margin-bottom:1.5rem;"></div>
                     <!-- Greeting -->
                     <div style="font-size:20px;font-weight:700;margin-bottom:1.5rem;" id="tr-greeting">👋 أهلاً بك،</div>
+                    <div id="promo-carousel" class="promo-carousel hidden"></div>
+                    <div id="learning-paths-section" style="margin-bottom:1.5rem;"></div>
 
                     <!-- Two Big Cards -->
                     <div class="trainee-home-grid">
@@ -1847,6 +1989,20 @@
             </div>
         </div>
 
+        <!-- Course Content Results -->
+        <div id="m-content-results" class="modal-wrap hidden">
+            <div class="modal" style="width:min(1080px,96vw);max-height:92vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="content-results-title">نتائج المحتوى</div>
+                    <button class="icon-btn" onclick="closeModal('m-content-results')"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="content-results-body" class="card table-scroll" style="padding:0;max-height:590px;overflow:auto;"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
+                    <button class="primary" onclick="exportContentResults()"><i class="ti ti-file-spreadsheet"></i>تصدير Excel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Manual Progress -->
         <div id="m-manual-progress" class="modal-wrap hidden">
             <div class="modal" style="max-width:620px;">
@@ -1876,6 +2032,7 @@
                     <button id="etb-ind" class="primary" style="flex:1;border:none;background:#fff;color:var(--color-text-primary);box-shadow:0 1px 3px rgba(0,0,0,0.1);" onclick="setEnrollTab('ind')">تحديد فردي</button>
                     <button id="etb-grp" style="flex:1;border:none;background:transparent;" onclick="setEnrollTab('grp')">تحديد مجموعة</button>
                     <button id="etb-flt" style="flex:1;border:none;background:transparent;" onclick="setEnrollTab('flt')">بحث متقدم</button>
+                    <button id="etb-excel" style="flex:1;border:none;background:transparent;" onclick="setEnrollTab('excel')">Excel</button>
                 </div>
                 <div id="enroll-ind">
                     <div class="field"><label>اختر المتدرب</label><select id="enroll-sel" style="width:100%;"><option value="">— جاري التحميل —</option></select></div>
@@ -1893,7 +2050,7 @@
                         <div class="field"><label>الفرع</label><input id="ef-branch"></div>
                     </div>
                 </div>
-                <div class="glass-panel" style="padding:12px;margin-top:12px;">
+                <div id="enroll-excel" class="glass-panel hidden" style="padding:12px;margin-top:12px;">
                     <div style="font-weight:800;margin-bottom:8px;"><i class="ti ti-file-spreadsheet"></i> تسجيل متدربين من Excel</div>
                     <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">حط الإيميلات تحت عمود email. أول صف عناوين بيتساب تلقائيا.</div>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -1905,6 +2062,33 @@
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-enroll')">إلغاء</button>
                     <button class="primary" onclick="submitEnroll()"><i class="ti ti-user-check"></i>تنفيذ التسجيل</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Path Overview -->
+        <div id="m-path-overview" class="modal-wrap hidden">
+            <div class="modal" style="width:min(900px,94vw);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="path-overview-title">معاينة المسار</div>
+                    <button class="icon-btn" onclick="closeModal('m-path-overview')"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="path-overview-body"></div>
+            </div>
+        </div>
+
+        <!-- Missing Enrollment Emails -->
+        <div id="m-missing-emails" class="modal-wrap hidden">
+            <div class="modal" style="max-width:620px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800">إيميلات غير موجودة في الأكاديمية</div>
+                    <button class="icon-btn" onclick="closeModal('m-missing-emails')"><i class="ti ti-x"></i></button>
+                </div>
+                <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;">تم تسجيل الإيميلات الموجودة، والقائمة التالية غير موجودة عندك كمستخدمين.</div>
+                <div id="missing-emails-list" class="card table-scroll" style="padding:0;max-height:360px;overflow:auto;"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
+                    <button onclick="closeModal('m-missing-emails')">إغلاق</button>
+                    <button class="primary" onclick="exportMissingEmails()"><i class="ti ti-file-download"></i>تصدير Excel</button>
                 </div>
             </div>
         </div>
@@ -1966,6 +2150,29 @@
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-change-pw')">إلغاء</button>
                     <button class="primary" onclick="submitChangePw()"><i class="ti ti-check"></i>تحديث</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Points History -->
+        <div id="m-points-history" class="modal-wrap hidden">
+            <div class="modal" style="width:min(900px,94vw);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800">History النقاط</div>
+                    <button class="icon-btn" onclick="closeModal('m-points-history')"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="points-history-list" class="card table-scroll" style="padding:0;max-height:520px;overflow:auto;"></div>
+            </div>
+        </div>
+
+        <!-- Confirm Dialog -->
+        <div id="m-confirm" class="modal-wrap hidden">
+            <div class="modal" style="max-width:460px;">
+                <div style="font-size:18px;font-weight:800;margin-bottom:10px;" id="confirm-title">تأكيد الإجراء</div>
+                <div id="confirm-body" style="font-size:14px;color:var(--color-text-secondary);line-height:1.8;margin-bottom:18px;"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
+                    <button onclick="cancelConfirm()">إلغاء</button>
+                    <button class="danger" onclick="confirmYes()"><i class="ti ti-check"></i>تأكيد</button>
                 </div>
             </div>
         </div>
@@ -2077,7 +2284,7 @@
                 </div>
                 <div id="cert-view-content"></div>
                 <div style="text-align:center;margin-top:16px;">
-                    <button class="primary" onclick="window.print()"><i class="ti ti-printer"></i> طباعة / PDF</button>
+                    <button class="primary" onclick="printCurrentCertificateView()"><i class="ti ti-printer"></i> طباعة / PDF</button>
                 </div>
             </div>
         </div>
@@ -2102,7 +2309,11 @@
                                 <div id="cert-linker-linked" style="display:grid;gap:6px;max-height:330px;overflow:auto;"></div>
                             </div>
                         </div>
-                        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">اضغط على أي دورة لنقلها بين القائمتين. أي متدرب يخلص دورة مربوطة يحصل على الشهادة تلقائيا.</div>
+                        <div class="glass-panel" style="padding:10px;margin-bottom:10px;">
+                            <div style="font-weight:800;margin-bottom:8px;">المسارات المرتبطة بالشهادة</div>
+                            <div id="cert-linker-paths" style="display:grid;gap:6px;max-height:180px;overflow:auto;"></div>
+                        </div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">اضغط على أي دورة أو مسار للربط. أي متدرب يخلص دورة/مسار مربوط يحصل على الشهادة تلقائيا.</div>
                         <button class="primary" style="width:100%;" onclick="saveCertLinks()"><i class="ti ti-link"></i>حفظ الربط وإصدار المستحق</button>
                     </div>
                     <div id="cert-linker-preview"></div>
@@ -2222,13 +2433,31 @@
                 </div>
                 <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0;">
                     <div style="font-weight:700;">الأسئلة</div>
-                    <button class="sm" onclick="courseItemAddQuestion()"><i class="ti ti-plus"></i>إضافة سؤال</button>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="sm" onclick="openQuestionBankPicker()"><i class="ti ti-database-import"></i>من بنك الأسئلة</button>
+                        <button class="sm" onclick="courseItemAddQuestion()"><i class="ti ti-plus"></i>إضافة سؤال</button>
+                    </div>
                 </div>
                 <div id="ci-questions" style="display:grid;gap:10px;"></div>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-course-item')">إلغاء</button>
                     <button class="primary" onclick="saveCourseItem()"><i class="ti ti-device-floppy"></i>حفظ المحتوى</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Question Bank Picker -->
+        <div id="m-question-bank-picker" class="modal-wrap hidden">
+            <div class="modal" style="width:min(900px,94vw);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800">استدعاء من بنك الأسئلة</div>
+                    <button class="icon-btn" onclick="closeModal('m-question-bank-picker')"><i class="ti ti-x"></i></button>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+                    <input id="qb-picker-search" placeholder="بحث في الأسئلة أو التصنيف..." oninput="renderQuestionBankPicker()">
+                    <button class="primary" onclick="importSelectedBankQuestions()"><i class="ti ti-download"></i>إضافة المحدد</button>
+                </div>
+                <div id="qb-picker-list" class="card table-scroll" style="padding:0;max-height:520px;overflow:auto;"></div>
             </div>
         </div>
 
@@ -2317,12 +2546,12 @@
                     <div style="font-size:18px;font-weight:700">الأسئلة والدعم</div>
                     <button class="icon-btn" onclick="closeModal('m-qa-ask')"><i class="ti ti-x"></i></button>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div id="qa-modal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="glass-panel" style="padding:14px;">
                         <div style="font-weight:700;margin-bottom:10px;"><i class="ti ti-history"></i>أسئلة سابقة</div>
                         <div id="qa-my-list" style="max-height:520px;overflow:auto;"></div>
                     </div>
-                    <div class="glass-panel" style="padding:14px;">
+                    <div id="qa-create-panel" class="glass-panel" style="padding:14px;">
                         <div style="font-weight:700;margin-bottom:10px;"><i class="ti ti-message-plus"></i>إنشاء سؤال جديد</div>
                         <div class="field"><label>ربط السؤال بدورة</label><select id="qa-course-scope"><option value="_all">سؤال عام</option></select></div>
                         <div class="field"><label>سؤالك</label><textarea id="qa-question" rows="8" placeholder="اكتب سؤالك حول الدورة أو المحتوى..."></textarea></div>
@@ -2367,6 +2596,7 @@
             UCACHE = [],
             CCACHE = [],
             GCACHE = [],
+            PATH_CACHE = [],
             ALL_PROGRESS_ROWS = [],
             CERT_CACHE = [],
             CERT_TEMPLATE_CACHE = [],
@@ -2380,7 +2610,19 @@
             COURSE_ACTION_ID = null,
             ADMIN_PREVIEW_ITEMS = [],
             CERT_LINKER_IDS = [],
+            CERT_LINKER_PATH_IDS = [],
             LP_SELECTED_COURSES = [],
+            LP_SELECTED_GROUPS = [],
+            LP_SELECTED_REGIONS = [],
+            LP_SELECTED_USERS = [],
+            POINT_SELECTED_USERS = new Set(),
+            QB_CACHE = [],
+            QB_SELECTED = new Set(),
+            MISSING_EMAILS = [],
+            CURRENT_CERT_GROUP_NAME = '',
+            CURRENT_CERT_GROUP_CERTS = [],
+            CONTENT_RESULTS_ROWS = [],
+            CONFIRM_ACTION = null,
             COURSE_ITEM_TYPE = 'video',
             SURVEY_ITEM_CONTEXT = 'course',
             SURVEY_EDITING_ITEM_ID = null,
@@ -2412,6 +2654,25 @@
             el.style.display = 'flex'; }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function askConfirm(title, body, onYes) {
+            document.getElementById('confirm-title').textContent = title || 'تأكيد الإجراء';
+            document.getElementById('confirm-body').textContent = body || 'هل أنت متأكد؟';
+            CONFIRM_ACTION = onYes;
+            openModal('m-confirm');
+        }
+
+        function cancelConfirm() {
+            CONFIRM_ACTION = null;
+            closeModal('m-confirm');
+        }
+
+        async function confirmYes() {
+            const action = CONFIRM_ACTION;
+            CONFIRM_ACTION = null;
+            closeModal('m-confirm');
+            if (typeof action === 'function') await action();
+        }
 
         function hide(id) { const el = document.getElementById(id);
             el.classList.add('hidden');
@@ -2584,6 +2845,7 @@
                 'video_likes',
                 'qa',
                 'survey_answers',
+                'assessment_attempts',
                 'points_log'
             ];
             for (const col of userEmailCollections) {
@@ -2726,16 +2988,42 @@
 
         async function logActivity(type, details = {}, actorEmail = '') {
             try {
+                const now = new Date();
                 await addDoc(collection(db, 'activity_log'), {
                     type,
                     details,
                     actorEmail: actorEmail || (CU?.email || 'system'),
                     actorName: CU?.full_name || CU?.email || 'system',
-                    createdAt: Date.now(),
-                    createdAtText: new Date().toISOString()
+                    createdAt: now.getTime(),
+                    createdAtText: now.toLocaleString('ar-EG', {
+                        timeZone: 'Asia/Riyadh',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
                 });
             } catch (e) {
                 console.warn('activity log failed', e);
+            }
+        }
+
+        async function logPoints(userEmail, delta, reason = '', by = 'system', source = 'automatic') {
+            try {
+                await addDoc(collection(db, 'points_log'), {
+                    userEmail: normalizeEmail(userEmail),
+                    delta: parseInt(delta) || 0,
+                    amount: Math.abs(parseInt(delta) || 0),
+                    mode: (parseInt(delta) || 0) < 0 ? 'deduct' : 'grant',
+                    reason,
+                    by,
+                    source,
+                    createdAt: Date.now()
+                });
+            } catch (e) {
+                console.warn('points log failed', e);
             }
         }
 
@@ -2755,7 +3043,16 @@
                 issue_certificate: 'إصدار شهادة',
                 view_course: 'مشاهدة دورة',
                 complete_course: 'إكمال دورة',
-                manual_complete_course: 'إكمال يدوي'
+                manual_complete_course: 'إكمال يدوي',
+                save_announcement: 'حفظ إعلان',
+                delete_announcement: 'حذف إعلان',
+                save_learning_path: 'حفظ مسار',
+                delete_learning_path: 'حذف مسار',
+                save_question_bank: 'حفظ سؤال في البنك',
+                import_question_bank: 'استيراد بنك الأسئلة',
+                save_cert_links: 'ربط شهادة',
+                delete_certificate: 'حذف شهادة',
+                assessment_attempt: 'محاولة اختبار'
             };
             return map[type] || type || 'نشاط';
         }
@@ -2777,6 +3074,15 @@
             if (row.type === 'view_course') return `فتح ${d.email || ''} الدورة ${d.courseId || ''}`;
             if (row.type === 'complete_course') return `أكمل ${d.email || ''} دورة ${d.courseName || d.courseId || ''}`;
             if (row.type === 'manual_complete_course') return `تم اعتماد إكمال الدورة يدويا لـ ${d.email || ''}`;
+            if (row.type === 'save_announcement') return `تم حفظ إعلان ${d.title || d.id || ''}`;
+            if (row.type === 'delete_announcement') return `تم حذف إعلان ${d.id || ''}`;
+            if (row.type === 'save_learning_path') return `تم حفظ مسار ${d.title || d.id || ''} بعدد ${d.courseCount || 0} دورة`;
+            if (row.type === 'delete_learning_path') return `تم حذف مسار ${d.id || ''}`;
+            if (row.type === 'save_question_bank') return `تم حفظ سؤال في بنك الأسئلة ${d.title || ''}`;
+            if (row.type === 'import_question_bank') return `تم استيراد ${d.count || 0} سؤال إلى بنك الأسئلة`;
+            if (row.type === 'save_cert_links') return `تم ربط شهادة بـ ${d.courseCount || 0} دورة و ${d.pathCount || 0} مسار`;
+            if (row.type === 'delete_certificate') return `تم حذف شهادة ${d.courseId || ''} من ${d.email || ''}`;
+            if (row.type === 'assessment_attempt') return `محاولة ${d.type || 'اختبار'} لـ ${d.email || ''}: ${d.score || 0}/${d.total || 0}`;
             return 'نشاط مسجل على المنصة';
         }
 
@@ -2786,7 +3092,7 @@
                 const rows = snaps.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 200);
                 html('activity-tb', rows.map(r => `
                     <tr>
-                        <td style="font-size:12px;direction:ltr;text-align:right;">${esc(r.createdAtText || (r.createdAt ? new Date(r.createdAt).toISOString() : ''))}</td>
+                        <td style="font-size:12px;direction:ltr;text-align:right;">${esc(r.createdAt ? new Date(r.createdAt).toLocaleString('ar-EG', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : (r.createdAtText || ''))}</td>
                         <td>${esc(r.actorName || r.actorEmail || 'system')}</td>
                         <td><span class="badge">${esc(activityTypeLabel(r.type))}</span></td>
                         <td style="font-size:13px;color:var(--color-text-secondary);">${esc(activityDetailsText(r))}</td>
@@ -2801,7 +3107,24 @@
             set('ann-status', 'published');
         }
 
+        function openAnnouncementForm() {
+            clearAnnouncementForm();
+            document.getElementById('announcement-form')?.classList.remove('hidden');
+            document.getElementById('ann-shell')?.classList.remove('form-closed');
+            const list = document.getElementById('announcements-list');
+            if (list) list.style.gridColumn = '';
+        }
+
+        function hideAnnouncementForm() {
+            document.getElementById('announcement-form')?.classList.add('hidden');
+            document.getElementById('ann-shell')?.classList.add('form-closed');
+            const list = document.getElementById('announcements-list');
+            if (list) list.style.gridColumn = '1/-1';
+            clearAnnouncementForm();
+        }
+
         async function loadAnnouncements() {
+            hideAnnouncementForm();
             const snaps = await getDocs(collection(db, 'announcements'));
             const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             html('announcements-list', rows.length ? rows.map(a => `
@@ -2832,8 +3155,9 @@
                 updatedAt: Date.now()
             };
             await setDoc(doc(db, 'announcements', id), announcement, { merge: true });
+            await logActivity('save_announcement', { id, title: announcement.title, status: announcement.status });
             toast('تم حفظ الإعلان');
-            clearAnnouncementForm();
+            hideAnnouncementForm();
             loadAnnouncements();
         }
 
@@ -2848,13 +3172,19 @@
             set('ann-start', a.start_at || '');
             set('ann-end', a.end_at || '');
             set('ann-status', a.status || 'published');
+            document.getElementById('announcement-form')?.classList.remove('hidden');
+            document.getElementById('ann-shell')?.classList.remove('form-closed');
+            const list = document.getElementById('announcements-list');
+            if (list) list.style.gridColumn = '';
         }
 
         async function deleteAnnouncement(id) {
-            if (!confirm('حذف الإعلان؟')) return;
-            await deleteDoc(doc(db, 'announcements', id));
-            toast('تم حذف الإعلان');
-            loadAnnouncements();
+            askConfirm('حذف الإعلان', 'هل تريد حذف هذا الإعلان؟', async () => {
+                await deleteDoc(doc(db, 'announcements', id));
+                await logActivity('delete_announcement', { id });
+                toast('تم حذف الإعلان');
+                loadAnnouncements();
+            });
         }
 
         function announcementIsActive(a) {
@@ -2868,8 +3198,7 @@
         async function showTraineeAnnouncements() {
             if (!CU?.email) return;
             const snaps = await getDocs(collection(db, 'announcements'));
-            const seen = JSON.parse(localStorage.getItem(`deraah_seen_ann_${CU.email}`) || '[]');
-            const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).filter(announcementIsActive).filter(a => !seen.includes(a.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).filter(announcementIsActive).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             if (!rows.length) return;
             const a = rows[0];
             document.getElementById('ann-popup-title').textContent = a.title || 'إعلان';
@@ -2882,13 +3211,6 @@
         }
 
         function closeAnnouncementPopup() {
-            const id = document.getElementById('ann-popup-id')?.value || '';
-            if (CU?.email && id) {
-                const key = `deraah_seen_ann_${CU.email}`;
-                const seen = JSON.parse(localStorage.getItem(key) || '[]');
-                if (!seen.includes(id)) seen.push(id);
-                localStorage.setItem(key, JSON.stringify(seen));
-            }
             closeModal('m-announcement-popup');
         }
 
@@ -2913,6 +3235,7 @@
                             <span class="badge"><i class="ti ti-book"></i> ${(p.courseIds || []).length} دورة</span>
                         </div>
                         <div style="display:flex;gap:6px;margin-top:12px;">
+                            <button class="sm" onclick="openLearningPathOverview('${p.id}')"><i class="ti ti-eye"></i>عرض</button>
                             <button class="sm" onclick="editLearningPath('${p.id}')"><i class="ti ti-edit"></i>تعديل</button>
                             <button class="sm danger" onclick="deleteLearningPath('${p.id}')"><i class="ti ti-trash"></i>حذف</button>
                         </div>
@@ -2929,17 +3252,11 @@
             const [users, groups] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' })]);
             if (users.success) {
                 UCACHE = users.users;
-                const userSel = document.getElementById('lp-users');
-                if (userSel) userSel.innerHTML = UCACHE.map(u => `<option value="${esc(u.email)}">${esc(u.full_name || u.email)} (${esc(u.email)})</option>`).join('');
-                const regions = [...new Set(UCACHE.map(u => u.region).filter(Boolean))].sort();
-                const regionSel = document.getElementById('lp-regions');
-                if (regionSel) regionSel.innerHTML = regions.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join('');
             }
             if (groups.success) {
                 GCACHE = groups.groups;
-                const groupSel = document.getElementById('lp-groups');
-                if (groupSel) groupSel.innerHTML = GCACHE.map(g => `<option value="${esc(g.group_name || g.group_id)}">${esc(g.group_name)}</option>`).join('');
             }
+            renderLearningPathAudiencePickers();
         }
 
         function renderLearningPathCoursePicker() {
@@ -2947,8 +3264,9 @@
             if (!box) return;
             box.innerHTML = CCACHE.map(c => {
                 const selected = LP_SELECTED_COURSES.includes(c.course_id);
-                return `<button type="button" class="sm ${selected ? 'primary' : ''}" style="justify-content:flex-start;text-align:right;white-space:normal;" onclick="toggleLearningPathCourse('${esc(c.course_id)}')">
-                    <i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${esc(c.course_name)}
+                const order = LP_SELECTED_COURSES.indexOf(c.course_id) + 1;
+                return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="toggleLearningPathCourse('${esc(c.course_id)}')">
+                    <i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${selected ? `<span class="badge">${order}</span>` : ''}${esc(c.course_name)}
                 </button>`;
             }).join('') || '<div style="color:var(--color-text-secondary);font-size:13px;">لا توجد دورات</div>';
         }
@@ -2963,14 +3281,61 @@
             return [...(document.getElementById(id)?.selectedOptions || [])].map(o => o.value).filter(Boolean);
         }
 
+        function normalizeEmail(v) {
+            return String(v || '').trim().toLowerCase();
+        }
+
+        function toggleLearningPathAudience(type, value) {
+            const key = type === 'group' ? 'LP_SELECTED_GROUPS' : type === 'region' ? 'LP_SELECTED_REGIONS' : 'LP_SELECTED_USERS';
+            const current = key === 'LP_SELECTED_GROUPS' ? LP_SELECTED_GROUPS : key === 'LP_SELECTED_REGIONS' ? LP_SELECTED_REGIONS : LP_SELECTED_USERS;
+            const clean = type === 'user' ? normalizeEmail(value) : String(value || '').trim();
+            const next = current.includes(clean) ? current.filter(x => x !== clean) : [...current, clean];
+            if (key === 'LP_SELECTED_GROUPS') LP_SELECTED_GROUPS = next;
+            if (key === 'LP_SELECTED_REGIONS') LP_SELECTED_REGIONS = next;
+            if (key === 'LP_SELECTED_USERS') LP_SELECTED_USERS = next;
+            renderLearningPathAudiencePickers();
+        }
+
+        function renderLearningPathAudiencePickers() {
+            const useGroups = !!document.getElementById('lp-use-groups')?.checked;
+            const useRegions = !!document.getElementById('lp-use-regions')?.checked;
+            document.getElementById('lp-groups-wrap')?.classList.toggle('hidden', !useGroups);
+            document.getElementById('lp-regions-wrap')?.classList.toggle('hidden', !useRegions);
+            if (!useGroups) LP_SELECTED_GROUPS = [];
+            if (!useRegions) LP_SELECTED_REGIONS = [];
+
+            const groupBox = document.getElementById('lp-group-picker');
+            if (groupBox) groupBox.innerHTML = GCACHE.map(g => {
+                const value = g.group_name || g.group_id;
+                const selected = LP_SELECTED_GROUPS.includes(value);
+                return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="toggleLearningPathAudience('group','${esc(value)}')"><i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${esc(g.group_name || value)}</button>`;
+            }).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);">لا توجد جروبات</div>';
+
+            const regions = [...new Set(UCACHE.map(u => u.region).filter(Boolean))].sort();
+            const regionBox = document.getElementById('lp-region-picker');
+            if (regionBox) regionBox.innerHTML = regions.map(r => {
+                const selected = LP_SELECTED_REGIONS.includes(r);
+                return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="toggleLearningPathAudience('region','${esc(r)}')"><i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${esc(r)}</button>`;
+            }).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);">لا توجد أقاليم</div>';
+
+            const userBox = document.getElementById('lp-user-picker');
+            if (userBox) userBox.innerHTML = UCACHE.filter(u => u.status !== 'deleted').map(u => {
+                const email = normalizeEmail(u.email);
+                const selected = LP_SELECTED_USERS.includes(email);
+                return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="toggleLearningPathAudience('user','${esc(email)}')"><i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${esc(u.full_name || email)} <span style="font-size:11px;color:var(--color-text-secondary);direction:ltr;">${esc(email)}</span></button>`;
+            }).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);">لا يوجد مستخدمون</div>';
+        }
+
         function togglePathAudience() {
             const box = document.getElementById('lp-audience-fields');
             if (box) box.classList.toggle('hidden', val('lp-visibility') !== 'private');
+            renderLearningPathAudiencePickers();
         }
 
         function openLearningPathForm() {
             clearLearningPathForm();
             document.getElementById('path-form')?.classList.remove('hidden');
+            document.getElementById('paths-shell')?.classList.remove('form-closed');
             const list = document.getElementById('paths-list');
             if (list) list.style.gridColumn = '';
             populateLearningPathFormOptions();
@@ -2978,6 +3343,7 @@
 
         function hideLearningPathForm() {
             document.getElementById('path-form')?.classList.add('hidden');
+            document.getElementById('paths-shell')?.classList.add('form-closed');
             const list = document.getElementById('paths-list');
             if (list) list.style.gridColumn = '1/-1';
         }
@@ -2988,8 +3354,14 @@
             set('lp-visibility', 'public');
             set('lp-rule', 'open');
             LP_SELECTED_COURSES = [];
+            LP_SELECTED_GROUPS = [];
+            LP_SELECTED_REGIONS = [];
+            LP_SELECTED_USERS = [];
+            const useGroups = document.getElementById('lp-use-groups');
+            const useRegions = document.getElementById('lp-use-regions');
+            if (useGroups) useGroups.checked = false;
+            if (useRegions) useRegions.checked = false;
             renderLearningPathCoursePicker();
-            ['lp-groups','lp-regions','lp-users'].forEach(id => [...(document.getElementById(id)?.options || [])].forEach(o => o.selected = false));
             togglePathAudience();
         }
 
@@ -3004,13 +3376,14 @@
                 visibility: val('lp-visibility'),
                 rule: val('lp-rule'),
                 courseIds: [...LP_SELECTED_COURSES],
-                audienceGroups: selectedOptionsValues('lp-groups'),
-                audienceRegions: selectedOptionsValues('lp-regions'),
-                audienceUsers: selectedOptionsValues('lp-users'),
+                audienceGroups: document.getElementById('lp-use-groups')?.checked ? [...LP_SELECTED_GROUPS] : [],
+                audienceRegions: document.getElementById('lp-use-regions')?.checked ? [...LP_SELECTED_REGIONS] : [],
+                audienceUsers: LP_SELECTED_USERS.map(normalizeEmail),
                 updatedAt: Date.now(),
                 createdAt: Date.now()
             };
             await setDoc(doc(db, 'learning_paths', id), path, { merge: true });
+            await logActivity('save_learning_path', { id, title: path.title, courseCount: path.courseIds.length, visibility: path.visibility });
             toast('تم حفظ المسار');
             clearLearningPathForm();
             hideLearningPathForm();
@@ -3029,26 +3402,80 @@
             set('lp-visibility', p.visibility || 'public');
             set('lp-rule', p.rule || 'open');
             LP_SELECTED_COURSES = p.courseIds || [];
+            LP_SELECTED_GROUPS = p.audienceGroups || [];
+            LP_SELECTED_REGIONS = p.audienceRegions || [];
+            LP_SELECTED_USERS = (p.audienceUsers || []).map(normalizeEmail);
+            const useGroups = document.getElementById('lp-use-groups');
+            const useRegions = document.getElementById('lp-use-regions');
+            if (useGroups) useGroups.checked = LP_SELECTED_GROUPS.length > 0;
+            if (useRegions) useRegions.checked = LP_SELECTED_REGIONS.length > 0;
             document.getElementById('path-form')?.classList.remove('hidden');
+            document.getElementById('paths-shell')?.classList.remove('form-closed');
             const list = document.getElementById('paths-list');
             if (list) list.style.gridColumn = '';
             await populateLearningPathFormOptions();
-            ['lp-groups','lp-regions','lp-users'].forEach(idName => {
-                const key = idName === 'lp-groups' ? 'audienceGroups' : idName === 'lp-regions' ? 'audienceRegions' : 'audienceUsers';
-                const vals = p[key] || [];
-                [...(document.getElementById(idName)?.options || [])].forEach(o => o.selected = vals.includes(o.value));
-            });
             togglePathAudience();
         }
 
         async function deleteLearningPath(id) {
-            if (!confirm('حذف المسار التعليمي؟')) return;
-            await deleteDoc(doc(db, 'learning_paths', id));
-            toast('تم حذف المسار');
-            loadLearningPaths();
+            askConfirm('حذف المسار التعليمي', 'هل تريد حذف هذا المسار؟', async () => {
+                await deleteDoc(doc(db, 'learning_paths', id));
+                await logActivity('delete_learning_path', { id });
+                toast('تم حذف المسار');
+                loadLearningPaths();
+            });
+        }
+
+        async function openLearningPathOverview(id) {
+            const snap = await getDoc(doc(db, 'learning_paths', id));
+            if (!snap.exists()) return toast('المسار غير موجود', 'error');
+            const p = snap.data();
+            const [users, groups, courses] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' }), call({ action: 'getCourses' })]);
+            if (users.success) UCACHE = users.users;
+            if (groups.success) GCACHE = groups.groups;
+            if (courses.success) CCACHE = courses.courses;
+            const allowed = UCACHE.filter(u => {
+                if (p.visibility !== 'private') return true;
+                const email = normalizeEmail(u.email);
+                const group = String(u.group || '').trim();
+                const region = String(u.region || '').trim();
+                return (p.audienceUsers || []).map(normalizeEmail).includes(email) ||
+                    (p.audienceGroups || []).includes(group) ||
+                    (p.audienceRegions || []).includes(region);
+            });
+            document.getElementById('path-overview-title').textContent = p.title || 'معاينة المسار';
+            html('path-overview-body', `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="glass-panel" style="padding:12px;">
+                        <div style="font-weight:800;margin-bottom:10px;">الدورات بالترتيب</div>
+                        ${(p.courseIds || []).map((cid, i) => {
+                            const c = CCACHE.find(x => x.course_id === cid) || { course_name: cid };
+                            return `<div style="display:flex;gap:10px;align-items:center;padding:8px;border-bottom:1px solid var(--color-border-tertiary);">
+                                <span class="badge">${i + 1}</span><span style="font-weight:700;">${esc(c.course_name)}</span>
+                            </div>`;
+                        }).join('') || '<div style="color:var(--color-text-secondary);">لا توجد دورات داخل المسار</div>'}
+                    </div>
+                    <div class="glass-panel" style="padding:12px;">
+                        <div style="font-weight:800;margin-bottom:10px;">المستخدمون المسموح لهم (${allowed.length})</div>
+                        <div style="max-height:360px;overflow:auto;">
+                            ${allowed.map(u => `<div style="padding:8px;border-bottom:1px solid var(--color-border-tertiary);">
+                                <div style="font-weight:700;">${esc(u.full_name || u.email)}</div>
+                                <div style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${esc(u.email || '')}</div>
+                            </div>`).join('') || '<div style="color:var(--color-text-secondary);">لم يتم تحديد مستخدمين بعد</div>'}
+                        </div>
+                    </div>
+                </div>
+            `);
+            openModal('m-path-overview');
         }
 
         async function loadTraineeLearningPaths() {
+            const ur = await call({ action: 'getUsers' });
+            if (ur.success) {
+                UCACHE = ur.users;
+                const fresh = UCACHE.find(u => normalizeEmail(u.email) === normalizeEmail(CU?.email));
+                if (fresh) CU = { ...CU, ...fresh };
+            }
             const snaps = await getDocs(collection(db, 'learning_paths'));
             const paths = snaps.docs.map(d => d.data()).filter(p => p.status === 'published' && pathVisibleToTrainee(p));
             const box = document.getElementById('learning-paths-section');
@@ -3069,12 +3496,13 @@
 
         function pathVisibleToTrainee(path) {
             if (path.visibility !== 'private') return true;
-            const email = (CU?.email || '').trim().toLowerCase();
-            const userGroup = CU?.group || '';
-            const userRegion = CU?.region || '';
-            return (path.audienceUsers || []).includes(email) ||
-                (path.audienceGroups || []).includes(userGroup) ||
-                (path.audienceRegions || []).includes(userRegion);
+            const email = normalizeEmail(CU?.email);
+            const userGroup = String(CU?.group || '').trim();
+            const userRegion = String(CU?.region || '').trim();
+            const users = (path.audienceUsers || []).map(normalizeEmail);
+            const groups = (path.audienceGroups || []).map(x => String(x || '').trim());
+            const regions = (path.audienceRegions || []).map(x => String(x || '').trim());
+            return users.includes(email) || groups.includes(userGroup) || regions.includes(userRegion);
         }
 
         // ─── API Router ───
@@ -3507,26 +3935,33 @@
                 }
                 if (action === 'issueCertificate') {
                     const email = p.userEmail.trim().toLowerCase();
-                    await setDoc(doc(db, 'certificates', `${email}_${p.courseId}`), {
+                    const certRef = doc(db, 'certificates', `${email}_${p.courseId}`);
+                    const oldCertSnap = await getDoc(certRef);
+                    const oldCert = oldCertSnap.exists() ? oldCertSnap.data() : {};
+                    const pointsToAward = oldCertSnap.exists() ? 0 : (parseInt(p.pointsAwarded) || 0);
+                    await setDoc(certRef, {
                         userEmail: email,
+                        user_email: email,
                         userName: p.userName,
                         user_name: p.userName,
                         courseId: p.courseId,
+                        course_id: p.courseId,
                         courseName: p.courseName,
                         course_name: p.courseName,
                         certificate_image_url: p.certificateImageUrl || '',
                         certificate_body: p.certificateBody || '',
                         certificate_builder: p.certificateBuilder || null,
                         template_id: p.templateId || '',
-                        issued_at: new Date().toISOString(),
-                        points_awarded: p.pointsAwarded || 0
+                        issued_at: oldCert.issued_at || new Date().toISOString(),
+                        points_awarded: oldCert.points_awarded || pointsToAward
                     }, { merge: true });
                     // Award points
-                    if (p.pointsAwarded > 0) {
+                    if (pointsToAward > 0) {
                         const uRef = doc(db, 'users', email);
                         const uSnap = await getDoc(uRef);
                         const current = uSnap.exists() ? (uSnap.data().points || 0) : 0;
-                        await setDoc(uRef, { points: current + parseInt(p.pointsAwarded) }, { merge: true });
+                        await setDoc(uRef, { points: current + pointsToAward }, { merge: true });
+                        await logPoints(email, pointsToAward, `شهادة ${p.courseName || p.courseId || ''}`, p.by || 'system', 'certificate');
                     }
                     await logActivity('issue_certificate', { email, courseId: p.courseId, courseName: p.courseName || '', templateId: p.templateId || '' });
                     return { success: true };
@@ -3585,12 +4020,25 @@
                 }
                 if (action === 'getAllQA') {
                     const snaps = await getDocs(collection(db, 'qa'));
-                    return { success: true, qa: snaps.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) };
+                    const rows = snaps.docs.map(d => d.data()).sort((a, b) => {
+                        const bp = b.isPinned === true ? 1 : 0;
+                        const ap = a.isPinned === true ? 1 : 0;
+                        if (bp !== ap) return bp - ap;
+                        if (bp && ap) return (b.pinnedAt || 0) - (a.pinnedAt || 0);
+                        return (b.createdAt || 0) - (a.createdAt || 0);
+                    });
+                    return { success: true, qa: rows };
                 }
                 if (action === 'getUserQA') {
                     const email = p.userEmail.trim().toLowerCase();
-                    const snaps = await getDocs(query(collection(db, 'qa'), where('userEmail', '==', email)));
-                    return { success: true, qa: snaps.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) };
+                    const snaps = await getDocs(collection(db, 'qa'));
+                    const rows = snaps.docs.map(d => d.data()).filter(q => {
+                        const mine = (q.userEmail || '').trim().toLowerCase() === email;
+                        if (p.onlyPublic) return q.visibility === 'public';
+                        if (p.includePublic) return mine || q.visibility === 'public';
+                        return mine;
+                    });
+                    return { success: true, qa: rows.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) };
                 }
                 if (action === 'addQA') {
                     const email = p.userEmail.trim().toLowerCase();
@@ -3607,26 +4055,62 @@
                         closed: false,
                         followups: [],
                         isPinned: false,
+                        pinnedAt: 0,
                         createdAt: Date.now(),
                         answeredAt: null
                     });
+                    await logActivity('add_qa', { email, courseId: p.courseId, question: p.question });
                     return { success: true };
                 }
                 if (action === 'answerQA') {
                     const ref = doc(db, 'qa', p.qaId);
+                    const snap = await getDoc(ref);
+                    const old = snap.exists() ? snap.data() : {};
+                    const responses = Array.isArray(old.responses) ? [...old.responses] : (old.answer ? [{
+                        text: old.answer,
+                        by: old.answeredBy || '',
+                        byName: old.answeredByName || old.answeredBy || 'الأدمن',
+                        createdAt: old.answeredAt || Date.now()
+                    }] : []);
+                    const responseIndex = Number.isInteger(p.responseIndex) ? p.responseIndex : parseInt(p.responseIndex);
+                    const response = {
+                        text: p.answer,
+                        by: p.answeredBy || '',
+                        byName: p.answeredByName || '',
+                        updatedAt: Date.now(),
+                        createdAt: Date.now()
+                    };
+                    if (!Number.isNaN(responseIndex) && responses[responseIndex]) {
+                        responses[responseIndex] = { ...responses[responseIndex], ...response, createdAt: responses[responseIndex].createdAt || Date.now() };
+                    } else {
+                        responses.push(response);
+                    }
                     await setDoc(ref, {
                         answer: p.answer,
+                        responses,
                         visibility: p.visibility || 'private',
                         answeredBy: p.answeredBy || '',
                         answeredByName: p.answeredByName || '',
                         status: 'answered',
-                        closed: false,
+                        closed: old.closed || false,
                         answeredAt: Date.now()
                     }, { merge: true });
+                    await logActivity('answer_qa', { qaId: p.qaId, visibility: p.visibility || 'private' });
+                    return { success: true };
+                }
+                if (action === 'setQAVisibility') {
+                    await setDoc(doc(db, 'qa', p.qaId), { visibility: p.visibility || 'private', updatedAt: Date.now() }, { merge: true });
+                    await logActivity('set_qa_visibility', { qaId: p.qaId, visibility: p.visibility || 'private' });
+                    return { success: true };
+                }
+                if (action === 'setQAClosed') {
+                    await setDoc(doc(db, 'qa', p.qaId), { closed: !!p.closed, status: p.closed ? 'closed' : 'answered', updatedAt: Date.now() }, { merge: true });
+                    await logActivity('set_qa_closed', { qaId: p.qaId, closed: !!p.closed });
                     return { success: true };
                 }
                 if (action === 'closeQA') {
                     await setDoc(doc(db, 'qa', p.qaId), { closed: true, status: 'closed', closedAt: Date.now() }, { merge: true });
+                    await logActivity('close_qa', { qaId: p.qaId });
                     return { success: true };
                 }
                 if (action === 'reopenQA') {
@@ -3636,15 +4120,19 @@
                     const followups = Array.isArray(data.followups) ? data.followups : [];
                     followups.push({ text: p.text || '', userEmail: p.userEmail || '', createdAt: Date.now() });
                     await setDoc(ref, { followups, status: 'pending', closed: false, answer: data.answer || '', reopenedAt: Date.now() }, { merge: true });
+                    await logActivity('reopen_qa', { qaId: p.qaId, userEmail: p.userEmail || '' });
                     return { success: true };
                 }
                 if (action === 'pinQA') {
                     const ref = doc(db, 'qa', p.qaId);
-                    await setDoc(ref, { isPinned: p.isPinned }, { merge: true });
+                    const pinned = p.isPinned === true || p.isPinned === 'true';
+                    await setDoc(ref, { isPinned: pinned, pinnedAt: pinned ? Date.now() : 0 }, { merge: true });
+                    await logActivity('pin_qa', { qaId: p.qaId, pinned });
                     return { success: true };
                 }
                 if (action === 'deleteQA') {
                     await deleteDoc(doc(db, 'qa', p.qaId));
+                    await logActivity('delete_qa', { qaId: p.qaId });
                     return { success: true };
                 }
                 if (action === 'getPointsConfig') {
@@ -3881,9 +4369,9 @@
         }
 
         function showTab(t) {
-            const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'points', 'settings', 'activity', 'announcements'];
+            const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
             tabs.forEach(x => { const el = document.getElementById('tab-' + x); if (el) el.classList.add('hidden'); });
-            const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'points', 'settings', 'activity', 'announcements'];
+            const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'question-bank', 'points', 'settings', 'activity', 'announcements'];
             navs.forEach(x => { const el = document.getElementById('nav-' + x); if (el) el.classList.remove('active'); });
             const te = document.getElementById('tab-' + t);
             if (te) te.classList.remove('hidden');
@@ -3897,6 +4385,7 @@
             else if (t === 'groups') loadGroups();
             else if (t === 'certs') loadAllCerts();
             else if (t === 'qa') loadQA();
+            else if (t === 'question-bank') loadQuestionBank();
             else if (t === 'points') loadPointsTab();
             else if (t === 'settings') loadSettingsModal(false);
             else if (t === 'activity') loadActivity();
@@ -3926,34 +4415,43 @@
                 if (sce) sce.textContent = certr.certificates.length;
             }
             try {
-                const [videosSnap, enrollSnap, progressSnap, commentsSnap, qaSnap, surveySnap, templatesSnap] = await Promise.all([
+                const [videosSnap, enrollSnap, progressSnap, commentsSnap, qaSnap, surveySnap, templatesSnap, pathsSnap] = await Promise.all([
                     getDocs(collection(db, 'videos')),
                     getDocs(collection(db, 'enrollments')),
                     getDocs(collection(db, 'progress')),
                     getDocs(collection(db, 'comments')),
                     getDocs(collection(db, 'qa')),
                     getDocs(collection(db, 'survey_answers')),
-                    getDocs(collection(db, 'certificate_templates'))
+                    getDocs(collection(db, 'certificate_templates')),
+                    getDocs(collection(db, 'learning_paths'))
                 ]);
-                const users = ur.success ? ur.users : [];
+                const users = ur.success ? ur.users.filter(u => u.status !== 'deleted') : [];
                 const courses = cr.success ? cr.courses : [];
                 const contents = videosSnap.docs.map(d => d.data());
                 const qaRows = qaSnap.docs.map(d => d.data());
+                const activeUserEmails = new Set(users.map(u => normalizeEmail(u.email)));
+                const courseIds = new Set(courses.map(c => c.course_id));
+                const liveEnrollments = enrollSnap.docs.map(d => d.data()).filter(e => activeUserEmails.has(normalizeEmail(e.userEmail)) && courseIds.has(e.courseId));
+                const liveEnrollKeys = new Set(liveEnrollments.map(e => `${normalizeEmail(e.userEmail)}_${e.courseId}`));
+                const liveProgress = progressSnap.docs.map(d => d.data()).filter(p => liveEnrollKeys.has(`${normalizeEmail(p.userEmail)}_${p.courseId}`));
+                const liveSurvey = surveySnap.docs.map(d => d.data()).filter(s => activeUserEmails.has(normalizeEmail(s.userEmail)) && (!s.courseId || liveEnrollKeys.has(`${normalizeEmail(s.userEmail)}_${s.courseId}`)));
+                const liveCertificates = certr.success ? certr.certificates.filter(c => activeUserEmails.has(normalizeEmail(c.userEmail)) && (!c.courseId || String(c.courseId).startsWith('path_') || courseIds.has(c.courseId))) : [];
                 const stats = [
-                    ['الالتحاقات', enrollSnap.size, '#5b8def'],
+                    ['الالتحاقات', liveEnrollments.length, '#5b8def'],
                     ['المتدربون', users.filter(u => (u.role || 'trainee') === 'trainee').length, '#f39c35'],
                     ['المدربون', users.filter(u => u.role === 'trainer').length, '#55a868'],
                     ['الأدمن', users.filter(u => u.role === 'admin').length, '#6b6eea'],
                     ['الدورات', courses.length, '#f2ad00'],
+                    ['المسارات', pathsSnap.docs.filter(d => (d.data().status || 'published') === 'published').length, '#06a77d'],
                     ['الدورات المفتوحة', courses.filter(c => effectiveCourseStatus(c) === 'active').length, '#0f9d58'],
                     ['الدورات الخاصة', courses.filter(c => c.visibility !== 'public').length, '#7a5cff'],
                     ['عناصر المحتوى', contents.length, '#5f6caf'],
                     ['الفيديوهات', contents.filter(v => (v.content_type || 'video') === 'video').length, '#4285f4'],
                     ['ملفات PDF', contents.filter(v => v.content_type === 'pdf').length, '#d93025'],
                     ['الامتحانات', contents.filter(v => v.content_type === 'exam').length, '#8e44ad'],
-                    ['السيرفاي', contents.filter(v => v.content_type === 'survey').length + surveySnap.size, '#d650b7'],
-                    ['سجلات التقدم', progressSnap.size, '#45b8c7'],
-                    ['الشهادات', certr.success ? certr.certificates.length : 0, '#5b8def'],
+                    ['السيرفاي', contents.filter(v => v.content_type === 'survey').length + liveSurvey.length, '#d650b7'],
+                    ['سجلات التقدم', liveProgress.length, '#45b8c7'],
+                    ['الشهادات', liveCertificates.length, '#5b8def'],
                     ['قوالب الشهادات', templatesSnap.size, '#b07d62'],
                     ['أسئلة المتدربين', qaRows.length, '#5b8def'],
                     ['التعليقات', commentsSnap.size, '#6d4c41']
@@ -4122,7 +4620,14 @@
         async function bulkSetStatus(status) {
             const emails = selectedUserEmails();
             if (!emails.length) return toast('اختار مستخدم واحد على الأقل', 'warning');
-            if (status === 'deleted' && !confirm(`حذف ${emails.length} مستخدم؟`)) return;
+            if (status === 'deleted') return askConfirm('حذف المستخدمين', `هل تريد حذف ${emails.length} مستخدم نهائياً؟`, async () => {
+                const r = await call({ action: 'setUsersStatus', emails, status });
+                if (r.success) {
+                    toast(r.message || 'تم التحديث');
+                    SELECTED_USERS.clear();
+                    loadUsers();
+                } else toast(r.error, 'error');
+            });
             const r = await call({ action: 'setUsersStatus', emails, status });
             if (r.success) {
                 toast(r.message || 'تم التحديث');
@@ -4187,7 +4692,7 @@
                 icon: 'ti-route',
                 value: p
             })), async (path) => {
-                const audienceUsers = [...new Set([...(path.audienceUsers || []), ...emails])];
+                const audienceUsers = [...new Set([...(path.audienceUsers || []), ...emails].map(normalizeEmail))];
                 await setDoc(doc(db, 'learning_paths', path.id), { visibility: 'private', audienceUsers, updatedAt: Date.now() }, { merge: true });
                 toast(`تمت إضافة ${emails.length} مستخدم للمسار`);
                 SELECTED_USERS.clear();
@@ -4410,9 +4915,10 @@
         }
 
         async function loadCourses() {
-            const r = await call({ action: 'getCourses' });
+            const [r, tr] = await Promise.all([call({ action: 'getCourses' }), call({ action: 'getCertTemplates' })]);
             if (!r.success) return;
             CCACHE = r.courses;
+            if (tr.success) CERT_TEMPLATE_CACHE = tr.templates;
             const expired = CCACHE.filter(isCourseExpired);
             for (const c of expired) {
                 await call({ action: 'updateCourse', courseId: c.course_id, updates: { status: 'draft', auto_archived_at: Date.now() } });
@@ -4428,10 +4934,12 @@
         function renderCoursesGrid() {
             const grid = document.getElementById('courses-grid');
             let courses = [...CCACHE];
+            const q = (val('course-search') || '').trim().toLowerCase();
             if (CURRENT_COURSE_FILTER === 'public') courses = courses.filter(c => c.visibility === 'public');
             if (CURRENT_COURSE_FILTER === 'private') courses = courses.filter(c => c.visibility !== 'public');
             if (CURRENT_COURSE_FILTER === 'active') courses = courses.filter(c => effectiveCourseStatus(c) === 'active');
             if (CURRENT_COURSE_FILTER === 'draft') courses = courses.filter(c => effectiveCourseStatus(c) !== 'active');
+            if (q) courses = courses.filter(c => `${c.course_name || ''} ${c.description || ''}`.toLowerCase().includes(q));
             if (!courses.length) { grid.innerHTML =
                     '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-secondary)"><i class="ti ti-books" style="font-size:48px;display:block;margin-bottom:12px;opacity:0.5;"></i>لا توجد دورات</div>';
                 return; }
@@ -4452,11 +4960,16 @@
                 <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                   <span class="badge badge-${effectiveCourseStatus(c) === 'active' ? 'active' : 'suspended'}">${effectiveCourseStatus(c) === 'active' ? 'مفتوحة' : 'مسودة'}</span>
                   <span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>
-                  ${c.certificate_enabled === 'yes' ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}
+                  ${hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}
                 </div>
               </div>
             </div>`
             ).join('');
+        }
+
+        function hasCourseCertificate(course) {
+            return course?.certificate_enabled === 'yes' ||
+                CERT_TEMPLATE_CACHE.some(t => certLinkedCourseIds(t).includes(course?.course_id));
         }
 
         async function openAddCourseModal() {
@@ -4792,6 +5305,158 @@
             </div>`;
         }
 
+        function renderResultRows(rows) {
+            if (!rows.length) return '<div style="padding:2rem;text-align:center;color:var(--color-text-secondary);">لا توجد ردود مسجلة حتى الآن</div>';
+            const cols = Object.keys(rows[0]);
+            return `<table style="min-width:900px;"><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>
+                ${rows.map(r => `<tr>${cols.map(c => `<td style="font-size:13px;">${esc(r[c] ?? '')}</td>`).join('')}</tr>`).join('')}
+            </tbody></table>`;
+        }
+
+        function surveyCategoryLabel(category) {
+            const key = String(category || 'course').toLowerCase();
+            const map = {
+                academy: 'الأكاديمية / المنصة',
+                platform: 'المنصة',
+                course: 'الدورة',
+                content: 'المحتوى',
+                trainer: 'المدرب'
+            };
+            return map[key] || category || 'الدورة';
+        }
+
+        function npsStats(values) {
+            const nums = values.map(v => Number(v)).filter(v => !Number.isNaN(v) && v >= 0 && v <= 10);
+            const total = nums.length;
+            const promoters = nums.filter(v => v >= 9).length;
+            const passives = nums.filter(v => v >= 7 && v <= 8).length;
+            const detractors = nums.filter(v => v <= 6).length;
+            const pct = (n) => total ? Math.round((n / total) * 100) : 0;
+            return {
+                total,
+                avg: total ? (nums.reduce((a, b) => a + b, 0) / total).toFixed(1) : '0.0',
+                promoters,
+                passives,
+                detractors,
+                promotersPct: pct(promoters),
+                passivesPct: pct(passives),
+                detractorsPct: pct(detractors),
+                nps: total ? pct(promoters) - pct(detractors) : 0
+            };
+        }
+
+        function renderSurveySummary(rows, questions = []) {
+            const questionByText = new Map((questions || []).map((q, i) => [String(q.text || '').trim(), { ...q, index: i }]));
+            const grouped = {};
+            const allValues = [];
+            rows.forEach(row => {
+                (row.answers || []).forEach((answer, i) => {
+                    if ((answer.type || 'nps') !== 'nps') return;
+                    const meta = questionByText.get(String(answer.question || '').trim()) || questions[i] || {};
+                    const category = answer.category || meta.category || 'course';
+                    if (!grouped[category]) grouped[category] = [];
+                    grouped[category].push(answer.value);
+                    allValues.push(answer.value);
+                });
+            });
+            const ordered = ['course', 'content', 'academy', 'platform', 'trainer']
+                .filter(k => grouped[k]?.length)
+                .concat(Object.keys(grouped).filter(k => !['course', 'content', 'academy', 'platform', 'trainer'].includes(k)));
+            const overall = npsStats(allValues);
+            const card = (label, stats, featured = false) => `
+                <div class="stat-card" style="text-align:right;padding:14px;border-color:${featured ? 'var(--color-text-info)' : 'var(--color-border-tertiary)'};">
+                    <div style="font-size:13px;font-weight:800;color:var(--color-text-secondary);margin-bottom:8px;">${esc(label)}</div>
+                    <div style="display:flex;align-items:flex-end;gap:8px;justify-content:space-between;margin-bottom:10px;">
+                        <div>
+                            <div style="font-size:30px;font-weight:900;color:var(--color-text-info);">${stats.nps}</div>
+                            <div style="font-size:12px;color:var(--color-text-secondary);">NPS</div>
+                        </div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);text-align:left;">
+                            <div>${stats.total} رد</div>
+                            <div>متوسط ${stats.avg}/10</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;gap:6px;font-size:12px;">
+                        <div style="display:flex;justify-content:space-between;"><span>Promoters</span><strong style="color:var(--color-text-success);">${stats.promotersPct}%</strong></div>
+                        <div style="display:flex;justify-content:space-between;"><span>Passives</span><strong style="color:var(--color-text-warning);">${stats.passivesPct}%</strong></div>
+                        <div style="display:flex;justify-content:space-between;"><span>Detractors</span><strong style="color:var(--color-text-danger);">${stats.detractorsPct}%</strong></div>
+                    </div>
+                </div>`;
+            if (!allValues.length) return '<div class="glass-panel" style="padding:14px;margin-bottom:14px;color:var(--color-text-secondary);">لا توجد إجابات NPS لحساب الإحصائيات.</div>';
+            return `
+                <div style="margin-bottom:16px;">
+                    <div style="font-weight:900;font-size:16px;margin-bottom:10px;">ملخص السيرفاي حسب البند</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;">
+                        ${card('الإجمالي العام', overall, true)}
+                        ${ordered.map(category => card(surveyCategoryLabel(category), npsStats(grouped[category]))).join('')}
+                    </div>
+                </div>`;
+        }
+
+        async function openContentResults(videoId) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            const vr = await call({ action: 'getVideos', courseId: CCI });
+            if (!vr.success) return toast('تعذر تحميل محتوى الدورة', 'error');
+            const item = vr.videos.find(v => v.video_id === videoId);
+            if (!item) return toast('المحتوى غير موجود', 'error');
+            document.getElementById('content-results-title').textContent = `نتائج: ${item.title || contentTypeLabel(item)}`;
+            CONTENT_RESULTS_ROWS = [];
+
+            if ((item.content_type || '') === 'survey') {
+                const snaps = await getDocs(collection(db, 'survey_answers'));
+                const rows = snaps.docs.map(d => d.data()).filter(r => r.courseId === CCI && r.videoId === videoId);
+                CONTENT_RESULTS_ROWS = rows.map(r => {
+                    const out = {
+                        'المتدرب': r.userName || r.userEmail || '',
+                        'الإيميل': r.userEmail || '',
+                        'وقت الإرسال': r.submittedAtText || r.submittedAt || ''
+                    };
+                    (r.answers || []).forEach((a, i) => {
+                        out[`س${i + 1}: ${a.question || ''}`] = a.value ?? '';
+                    });
+                    return out;
+                });
+                html('content-results-body', `<div style="padding:14px;">${renderSurveySummary(rows, item.questions || [])}</div>${renderResultRows(CONTENT_RESULTS_ROWS)}`);
+                openModal('m-content-results');
+                return;
+            }
+
+            const snaps = await getDocs(collection(db, 'assessment_attempts'));
+            const attempts = snaps.docs.map(d => d.data()).filter(r => r.courseId === CCI && r.videoId === videoId);
+            const grouped = new Map();
+            attempts.forEach(a => {
+                const email = normalizeEmail(a.userEmail);
+                if (!grouped.has(email)) grouped.set(email, []);
+                grouped.get(email).push(a);
+            });
+            CONTENT_RESULTS_ROWS = [...grouped.entries()].map(([email, list]) => {
+                list.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0));
+                const last = list[list.length - 1] || {};
+                const best = list.reduce((m, a) => Math.max(m, parseInt(a.score) || 0), 0);
+                const total = last.total || item.questions?.length || 0;
+                const passScore = last.passScore || item.pass_score || total;
+                return {
+                    'المتدرب': last.userName || email,
+                    'الإيميل': email,
+                    'نوع المحتوى': contentTypeLabel(item),
+                    'عدد المحاولات': list.length,
+                    'مرات الرسوب': list.filter(a => !a.passed).length,
+                    'أعلى درجة': `${best}/${total}`,
+                    'آخر درجة': `${last.score || 0}/${total}`,
+                    'درجة النجاح': `${passScore}/${total}`,
+                    'الحالة': list.some(a => a.passed) ? 'اجتاز' : 'لم يجتز',
+                    'آخر محاولة': last.submittedAtText || ''
+                };
+            });
+            html('content-results-body', renderResultRows(CONTENT_RESULTS_ROWS));
+            openModal('m-content-results');
+        }
+
+        function exportContentResults() {
+            if (!CONTENT_RESULTS_ROWS.length) return toast('لا توجد نتائج للتصدير', 'warning');
+            exportRowsToExcel(CONTENT_RESULTS_ROWS, 'content_results', 'deraah_content_results.xlsx');
+        }
+
         async function deleteCourseFromActions() {
             closeModal('m-course-actions');
             CCI = COURSE_ACTION_ID || CCI;
@@ -4812,15 +5477,99 @@
         async function markManualCourseComplete() {
             const email = val('manual-progress-user');
             if (!email) return toast('اختر متدرب أولا', 'warning');
-            const vr = await call({ action: 'getVideos', courseId: CCI });
-            if (!vr.success || !vr.videos.length) return toast('لا يوجد محتوى في الدورة', 'warning');
-            for (const item of vr.videos) {
-                await call({ action: 'saveProgress', userEmail: email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
-            }
-            await logActivity('manual_complete_course', { email, courseId: CCI, items: vr.videos.length });
+            await markCourseCompleteForUser(email, CCI);
             closeModal('m-manual-progress');
             toast('تم اعتماد إكمال الدورة للمتدرب');
             openCourseDetail(CCI);
+        }
+
+        function confirmManualProgress(email, courseId) {
+            askConfirm('اعتماد التقدم اليدوي', 'سيتم تحويل تقدم المتدرب إلى 100% وإصدار الشهادة لو الدورة مرتبطة بشهادة. هل تريد المتابعة؟', async () => {
+                await markCourseCompleteForUser(email, courseId);
+                toast('تم اعتماد التقدم وإصدار المستحقات');
+                await loadAllProgress();
+            });
+        }
+
+        async function issueAutoCertificatesForUser(course, user) {
+            const templates = await linkedCertificateTemplatesForCourse(course);
+            if (!templates.length || !user?.email) return [];
+            const email = normalizeEmail(user.email);
+            for (const t of templates) {
+                await call({
+                    action: 'issueCertificate',
+                    userEmail: email,
+                    userName: user.full_name || email,
+                    courseId: course.course_id || CCI,
+                    courseName: course.course_name || '',
+                    certificateImageUrl: t.imageUrl || t.builder?.background || '',
+                    certificateBody: t.body || '',
+                    certificateBuilder: t.builder || null,
+                    templateId: t.id || '',
+                    pointsAwarded: 0
+                });
+            }
+            return templates;
+        }
+
+        async function issueCompletedPathCertificatesForUser(user) {
+            const email = normalizeEmail(user?.email || CU?.email);
+            if (!email) return [];
+            const [pathsSnap, templatesRes] = await Promise.all([
+                getDocs(collection(db, 'learning_paths')),
+                call({ action: 'getCertTemplates' })
+            ]);
+            PATH_CACHE = pathsSnap.docs.map(d => ({ ...d.data(), id: d.id }));
+            if (templatesRes.success) CERT_TEMPLATE_CACHE = templatesRes.templates;
+            const issued = [];
+            for (const path of PATH_CACHE.filter(p => (p.courseIds || []).includes(CCI))) {
+                const linked = CERT_TEMPLATE_CACHE.filter(t => certLinkedPathIds(t).includes(path.id));
+                if (!linked.length) continue;
+                let done = true;
+                for (const courseId of path.courseIds || []) {
+                    if (!(await courseCompletedForUser(email, courseId))) {
+                        done = false;
+                        break;
+                    }
+                }
+                if (!done) continue;
+                for (const t of linked) {
+                    await call({
+                        action: 'issueCertificate',
+                        userEmail: email,
+                        userName: user?.full_name || CU?.full_name || email,
+                        courseId: `path_${path.id}`,
+                        courseName: path.title || 'مسار تعليمي',
+                        certificateImageUrl: t.imageUrl || t.builder?.background || '',
+                        certificateBody: t.body || '',
+                        certificateBuilder: t.builder || null,
+                        templateId: t.id || '',
+                        pointsAwarded: 0
+                    });
+                    issued.push({ template: t, path });
+                }
+            }
+            return issued;
+        }
+
+        async function markCourseCompleteForUser(email, courseId) {
+            const oldCourse = CCI;
+            CCI = courseId;
+            const vr = await call({ action: 'getVideos', courseId: CCI });
+            if (!vr.success || !vr.videos.length) {
+                CCI = oldCourse || courseId;
+                return toast('لا يوجد محتوى في الدورة', 'warning');
+            }
+            for (const item of vr.videos) {
+                await call({ action: 'saveProgress', userEmail: email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
+            }
+            const [courseRes, usersRes] = await Promise.all([call({ action: 'getCourse', courseId: CCI }), call({ action: 'getUsers' })]);
+            const course = courseRes.success ? courseRes.course : CCACHE.find(c => c.course_id === CCI);
+            const user = usersRes.success ? usersRes.users.find(u => normalizeEmail(u.email) === normalizeEmail(email)) : { email };
+            if (course) await issueAutoCertificatesForUser(course, user || { email });
+            await issueCompletedPathCertificatesForUser(user || { email });
+            await logActivity('manual_complete_course', { email, courseId: CCI, items: vr.videos.length });
+            CCI = oldCourse || courseId;
         }
 
         async function openCourseDetail(courseId) {
@@ -4835,10 +5584,14 @@
             ` : '');
             document.getElementById('tab-courses').classList.add('hidden');
             document.getElementById('tab-course-detail').classList.remove('hidden');
-            const [vr, pr] = await Promise.all([
+            const [vr, pr, certRes] = await Promise.all([
                 call({ action: 'getVideos', courseId }),
-                call({ action: 'getCourseProgress', courseId })
+                call({ action: 'getCourseProgress', courseId }),
+                call({ action: 'getCertificates' })
             ]);
+            const issuedCerts = new Set((certRes.success ? certRes.certificates : [])
+                .filter(c => c.courseId === courseId)
+                .map(c => normalizeEmail(c.userEmail)));
             html('cd-videos', vr.success && vr.videos.length ? vr.videos.map((v, i) =>
                 `<div style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:8px;background:var(--color-background-primary);">
               <span class="content-type-badge"><i class="ti ${contentTypeIcon(v)}"></i></span>
@@ -4846,6 +5599,7 @@
                 <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i+1}. ${esc(v.title || contentTypeLabel(v))}</div>
                 <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">${contentTypeLabel(v)}${v.description ? ` - ${esc(v.description)}` : ''}${v.pass_score ? ` - النجاح: ${v.pass_score}/${(v.questions || []).length || 1}` : ''}${v.time_minutes ? ` - ${v.time_minutes} دقيقة` : ''}</div>
               </div>
+              ${['survey','exam','question'].includes(v.content_type || '') ? `<button class="icon-btn sm" title="نتائج المتدربين" onclick="openContentResults('${v.video_id}')"><i class="ti ti-chart-bar"></i></button>` : ''}
               <button class="icon-btn sm" onclick="moveContentItem('${v.video_id}', -1)"><i class="ti ti-arrow-up"></i></button>
               <button class="icon-btn sm" onclick="moveContentItem('${v.video_id}', 1)"><i class="ti ti-arrow-down"></i></button>
               <button class="icon-btn sm" style="background:#e8f0fe;color:#1a73e8;" onclick="editVideo('${v.video_id}')"><i class="ti ti-edit"></i></button>
@@ -4859,7 +5613,7 @@
                 <span style="font-weight:700;cursor:pointer;color:var(--color-text-info);" onclick="viewAdminProfile('${p.email}')">${p.full_name || p.email}</span>
                 <div style="display:flex;align-items:center;gap:8px;">
                    <span style="font-weight:700;color:${p.completed ? 'var(--color-text-success)' : 'var(--color-text-secondary)'}">${Math.round(p.progress_percent)}%</span>
-                   ${p.completed ? `<button class="sm success" style="padding:4px 8px;font-size:12px;" onclick="openIssueCert('${p.email}','${p.full_name || p.email}')"><i class="ti ti-award"></i> منح شهادة</button>` : ''}
+                   ${p.completed ? (issuedCerts.has(normalizeEmail(p.email)) ? `<button class="sm" disabled style="padding:4px 8px;font-size:12px;"><i class="ti ti-award-filled"></i> الشهادة صادرة</button>` : `<button class="sm success" style="padding:4px 8px;font-size:12px;" onclick="openIssueCert('${p.email}','${p.full_name || p.email}')"><i class="ti ti-award"></i> منح شهادة</button>`) : ''}
                    <button class="sm danger" style="padding:4px 8px;font-size:12px;" onclick="unenrollFromCourse('${p.email}')"><i class="ti ti-user-minus"></i> إلغاء الالتحاق</button>
                  </div>
               </div>
@@ -5011,7 +5765,7 @@
         }
 
         function setEnrollTab(t) {
-            ['ind', 'grp', 'flt'].forEach(x => {
+            ['ind', 'grp', 'flt', 'excel'].forEach(x => {
                 document.getElementById('enroll-' + x).classList[x === t ? 'remove' : 'add']('hidden');
                 const btn = document.getElementById('etb-' + x);
                 if (x === t) { btn.classList.add('primary');
@@ -5043,7 +5797,7 @@
         }
 
         async function submitEnroll() {
-            const active = ['ind', 'grp', 'flt'].find(t => !document.getElementById('enroll-' + t).classList.contains(
+            const active = ['ind', 'grp', 'flt', 'excel'].find(t => !document.getElementById('enroll-' + t).classList.contains(
             'hidden'));
             let r;
             if (active === 'ind') {
@@ -5054,7 +5808,7 @@
                 const gid = val('enroll-grp-select');
                 if (!gid) return toast('اختر مجموعة', 'warning');
                 r = await call({ action: 'enrollGroup', groupId: gid, courseId: CCI });
-            } else {
+            } else if (active === 'flt') {
                 r = await call({
                     action: 'enrollByFilter',
                     courseId: CCI,
@@ -5063,6 +5817,8 @@
                     filterRegionManager: val('ef-regmgr') || undefined,
                     filterBranch: val('ef-branch') || undefined
                 });
+            } else {
+                return submitEnrollExcel();
             }
             if (r.success) { closeModal('m-enroll');
                 toast(r.message || 'تم التسجيل');
@@ -5092,13 +5848,30 @@
             const rows = window.XLSX.utils.sheet_to_json(ws, { header: 1 });
             const emails = rows.slice(1).map(r => String(r[0] || '').trim().toLowerCase()).filter(Boolean);
             if (!emails.length) return toast('لا توجد إيميلات في الملف', 'warning');
-            const r = await call({ action: 'enrollUsers', emails, courseId: CCI });
+            const ur = await call({ action: 'getUsers' });
+            const existing = new Set((ur.success ? ur.users : []).map(u => normalizeEmail(u.email)));
+            const unique = [...new Set(emails.map(normalizeEmail).filter(Boolean))];
+            const valid = unique.filter(e => existing.has(e));
+            MISSING_EMAILS = unique.filter(e => !existing.has(e));
+            let r = { success: true, message: '' };
+            if (valid.length) r = await call({ action: 'enrollUsers', emails: valid, courseId: CCI });
             if (r.success) {
                 document.getElementById('enroll-bulk-file').value = '';
                 closeModal('m-enroll');
-                toast(r.message || `تم تسجيل ${emails.length} متدرب`);
+                toast(r.message || `تم تسجيل ${valid.length} متدرب`);
                 openCourseDetail(CCI);
+                if (MISSING_EMAILS.length) showMissingEmails();
             } else toast(r.error, 'error');
+        }
+
+        function showMissingEmails() {
+            html('missing-emails-list', `<table><thead><tr><th>الإيميل</th></tr></thead><tbody>${MISSING_EMAILS.map(e => `<tr><td style="direction:ltr;text-align:right;">${esc(e)}</td></tr>`).join('')}</tbody></table>`);
+            openModal('m-missing-emails');
+        }
+
+        function exportMissingEmails() {
+            if (!MISSING_EMAILS.length) return toast('لا توجد إيميلات للتصدير', 'warning');
+            exportRowsToExcel(MISSING_EMAILS.map(email => ({ email })), 'missing_emails', 'missing_enrollment_emails.xlsx');
         }
 
         async function exportCourseProgress() {
@@ -5200,6 +5973,7 @@
             );
             html('progress-tb', rows.length ? rows.map(u =>
                 `<tr>
+              <td><button class="icon-btn sm success" title="اعتماد التقدم اليدوي" onclick="confirmManualProgress('${esc(u.email)}','${esc(u.course_id)}')"><i class="ti ti-check"></i></button></td>
               <td style="font-weight:700;cursor:pointer;color:var(--color-text-info);" onclick="viewAdminProfile('${u.email}')">${esc(u.full_name || '—')}</td>
               <td style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${esc(u.email)}</td>
               <td>${esc(u.course_name || '—')}</td>
@@ -5209,7 +5983,7 @@
               <td><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(u.progress_percent)}%;background:${u.completed ? '#0f9d58' : '#1a73e8'};"></div></div><div style="font-size:12px;font-weight:700;margin-top:4px;">${Math.round(u.progress_percent)}%</div></td>
               <td><span class="badge badge-${u.completed ? 'active' : 'suspended'}">${u.completed ? 'مكتمل' : 'قيد التقدم'}</span></td>
             </tr>`).join('') :
-            '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">لا توجد بيانات مطابقة للفلاتر</td></tr>');
+            '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">لا توجد بيانات مطابقة للفلاتر</td></tr>');
         }
 
         async function loadProgressCourse(courseId) {
@@ -5541,21 +6315,19 @@
             });
             const rows = Object.entries(groups).map(([name, certs]) => {
                 const latest = certs.map(c => c.issued_at || '').sort().pop() || '';
-                const points = certs.reduce((sum, c) => sum + (parseInt(c.points_awarded) || 0), 0);
-                return { name, certs, latest, points };
+                return { name, certs, latest };
             });
             html('certs-tb', rows.length ? rows.map(g =>
                 `<tr>
               <td style="font-weight:700;color:var(--color-text-info);cursor:pointer;" onclick="viewCertificateGroup('${esc(g.name)}')">${esc(g.name)}</td>
               <td><span class="badge badge-cert">${g.certs.length} شخص</span></td>
               <td style="font-size:13px;color:var(--color-text-secondary);"><i class="ti ti-calendar-event"></i> ${g.latest ? g.latest.split('T')[0] : ''}</td>
-              <td><span class="badge badge-points"><i class="ti ti-star"></i> ${g.points}</span></td>
               <td>
                 <button class="sm primary" style="background:#e8f0fe;color:#1a73e8;border:none;" onclick="viewCertificateGroup('${esc(g.name)}')"><i class="ti ti-users"></i> المستلمين</button>
               </td>
             </tr>`
             ).join('') :
-            '<tr><td colspan="5" style="text-align:center;padding:3rem;color:var(--color-text-secondary)"><i class="ti ti-certificate" style="font-size:48px;display:block;margin-bottom:12px;opacity:0.5;"></i>لا توجد شهادات</td></tr>');
+            '<tr><td colspan="4" style="text-align:center;padding:3rem;color:var(--color-text-secondary)"><i class="ti ti-certificate" style="font-size:48px;display:block;margin-bottom:12px;opacity:0.5;"></i>لا توجد شهادات</td></tr>');
         }
 
         function certLinkedCourseIds(template) {
@@ -5564,13 +6336,17 @@
             return ids;
         }
 
+        function certLinkedPathIds(template) {
+            return Array.isArray(template?.pathIds) ? template.pathIds.filter(Boolean) : [];
+        }
+
         function renderCertTemplates() {
             const el = document.getElementById('cert-template-list');
             if (!el) return;
             el.innerHTML = CERT_TEMPLATE_CACHE.length ? CERT_TEMPLATE_CACHE.map(t =>
                 `<div class="card" style="padding:1rem;">
                     <div style="font-weight:700;margin-bottom:6px;">${esc(t.name || 'قالب شهادة')}</div>
-                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${certLinkedCourseIds(t).length ? `مرتبطة بـ ${certLinkedCourseIds(t).length} دورة` : 'غير مرتبطة بدورة'}</div>
+                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${certLinkedCourseIds(t).length || certLinkedPathIds(t).length ? `مرتبطة بـ ${certLinkedCourseIds(t).length} دورة و ${certLinkedPathIds(t).length} مسار` : 'غير مرتبطة'}</div>
                     ${(t.builder?.background || t.imageUrl) ? `<img src="${esc(t.builder?.background || t.imageUrl)}" onclick="openCertLinker('${t.id}')" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;cursor:pointer;">` : `<div onclick="openCertLinker('${t.id}')" style="height:80px;border-radius:8px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;margin-bottom:10px;cursor:pointer;color:var(--color-text-secondary);"><i class="ti ti-certificate" style="font-size:28px;"></i></div>`}
                     <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${(t.builder?.elements || []).length || 0} عنصر تصميم</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -5600,11 +6376,13 @@
         }
 
         async function saveCertTemplate() {
+            const oldTemplate = val('ct-id') ? CERT_TEMPLATE_CACHE.find(t => t.id === val('ct-id')) : null;
             const template = {
                 id: val('ct-id') || undefined,
                 name: val('ct-name').trim(),
                 courseId: val('ct-course') || '',
-                courseIds: val('ct-course') ? [val('ct-course')] : [],
+                courseIds: val('ct-course') ? [val('ct-course')] : (oldTemplate?.courseIds || []),
+                pathIds: oldTemplate?.pathIds || [],
                 imageUrl: CERT_BUILDER.background || val('ct-img'),
                 body: val('ct-body') || 'تشهد Deraah Academy بأن {name} قد أتم {course} بتاريخ {date}',
                 builder: CERT_BUILDER
@@ -5619,22 +6397,25 @@
         }
 
         async function deleteCertTemplate(templateId) {
-            if (!confirm('حذف قالب الشهادة؟')) return;
-            const r = await call({ action: 'deleteCertTemplate', templateId });
-            if (r.success) {
-                toast('تم حذف القالب');
-                loadAllCerts();
-            } else toast(r.error, 'error');
+            askConfirm('حذف قالب الشهادة', 'هل تريد حذف قالب الشهادة؟', async () => {
+                const r = await call({ action: 'deleteCertTemplate', templateId });
+                if (r.success) {
+                    toast('تم حذف القالب');
+                    loadAllCerts();
+                } else toast(r.error, 'error');
+            });
         }
 
         async function openCertLinker(templateId) {
             const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
             if (!t) return toast('قالب الشهادة غير موجود', 'error');
-            const courses = await call({ action: 'getCourses' });
+            const [courses, pathsSnap] = await Promise.all([call({ action: 'getCourses' }), getDocs(collection(db, 'learning_paths'))]);
             if (courses.success) CCACHE = courses.courses;
+            PATH_CACHE = pathsSnap.docs.map(d => ({ ...d.data(), id: d.id }));
             set('cert-linker-id', templateId);
-            document.getElementById('cert-linker-title').textContent = `ربط "${t.name || 'قالب شهادة'}" بالدورات`;
+            document.getElementById('cert-linker-title').textContent = `ربط "${t.name || 'قالب شهادة'}" بالدورات والمسارات`;
             CERT_LINKER_IDS = certLinkedCourseIds(t);
+            CERT_LINKER_PATH_IDS = certLinkedPathIds(t);
             renderCertLinkerPreview();
             openModal('m-cert-linker');
         }
@@ -5642,6 +6423,12 @@
         function toggleCertLinkedCourse(courseId) {
             if (CERT_LINKER_IDS.includes(courseId)) CERT_LINKER_IDS = CERT_LINKER_IDS.filter(id => id !== courseId);
             else CERT_LINKER_IDS.push(courseId);
+            renderCertLinkerPreview();
+        }
+
+        function toggleCertLinkedPath(pathId) {
+            if (CERT_LINKER_PATH_IDS.includes(pathId)) CERT_LINKER_PATH_IDS = CERT_LINKER_PATH_IDS.filter(id => id !== pathId);
+            else CERT_LINKER_PATH_IDS.push(pathId);
             renderCertLinkerPreview();
         }
 
@@ -5657,17 +6444,26 @@
             const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
             if (!t) return;
             const ids = CERT_LINKER_IDS;
+            const pathIds = CERT_LINKER_PATH_IDS;
             html('cert-linker-all', CCACHE.filter(c => !ids.includes(c.course_id)).map(c => renderCertCoursePill(c, false)).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px;">كل الدورات مربوطة</div>');
             html('cert-linker-linked', CCACHE.filter(c => ids.includes(c.course_id)).map(c => renderCertCoursePill(c, true)).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px;">لا توجد دورات مربوطة</div>');
-            const course = CCACHE.find(c => c.course_id === ids[0]) || CCACHE[0] || {};
+            html('cert-linker-paths', PATH_CACHE.map(p => {
+                const selected = pathIds.includes(p.id);
+                return `<button class="sm ${selected ? 'primary' : ''}" style="justify-content:flex-start;text-align:right;width:100%;white-space:normal;" onclick="toggleCertLinkedPath('${esc(p.id)}')">
+                    <i class="ti ${selected ? 'ti-link' : 'ti-route'}"></i>${esc(p.title || 'مسار تعليمي')}
+                </button>`;
+            }).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px;">لا توجد مسارات</div>');
+            const course = CCACHE.find(c => c.course_id === ids[0]) || PATH_CACHE.find(p => pathIds.includes(p.id)) || CCACHE[0] || {};
             const previewName = 'اسم المتدرب';
-            const previewCourse = course.course_name || 'اسم الدورة';
+            const previewCourse = course.course_name || course.title || 'اسم الدورة / المسار';
             html('cert-linker-preview', `
                 <div style="font-weight:800;margin-bottom:10px;">معاينة الشهادة مع الدورة المختارة</div>
                 <div style="display:flex;justify-content:center;">${renderCertificateCanvas(t.builder || normalizeCertBuilder(null, t.imageUrl || '', t.body || ''), previewName, previewCourse)}</div>
                 <div style="margin-top:12px;">
                     <div style="font-weight:700;margin-bottom:8px;">الدورات المرتبطة حاليا</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">${ids.map(id => `<span class="badge">${esc(CCACHE.find(c => c.course_id === id)?.course_name || id)}</span>`).join('') || '<span style="color:var(--color-text-secondary);font-size:13px;">لم يتم اختيار دورات</span>'}</div>
+                    <div style="font-weight:700;margin:12px 0 8px;">المسارات المرتبطة حاليا</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">${pathIds.map(id => `<span class="badge">${esc(PATH_CACHE.find(p => p.id === id)?.title || id)}</span>`).join('') || '<span style="color:var(--color-text-secondary);font-size:13px;">لم يتم اختيار مسارات</span>'}</div>
                 </div>
             `);
         }
@@ -5677,12 +6473,17 @@
             const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
             if (!t) return toast('قالب الشهادة غير موجود', 'error');
             const courseIds = [...CERT_LINKER_IDS];
-            const updated = { ...t, courseIds, courseId: courseIds[0] || '' };
+            const pathIds = [...CERT_LINKER_PATH_IDS];
+            const updated = { ...t, courseIds, courseId: courseIds[0] || '', pathIds };
             const r = await call({ action: 'saveCertTemplate', template: updated });
             if (!r.success) return toast(r.error, 'error');
-            toast('تم حفظ ربط الشهادة بالدورات');
+            await logActivity('save_cert_links', { templateId, courseCount: courseIds.length, pathCount: pathIds.length });
+            toast('تم حفظ ربط الشهادة بالدورات والمسارات');
             for (const courseId of courseIds) {
                 await issueTemplateToCompletedUsers(updated, courseId);
+            }
+            for (const pathId of pathIds) {
+                await issueTemplateToCompletedPathUsers(updated, pathId);
             }
             closeModal('m-cert-linker');
             await loadAllCerts();
@@ -5709,6 +6510,36 @@
             }
         }
 
+        async function issueTemplateToCompletedPathUsers(template, pathId) {
+            const path = PATH_CACHE.find(p => p.id === pathId) || (await getDoc(doc(db, 'learning_paths', pathId))).data();
+            if (!path || !(path.courseIds || []).length) return;
+            const users = await call({ action: 'getUsers' });
+            if (!users.success) return;
+            for (const user of users.users.filter(u => u.status === 'active')) {
+                let done = true;
+                for (const courseId of path.courseIds || []) {
+                    if (!(await courseCompletedForUser(normalizeEmail(user.email), courseId))) {
+                        done = false;
+                        break;
+                    }
+                }
+                if (done) {
+                    await call({
+                        action: 'issueCertificate',
+                        userEmail: normalizeEmail(user.email),
+                        userName: user.full_name || user.email,
+                        courseId: `path_${path.id}`,
+                        courseName: path.title || 'مسار تعليمي',
+                        certificateImageUrl: template.imageUrl || template.builder?.background || '',
+                        certificateBody: template.body || '',
+                        certificateBuilder: template.builder || null,
+                        templateId: template.id || '',
+                        pointsAwarded: 0
+                    });
+                }
+            }
+        }
+
         async function linkedCertificateTemplatesForCourse(course) {
             if (!CERT_TEMPLATE_CACHE.length) {
                 const tr = await call({ action: 'getCertTemplates' });
@@ -5719,6 +6550,14 @@
                 certLinkedCourseIds(t).includes(courseId) ||
                 (course?.certificate_template_id && t.id === course.certificate_template_id)
             );
+        }
+
+        async function linkedCertificateTemplatesForPath(pathId) {
+            if (!CERT_TEMPLATE_CACHE.length) {
+                const tr = await call({ action: 'getCertTemplates' });
+                if (tr.success) CERT_TEMPLATE_CACHE = tr.templates;
+            }
+            return CERT_TEMPLATE_CACHE.filter(t => certLinkedPathIds(t).includes(pathId));
         }
 
         async function issueAutoCertificatesForCurrentCourse(course) {
@@ -5744,6 +6583,8 @@
 
         function viewCertificateGroup(name) {
             const certs = CERT_CACHE.filter(c => (c.course_name || c.courseName || c.courseId || 'شهادة') === name);
+            CURRENT_CERT_GROUP_NAME = name;
+            CURRENT_CERT_GROUP_CERTS = certs;
             const d = document.getElementById('cert-view-content');
             d.innerHTML = `<div style="font-size:18px;font-weight:700;margin-bottom:12px;">${esc(name)} - ${certs.length} مستلم</div>` +
                 certs.map(c => `<div style="display:flex;align-items:center;gap:10px;justify-content:space-between;border-bottom:1px solid var(--color-border-tertiary);padding:8px 0;">
@@ -5771,10 +6612,15 @@
         }
 
         async function deleteCert(email, courseId) {
-            if (!confirm('حذف الشهادة؟')) return;
-            const r = await call({ action: 'deleteCertificate', userEmail: email, courseId });
-            if (r.success) { toast('تم الحذف');
-                loadAllCerts(); } else toast(r.error, 'error');
+            askConfirm('حذف الشهادة', 'هل تريد حذف هذه الشهادة؟', async () => {
+                const r = await call({ action: 'deleteCertificate', userEmail: email, courseId });
+                if (r.success) {
+                    await logActivity('delete_certificate', { email, courseId });
+                    toast('تم الحذف');
+                    await loadAllCerts();
+                    if (CURRENT_CERT_GROUP_NAME) viewCertificateGroup(CURRENT_CERT_GROUP_NAME);
+                } else toast(r.error, 'error');
+            });
         }
 
         async function openIssueCert(email, name) {
@@ -5816,12 +6662,7 @@
                 ISSUE_CERT_BUILDER = course.certificate_builder;
                 prev.innerHTML = renderCertificateCanvas(ISSUE_CERT_BUILDER, name, course.course_name || '');
             }
-            if (!document.getElementById('ic-points')) {
-                const div = document.createElement('div');
-                div.className = 'field';
-                div.innerHTML = `<label>نقاط الشهادة</label><input id="ic-points" type="number" value="10" min="0" style="width:100%;">`;
-                document.getElementById('ic-cert-preview').after(div);
-            }
+            document.getElementById('ic-points')?.closest('.field')?.remove();
             openModal('m-issue-cert');
         }
 
@@ -5839,7 +6680,8 @@
         }
 
         async function submitIssueCert() {
-            const points = parseInt(document.getElementById('ic-points')?.value) || 0;
+            const cfg = await call({ action: 'getPointsConfig' });
+            const points = cfg.success ? (parseInt(cfg.config.certificate) || 0) : 0;
             const r = await call({
                 action: 'issueCertificate',
                 userEmail: val('ic-email'),
@@ -5866,6 +6708,8 @@
         }
 
         function viewCert(imgUrl, userName, courseName, body = '', builderEncoded = '') {
+            CURRENT_CERT_GROUP_NAME = '';
+            CURRENT_CERT_GROUP_CERTS = [];
             const d = document.getElementById('cert-view-content');
             const builder = builderEncoded ? safeJson(decodeURIComponent(builderEncoded), null) : null;
             if (builder) {
@@ -5900,15 +6744,292 @@
             openModal('m-view-cert');
         }
 
+        function certificatePrintHtml(c) {
+            const name = c.user_name || c.userName || c.userEmail || '';
+            const course = c.course_name || c.courseName || c.courseId || '';
+            const builder = c.certificate_builder || null;
+            if (builder) return `<div style="page-break-after:always;break-after:page;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">${renderCertificateCanvas(builder, name, course)}</div>`;
+            if (c.certificate_image_url) {
+                return `<div style="text-align:center;page-break-after:always;break-after:page;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <img src="${esc(c.certificate_image_url)}" style="max-width:100%;border-radius:8px;">
+                    <div style="font-size:24px;font-weight:800;margin-top:16px;">${esc(name)}</div>
+                    <div style="font-size:16px;color:var(--color-text-secondary);">${esc(course)}</div>
+                </div>`;
+            }
+            return `<div style="background:#fff;border:8px solid #1a73e8;border-radius:16px;padding:4rem 2rem;text-align:center;page-break-after:always;break-after:page;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <i class="ti ti-military-award" style="font-size:80px;color:#f57f17;display:block;margin-bottom:24px;"></i>
+                <h2 style="font-size:32px;font-weight:700;margin-bottom:8px;color:#1a73e8;">شهادة إتمام دورة</h2>
+                <div style="font-size:28px;font-weight:700;margin:24px auto;padding-bottom:12px;border-bottom:2px dashed #ced4da;display:inline-block;min-width:60%;">${esc(name)}</div>
+                <div style="font-size:22px;font-weight:700;">${esc(course)}</div>
+            </div>`;
+        }
+
+        function printCurrentCertificateView() {
+            if (CURRENT_CERT_GROUP_CERTS.length) {
+                const name = CURRENT_CERT_GROUP_NAME;
+                html('cert-view-content', CURRENT_CERT_GROUP_CERTS.map(certificatePrintHtml).join(''));
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(() => viewCertificateGroup(name), 400);
+                }, 100);
+                return;
+            }
+            window.print();
+        }
+
+        // ─── QUESTION BANK ───
+        function clearQuestionBankForm() {
+            ['qb-id','qb-title','qb-question'].forEach(id => set(id, ''));
+            set('qb-type', 'choice');
+            renderQuestionBankOptions();
+        }
+
+        function renderQuestionBankOptions(q = {}) {
+            const type = val('qb-type') || 'choice';
+            const box = document.getElementById('qb-options-box');
+            if (!box) return;
+            if (type === 'text') {
+                box.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:10px;border-radius:8px;">سؤال نصي مفتوح، لا يحتاج إجابة صحيحة.</div>';
+                return;
+            }
+            if (type === 'truefalse') {
+                box.innerHTML = `<div class="field"><label>الإجابة الصحيحة</label><select id="qb-correct"><option value="true">صح</option><option value="false">غلط</option></select></div>`;
+                set('qb-correct', q.correct || 'true');
+                return;
+            }
+            const opts = q.options || ['', '', '', ''];
+            box.innerHTML = `
+                <div class="field-row">
+                    <div class="field"><label>اختيار 1</label><input class="qb-opt" value="${esc(opts[0] || '')}"></div>
+                    <div class="field"><label>اختيار 2</label><input class="qb-opt" value="${esc(opts[1] || '')}"></div>
+                    <div class="field"><label>اختيار 3</label><input class="qb-opt" value="${esc(opts[2] || '')}"></div>
+                    <div class="field"><label>اختيار 4</label><input class="qb-opt" value="${esc(opts[3] || '')}"></div>
+                </div>
+                <div class="field"><label>الإجابة الصحيحة</label><select id="qb-correct"><option value="0">اختيار 1</option><option value="1">اختيار 2</option><option value="2">اختيار 3</option><option value="3">اختيار 4</option></select></div>`;
+            set('qb-correct', q.correctIndex ?? 0);
+        }
+
+        function collectQuestionBankItem() {
+            const type = val('qb-type') || 'choice';
+            const base = {
+                title: val('qb-title'),
+                question: val('qb-question'),
+                type,
+                updatedAt: Date.now()
+            };
+            if (type === 'text') return { ...base, options: [], correct: '' };
+            if (type === 'truefalse') return { ...base, options: ['صح', 'غلط'], correct: val('qb-correct') || 'true' };
+            const options = [...document.querySelectorAll('.qb-opt')].map(i => i.value.trim()).filter(Boolean);
+            return { ...base, options, correctIndex: parseInt(val('qb-correct')) || 0, correct: options[parseInt(val('qb-correct')) || 0] || '' };
+        }
+
+        async function loadQuestionBank() {
+            renderQuestionBankOptions();
+            const snaps = await getDocs(collection(db, 'question_bank'));
+            QB_CACHE = snaps.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            const rows = QB_CACHE;
+            html('question-bank-tb', rows.map(q => `
+                <tr>
+                    <td>${esc(q.title || '-')}</td>
+                    <td>${esc(q.question || '')}</td>
+                    <td><span class="badge">${q.type === 'truefalse' ? 'صح وغلط' : q.type === 'text' ? 'نصي' : 'اختيارات'}</span></td>
+                    <td>${esc(q.type === 'choice' ? (q.options || [])[q.correctIndex || 0] : q.correct || '')}</td>
+                    <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button class="sm" onclick="editQuestionBankItem('${q.id}')"><i class="ti ti-edit"></i>تعديل</button>
+                        <button class="sm danger" onclick="deleteQuestionBankItem('${q.id}')"><i class="ti ti-trash"></i>حذف</button>
+                    </td>
+                </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--color-text-secondary);">لا توجد أسئلة محفوظة بعد</td></tr>');
+        }
+
+        async function saveQuestionBankItem() {
+            const id = val('qb-id') || doc(collection(db, 'question_bank')).id;
+            const item = { id, ...collectQuestionBankItem(), createdAt: Date.now() };
+            if (!item.question) return toast('اكتب السؤال أولاً', 'warning');
+            if (item.type === 'choice' && item.options.length < 2) return toast('اكتب اختيارين على الأقل', 'warning');
+            await setDoc(doc(db, 'question_bank', id), item, { merge: true });
+            await logActivity('save_question_bank', { id, title: item.title || '', type: item.type });
+            toast('تم حفظ السؤال');
+            clearQuestionBankForm();
+            loadQuestionBank();
+        }
+
+        async function editQuestionBankItem(id) {
+            const snap = await getDoc(doc(db, 'question_bank', id));
+            if (!snap.exists()) return toast('السؤال غير موجود', 'error');
+            const q = snap.data();
+            set('qb-id', id);
+            set('qb-title', q.title || '');
+            set('qb-question', q.question || '');
+            set('qb-type', q.type === 'mcq' ? 'choice' : (q.type || 'choice'));
+            renderQuestionBankOptions(q);
+        }
+
+        async function deleteQuestionBankItem(id) {
+            askConfirm('حذف السؤال', 'هل تريد حذف هذا السؤال من بنك الأسئلة؟', async () => {
+                await deleteDoc(doc(db, 'question_bank', id));
+                toast('تم حذف السؤال');
+                loadQuestionBank();
+            });
+        }
+
+        function downloadQuestionBankTemplate() {
+            if (!window.XLSX) return toast('مكتبة Excel لم تكتمل بعد', 'warning');
+            const rows = [
+                { title: 'خدمة العملاء', question: 'السؤال هنا', type: 'mcq', option1: 'اختيار 1', option2: 'اختيار 2', option3: 'اختيار 3', option4: 'اختيار 4', correct: 'اختيار 1' },
+                { title: 'السلامة', question: 'العبارة صحيحة؟', type: 'truefalse', option1: 'صح', option2: 'غلط', option3: '', option4: '', correct: 'صح' }
+            ];
+            const ws = window.XLSX.utils.json_to_sheet(rows);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, 'question_bank');
+            window.XLSX.writeFile(wb, 'deraah_question_bank_template.xlsx');
+        }
+
+        async function importQuestionBankExcel() {
+            const file = document.getElementById('qb-import-file')?.files?.[0];
+            if (!file) return toast('اختار ملف Excel أولاً', 'warning');
+            if (!window.XLSX) return toast('مكتبة Excel لم تكتمل بعد', 'warning');
+            const data = await file.arrayBuffer();
+            const wb = window.XLSX.read(data);
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = window.XLSX.utils.sheet_to_json(ws, { header: 1 }).slice(1);
+            const batch = writeBatch(db);
+            let count = 0;
+            rows.forEach(r => {
+                const question = String(r[1] || '').trim();
+                if (!question) return;
+                const ref = doc(collection(db, 'question_bank'));
+                const rawType = String(r[2] || 'choice').trim().toLowerCase();
+                const type = rawType === 'mcq' ? 'choice' : rawType;
+                const options = [r[3], r[4], r[5], r[6]].map(x => String(x || '').trim()).filter(Boolean);
+                const correct = String(r[7] || '').trim();
+                batch.set(ref, {
+                    id: ref.id,
+                    title: String(r[0] || '').trim(),
+                    question,
+                    type,
+                    options: type === 'truefalse' ? ['صح', 'غلط'] : options,
+                    correct,
+                    correctIndex: Math.max(0, options.findIndex(o => o === correct)),
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                });
+                count++;
+            });
+            if (!count) return toast('لا توجد أسئلة صالحة في الملف', 'warning');
+            await batch.commit();
+            await logActivity('import_question_bank', { count });
+            document.getElementById('qb-import-file').value = '';
+            toast(`تم استيراد ${count} سؤال`);
+            loadQuestionBank();
+        }
+
+        async function openQuestionBankPicker() {
+            const snaps = await getDocs(collection(db, 'question_bank'));
+            QB_CACHE = snaps.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            QB_SELECTED.clear();
+            renderQuestionBankPicker();
+            openModal('m-question-bank-picker');
+        }
+
+        function renderQuestionBankPicker() {
+            const q = (val('qb-picker-search') || '').trim().toLowerCase();
+            const rows = QB_CACHE.filter(x => {
+                const hay = `${x.title || ''} ${x.question || ''}`.toLowerCase();
+                return !q || hay.includes(q);
+            });
+            const grouped = {};
+            rows.forEach(item => {
+                const title = item.title || 'بدون تصنيف';
+                if (!grouped[title]) grouped[title] = [];
+                grouped[title].push(item);
+            });
+            html('qb-picker-list', Object.entries(grouped).map(([title, items]) => `
+                <div style="padding:12px;border-bottom:1px solid var(--color-border-tertiary);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <button class="sm" onclick="toggleQuestionBankGroup('${esc(title)}')"><i class="ti ti-list-check"></i>تحديد المجموعة</button>
+                        <strong style="flex:1;">${esc(title)}</strong>
+                        <span class="badge">${items.length} سؤال</span>
+                    </div>
+                    <div style="display:grid;gap:6px;">
+                        ${items.map(item => {
+                            const selected = QB_SELECTED.has(item.id);
+                            return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="toggleQuestionBankPick('${esc(item.id)}')">
+                                <i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>
+                                <span style="flex:1;">${esc(item.question)}</span>
+                                <span class="badge">${item.type === 'truefalse' ? 'صح/غلط' : item.type === 'text' ? 'نصي' : 'اختيارات'}</span>
+                            </button>`;
+                        }).join('')}
+                    </div>
+                </div>`).join('') || '<div style="padding:2rem;text-align:center;color:var(--color-text-secondary);">لا توجد أسئلة في البنك</div>');
+        }
+
+        function toggleQuestionBankPick(id) {
+            if (QB_SELECTED.has(id)) QB_SELECTED.delete(id);
+            else QB_SELECTED.add(id);
+            renderQuestionBankPicker();
+        }
+
+        function toggleQuestionBankGroup(title) {
+            const items = QB_CACHE.filter(x => (x.title || 'بدون تصنيف') === title);
+            const allSelected = items.every(x => QB_SELECTED.has(x.id));
+            items.forEach(x => allSelected ? QB_SELECTED.delete(x.id) : QB_SELECTED.add(x.id));
+            renderQuestionBankPicker();
+        }
+
+        function bankQuestionToCourseQuestion(item) {
+            const type = item.type === 'mcq' ? 'choice' : item.type;
+            if (type === 'truefalse') {
+                const correctRaw = String(item.correct || 'true').trim().toLowerCase();
+                const correct = ['true', 'صح', 'صحيح', 'yes', '1'].includes(correctRaw) ? 'true' : 'false';
+                return { type, text: item.question, options: ['صح', 'غلط'], correct };
+            }
+            if (type === 'text') return { type: 'choice', text: item.question, options: ['إجابة نموذجية', 'إجابة غير صحيحة'], correctIndex: 0 };
+            return { type: 'choice', text: item.question, options: item.options || [], correctIndex: parseInt(item.correctIndex) || 0 };
+        }
+
+        function importSelectedBankQuestions() {
+            const selected = QB_CACHE.filter(x => QB_SELECTED.has(x.id));
+            if (!selected.length) return toast('حدد سؤال واحد على الأقل', 'warning');
+            selected.forEach(item => courseItemAddQuestion(bankQuestionToCourseQuestion(item)));
+            closeModal('m-question-bank-picker');
+            toast(`تمت إضافة ${selected.length} سؤال من البنك`);
+        }
+
         // ─── Q&A ───
+        function qaResponses(q) {
+            if (Array.isArray(q.responses) && q.responses.length) return q.responses;
+            return q.answer ? [{ text: q.answer, byName: q.answeredByName || q.answeredBy || 'الأدمن', createdAt: q.answeredAt || q.createdAt }] : [];
+        }
+
+        function qaPinned(q) {
+            return q.isPinned === true || q.isPinned === 'true';
+        }
+
+        function renderQAResponses(q, admin = false) {
+            const responses = qaResponses(q);
+            if (!responses.length) return '';
+            return `<div style="display:grid;gap:8px;margin-top:8px;">${responses.map((r, i) => `
+                <div class="a" style="display:flex;gap:8px;align-items:flex-start;">
+                    <div style="flex:1;"><strong>${esc(r.byName || r.by || 'الأدمن')}:</strong> ${esc(r.text || '')}</div>
+                    ${admin ? `<button class="icon-btn sm" onclick="editQAResponse('${q.id}',${i})"><i class="ti ti-edit"></i></button>` : ''}
+                </div>`).join('')}</div>`;
+        }
+
         async function loadQA() {
             const r = await call({ action: 'getAllQA' });
             if (!r.success) return;
             const courseRes = await call({ action: 'getCourses' });
             if (courseRes.success) CCACHE = courseRes.courses;
             const qa = r.qa;
-            const pending = qa.filter(q => (q.status || (q.answer ? 'answered' : 'pending')) === 'pending');
-            const answered = qa.filter(q => (q.status || (q.answer ? 'answered' : 'pending')) !== 'pending');
+            const ordered = [...qa].sort((a, b) => {
+                const bp = qaPinned(b) ? 1 : 0;
+                const ap = qaPinned(a) ? 1 : 0;
+                if (bp !== ap) return bp - ap;
+                if (bp && ap) return (b.pinnedAt || 0) - (a.pinnedAt || 0);
+                return (b.createdAt || 0) - (a.createdAt || 0);
+            });
+            const pending = ordered.filter(q => (q.status || (q.answer ? 'answered' : 'pending')) === 'pending');
+            const answered = ordered.filter(q => (q.status || (q.answer ? 'answered' : 'pending')) !== 'pending');
             const card = (q) => `
                 <div class="qa-thread ${q.closed ? 'closed' : ''}">
                     <div style="display:flex;gap:8px;align-items:flex-start;">
@@ -5917,21 +7038,24 @@
                             <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;">
                                 ${q.courseId !== '_all' ? `دورة: ${esc(CCACHE.find(c => c.course_id === q.courseId)?.course_name || q.courseId)}` : 'سؤال عام'}
                                 - ${q.visibility === 'public' ? 'ظاهر للجميع' : 'خاص بالسائل'}
+                                - ${q.closed ? '<span style="color:var(--color-text-danger);font-weight:700;">مقفول</span>' : '<span style="color:var(--color-text-success);font-weight:700;">مفتوح</span>'}
                             </div>
                         </div>
-                        <button class="icon-btn sm" onclick="togglePinQA('${q.id}','${!q.isPinned}')"><i class="ti ti-${q.isPinned ? 'pinned-off' : 'pinned'}"></i></button>
+                        <button class="icon-btn sm ${qaPinned(q) ? 'primary' : ''}" title="${qaPinned(q) ? 'إلغاء التثبيت' : 'تثبيت'}" onclick="togglePinQA('${q.id}',${!qaPinned(q)})"><i class="ti ti-${qaPinned(q) ? 'pinned-off' : 'pin'}"></i></button>
+                        <button class="icon-btn sm" onclick="setQAClosed('${q.id}',${!q.closed})"><i class="ti ti-${q.closed ? 'lock-open' : 'lock'}"></i></button>
                         <button class="icon-btn sm danger" onclick="deleteQA('${q.id}')"><i class="ti ti-trash"></i></button>
                     </div>
                     <div style="font-weight:700;margin:8px 0;">${esc(q.question)}</div>
                     ${(q.followups || []).length ? `<div style="font-size:13px;background:var(--color-background-warning);color:var(--color-text-warning);padding:8px;border-radius:8px;margin-bottom:8px;">${q.followups.map(f => `متابعة: ${esc(f.text)}`).join('<br>')}</div>` : ''}
-                    ${q.answer ? `<div class="a"><strong>${esc(q.answeredByName || q.answeredBy || 'الأدمن')}:</strong> ${esc(q.answer)}</div>` : ''}
-                    <div style="display:grid;grid-template-columns:1fr 160px auto;gap:8px;margin-top:10px;">
-                        <input id="qa-ans-${q.id}" placeholder="${q.answer ? 'تعديل / استكمال الرد...' : 'اكتب الرد...'}" value="${esc(q.answer || '')}">
+                    ${renderQAResponses(q, true)}
+                    <div style="display:grid;grid-template-columns:1fr 160px auto auto;gap:8px;margin-top:10px;">
+                        <input id="qa-ans-${q.id}" data-edit-index="" placeholder="اكتب رد جديد أو عدل رد قديم من علامة التعديل...">
                         <select id="qa-vis-${q.id}"><option value="private">للسائل فقط</option><option value="public">يظهر للكل</option></select>
+                        <button class="sm" onclick="saveQAVisibility('${q.id}')"><i class="ti ti-eye-check"></i>حفظ الظهور</button>
                         <button class="primary sm" onclick="answerQA('${q.id}')"><i class="ti ti-send"></i>حفظ الرد</button>
                     </div>
                 </div>`;
-            html('qa-list', qa.length ? `
+            html('qa-list', ordered.length ? `
                 <div class="qa-board">
                     <div>
                         <div class="qa-column-title"><span><i class="ti ti-hourglass"></i>قيد الإجابة</span><span class="badge">${pending.length}</span></div>
@@ -5950,30 +7074,45 @@
         }
 
         async function openAskQuestion(courseId = '') {
+            document.getElementById('qa-create-panel')?.classList.remove('hidden');
+            const grid = document.getElementById('qa-modal-grid');
+            if (grid) grid.style.gridTemplateColumns = '1fr 1fr';
             const select = document.getElementById('qa-course-scope');
             const courses = await call({ action: 'getCourses', userEmail: CU.email, userRole: 'trainee' });
             const current = courseId || CCI || '_all';
             select.innerHTML = '<option value="_all">سؤال عام</option>' + (courses.success ? courses.courses.map(c =>
                 `<option value="${c.course_id}">${esc(c.course_name)}</option>`).join('') : '');
             select.value = current;
-            await loadMyQA();
+            await loadMyQA('mine');
             openModal('m-qa-ask');
         }
 
-        async function loadMyQA() {
-            const r = await call({ action: 'getUserQA', userEmail: CU.email });
+        async function openQAHistoryOnly() {
+            document.getElementById('qa-create-panel')?.classList.add('hidden');
+            const grid = document.getElementById('qa-modal-grid');
+            if (grid) grid.style.gridTemplateColumns = '1fr';
+            await loadMyQA('public');
+            openModal('m-qa-ask');
+        }
+
+        async function loadMyQA(mode = 'mine') {
+            const r = await call({ action: 'getUserQA', userEmail: CU.email, onlyPublic: mode === 'public', includePublic: mode === 'all' });
             const el = document.getElementById('qa-my-list');
             if (!el) return;
             if (!r.success || !r.qa.length) {
-                el.innerHTML = '<div style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:10px;border-radius:8px;">لا توجد أسئلة سابقة لك.</div>';
+                el.innerHTML = `<div style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:10px;border-radius:8px;">${mode === 'public' ? 'لا توجد أسئلة منشورة للكل.' : 'لا توجد أسئلة سابقة لك.'}</div>`;
                 return;
             }
             el.innerHTML = r.qa.map(q =>
                 `<div style="border:1px solid var(--color-border-tertiary);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--color-background-primary);">
+                    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                        <span class="badge">${q.visibility === 'public' ? 'منشور للكل' : ((q.userEmail || '').toLowerCase() === (CU.email || '').toLowerCase() ? 'سؤالي' : 'عام')}</span>
+                        <span class="badge ${q.closed ? 'badge-suspended' : 'badge-active'}">${q.closed ? 'مغلقة' : 'مفتوحة'}</span>
+                    </div>
                     <div style="font-weight:700;">${esc(q.question)}</div>
                     <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">${q.courseId === '_all' ? 'عام' : (CCACHE.find(c => c.course_id === q.courseId)?.course_name || q.courseId)}</div>
-                    <div style="margin-top:8px;color:${q.answer ? 'var(--color-text-primary)' : 'var(--color-text-warning)'};">${q.answer ? esc(q.answer) : 'بانتظار رد المدرب'}</div>
-                    ${q.answer && !q.closed ? `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+                    ${qaResponses(q).length ? renderQAResponses(q, false) : `<div style="margin-top:8px;color:var(--color-text-warning);">بانتظار رد المدرب</div>`}
+                    ${qaResponses(q).length && !q.closed && (q.userEmail || '').toLowerCase() === (CU.email || '').toLowerCase() ? `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
                         <button class="sm success" onclick="closeMyQA('${q.id}')"><i class="ti ti-check"></i>نعم، جاوب على استفساري</button>
                         <button class="sm" onclick="showFollowupBox('${q.id}')"><i class="ti ti-message-plus"></i>لا، عندي متابعة</button>
                     </div>
@@ -5981,7 +7120,6 @@
                         <textarea id="qa-follow-text-${q.id}" rows="2" placeholder="اكتب المتابعة..."></textarea>
                         <button class="primary sm" onclick="reopenMyQA('${q.id}')"><i class="ti ti-send"></i>إرسال متابعة</button>
                     </div>` : ''}
-                    ${q.closed ? '<span class="badge badge-active" style="margin-top:8px;">مغلقة</span>' : ''}
                 </div>`).join('');
         }
 
@@ -5990,13 +7128,57 @@
             if (!answer) return toast('اكتب الرد أولاً', 'warning');
             const all = await call({ action: 'getAllQA' });
             const qaItem = all.success ? all.qa.find(q => q.id === qid) : null;
-            const r = await call({ action: 'answerQA', qaId: qid, answer, visibility: val(`qa-vis-${qid}`), answeredBy: CU.email, answeredByName: CU.full_name || CU.email });
+            const input = document.getElementById(`qa-ans-${qid}`);
+            const editIndex = input?.dataset?.editIndex || '';
+            const r = await call({ action: 'answerQA', qaId: qid, answer, responseIndex: editIndex, visibility: val(`qa-vis-${qid}`), answeredBy: CU.email, answeredByName: CU.full_name || CU.email });
             if (r.success) {
                 if (qaItem && qaItem.userEmail) {
                     await call({ action: 'addNotification', userEmail: qaItem.userEmail, message: `تم الرد على سؤالك: ${qaItem.question}`, type: 'qa', link: '#' });
                 }
+                if (val(`qa-vis-${qid}`) === 'public') {
+                    const users = await call({ action: 'getUsers' });
+                    if (users.success) {
+                        for (const u of users.users.filter(u => u.status === 'active' && normalizeEmail(u.email) !== normalizeEmail(qaItem?.userEmail))) {
+                            await call({ action: 'addNotification', userEmail: u.email, message: `إجابة جديدة منشورة للكل: ${qaItem?.question || 'سؤال عام'}`, type: 'qa', link: '#' });
+                        }
+                    }
+                }
+                if (input) {
+                    input.value = '';
+                    input.dataset.editIndex = '';
+                    input.placeholder = 'اكتب رد جديد أو عدل رد قديم من علامة التعديل...';
+                }
                 toast('تم الرد');
                 loadQA(); } else toast(r.error, 'error');
+        }
+
+        async function saveQAVisibility(qid) {
+            const visibility = val(`qa-vis-${qid}`);
+            const r = await call({ action: 'setQAVisibility', qaId: qid, visibility });
+            if (r.success) {
+                toast(visibility === 'public' ? 'تم نشر السؤال للكل' : 'تم جعل السؤال خاص بالسائل');
+                loadQA();
+            } else toast(r.error, 'error');
+        }
+
+        async function editQAResponse(qid, index) {
+            const all = await call({ action: 'getAllQA' });
+            const q = all.success ? all.qa.find(x => x.id === qid) : null;
+            const r = q ? qaResponses(q)[index] : null;
+            const input = document.getElementById(`qa-ans-${qid}`);
+            if (!r || !input) return;
+            input.value = r.text || '';
+            input.dataset.editIndex = String(index);
+            input.placeholder = 'تعديل الرد المحدد...';
+            input.focus();
+        }
+
+        async function setQAClosed(qid, closed) {
+            const r = await call({ action: 'setQAClosed', qaId: qid, closed });
+            if (r.success) {
+                toast(closed ? 'تم غلق التذكرة' : 'تم فتح التذكرة');
+                loadQA();
+            } else toast(r.error, 'error');
         }
 
         function showFollowupBox(qid) {
@@ -6026,16 +7208,18 @@
         }
 
         async function togglePinQA(qid, pin) {
-            const r = await call({ action: 'pinQA', qaId: qid, isPinned: pin });
-            if (r.success) { toast(pin ? 'تم التثبيت' : 'تم إلغاء التثبيت');
+            const pinned = pin === true || pin === 'true';
+            const r = await call({ action: 'pinQA', qaId: qid, isPinned: pinned });
+            if (r.success) { toast(pinned ? 'تم التثبيت' : 'تم إلغاء التثبيت');
                 loadQA(); } else toast(r.error, 'error');
         }
 
         async function deleteQA(qid) {
-            if (!confirm('حذف السؤال؟')) return;
-            const r = await call({ action: 'deleteQA', qaId: qid });
-            if (r.success) { toast('تم الحذف');
-                loadQA(); } else toast(r.error, 'error');
+            askConfirm('حذف السؤال', 'هل تريد حذف هذا السؤال؟', async () => {
+                const r = await call({ action: 'deleteQA', qaId: qid });
+                if (r.success) { toast('تم الحذف');
+                    loadQA(); } else toast(r.error, 'error');
+            });
         }
 
         async function submitQA() {
@@ -6063,11 +7247,10 @@
                 document.getElementById('pt-cert').value = r.config.certificate || 10;
             }
             // Leaderboard
-            const ur = await call({ action: 'getUsers' });
+            const [ur, gr] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' })]);
             if (ur.success) {
-                const ptUsers = document.getElementById('pt-users');
-                if (ptUsers) ptUsers.innerHTML = ur.users.map(u =>
-                    `<option value="${u.email}">${esc(u.full_name || u.email)} - ${esc(roleLabel(u.role))}</option>`).join('');
+                UCACHE = ur.users;
+                renderPointsUsersPicker();
                 const sorted = ur.users.filter(u => u.role === 'trainee').sort((a, b) => (b.points || 0) - (a.points ||
                 0));
                 html('points-leaderboard', sorted.map((u, i) =>
@@ -6081,6 +7264,11 @@
                 <td><span class="badge badge-points"><i class="ti ti-star"></i> ${u.points || 0}</span></td>
               </tr>`
                 ).join('') || '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--color-text-secondary);">لا يوجد متدربون</td></tr>');
+            }
+            if (gr.success) {
+                GCACHE = gr.groups;
+                const sel = document.getElementById('pt-group-filter');
+                if (sel) sel.innerHTML = '<option value="">اختيار جروب كامل</option>' + GCACHE.map(g => `<option value="${esc(g.group_id)}">${esc(g.group_name)}</option>`).join('');
             }
         }
 
@@ -6097,7 +7285,7 @@
         }
 
         async function submitAdjustPoints() {
-            const emails = [...document.getElementById('pt-users').selectedOptions].map(o => o.value);
+            const emails = [...POINT_SELECTED_USERS];
             if (!emails.length) return toast('اختار مستخدم واحد على الأقل', 'warning');
             const amount = parseInt(val('pt-amount')) || 0;
             if (amount <= 0) return toast('اكتب عدد نقاط صحيح', 'warning');
@@ -6114,6 +7302,56 @@
                 loadPointsTab();
                 loadUsers();
             } else toast(r.error, 'error');
+        }
+
+        function renderPointsUsersPicker() {
+            const box = document.getElementById('pt-users-picker');
+            if (!box) return;
+            const q = (val('pt-user-search') || '').trim().toLowerCase();
+            const users = UCACHE.filter(u => u.status !== 'deleted').filter(u => {
+                const hay = `${u.full_name || ''} ${u.email || ''} ${u.employee_id || ''}`.toLowerCase();
+                return !q || hay.includes(q);
+            });
+            box.innerHTML = users.map(u => {
+                const email = normalizeEmail(u.email);
+                const selected = POINT_SELECTED_USERS.has(email);
+                return `<button type="button" class="sm pick-chip ${selected ? 'selected' : ''}" onclick="togglePointUser('${esc(email)}')">
+                    <i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>
+                    ${esc(u.full_name || email)}
+                    <span style="font-size:11px;color:var(--color-text-secondary);direction:ltr;">${esc(email)}</span>
+                </button>`;
+            }).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);">لا يوجد مستخدمون مطابقون</div>';
+        }
+
+        function togglePointUser(email) {
+            const clean = normalizeEmail(email);
+            if (POINT_SELECTED_USERS.has(clean)) POINT_SELECTED_USERS.delete(clean);
+            else POINT_SELECTED_USERS.add(clean);
+            renderPointsUsersPicker();
+        }
+
+        function selectPointGroup() {
+            const gid = val('pt-group-filter');
+            if (!gid) return;
+            const group = GCACHE.find(g => g.group_id === gid);
+            (group?.members || []).forEach(email => POINT_SELECTED_USERS.add(normalizeEmail(email)));
+            renderPointsUsersPicker();
+        }
+
+        async function openPointsHistory() {
+            const snaps = await getDocs(collection(db, 'points_log'));
+            const rows = snaps.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 300);
+            html('points-history-list', `<table><thead><tr><th>التاريخ</th><th>المستخدم</th><th>العملية</th><th>النقاط</th><th>السبب</th><th>بواسطة</th></tr></thead><tbody>${
+                rows.map(r => `<tr>
+                    <td style="font-size:12px;direction:ltr;text-align:right;">${esc(r.createdAt ? new Date(r.createdAt).toLocaleString('ar-EG') : '')}</td>
+                    <td style="direction:ltr;text-align:right;">${esc(r.userEmail || '')}</td>
+                    <td>${r.delta >= 0 ? 'منح' : 'خصم'}</td>
+                    <td><span class="badge badge-points">${r.delta > 0 ? '+' : ''}${r.delta || 0}</span></td>
+                    <td>${esc(r.reason || 'بدون سبب')}</td>
+                    <td>${esc(r.by || r.source || 'system')}</td>
+                </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--color-text-secondary);">لا يوجد تاريخ نقاط بعد</td></tr>'
+            }</tbody></table>`);
+            openModal('m-points-history');
         }
 
         // ─── SURVEYS ───
@@ -6159,7 +7397,7 @@
             wrap.innerHTML = `
                 <div class="field"><label>السؤال</label><input class="survey-q-text" value="${esc(q.text || '')}"></div>
                 <div class="field-row">
-                    <div class="field"><label>البند</label><select class="survey-q-cat"><option value="academy">الأكاديمية</option><option value="course">الدورة</option><option value="trainer">المدرب</option></select></div>
+                    <div class="field"><label>البند</label><select class="survey-q-cat"><option value="course">الدورة</option><option value="content">المحتوى</option><option value="academy">الأكاديمية / المنصة</option><option value="platform">المنصة</option><option value="trainer">المدرب</option></select></div>
                     <div class="field"><label>النوع</label><select class="survey-q-type"><option value="nps">NPS 0-10</option><option value="text">نص</option></select></div>
                 </div>
                 <button class="sm danger" onclick="this.closest('.survey-q').remove()"><i class="ti ti-trash"></i>حذف</button>`;
@@ -6571,20 +7809,57 @@
             const enrolled = enrSnaps.docs.map(d => d.data().courseId);
             const ids = path.courseIds || [];
             const courses = ids.map(id => CCACHE.find(c => c.course_id === id)).filter(Boolean).filter(c => effectiveCourseStatus(c) === 'active');
+            const completion = {};
+            for (const c of courses) completion[c.course_id] = await courseCompletedForUser(email, c.course_id);
+            let firstIncomplete = courses.find(c => !completion[c.course_id])?.course_id || '';
+            const activeEnrolled = courses.find(c => enrolled.includes(c.course_id) && !completion[c.course_id])?.course_id || '';
             hide('tr-home-content');
             hide('tr-certs-content');
             show('tr-available-content');
             html('tr-available-title', `<i class="ti ti-route" style="color:var(--color-border-primary);"></i> ${esc(path.title || 'المسار التعليمي')}`);
-            html('tr-available-grid', courses.length ? courses.map(c => renderTraineeCourseCard(c, enrolled)).join('') :
+            const pathHeader = `
+                <div class="card" style="grid-column:1/-1;display:grid;grid-template-columns:220px 1fr;gap:18px;align-items:center;">
+                    <div class="course-thumb" style="height:130px;border-radius:12px;overflow:hidden;">${path.thumbnail_url ? `<img src="${esc(path.thumbnail_url)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="ti ti-route" style="font-size:54px;color:rgba(0,0,0,.18);"></i>'}</div>
+                    <div>
+                        <div style="font-size:24px;font-weight:900;margin-bottom:6px;">${esc(path.title || 'المسار التعليمي')}</div>
+                        <div style="color:var(--color-text-secondary);line-height:1.8;">${esc(path.description || 'لا يوجد وصف')}</div>
+                        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                            <span class="badge">${path.rule === 'sequential' ? 'بالترتيب' : path.rule === 'single' ? 'دورة واحدة في المرة' : 'مفتوح'}</span>
+                            <span class="badge"><i class="ti ti-book"></i>${courses.length} دورة</span>
+                        </div>
+                    </div>
+                </div>`;
+            html('tr-available-grid', courses.length ? pathHeader + courses.map((c, i) => {
+                let locked = false;
+                let reason = '';
+                if (path.rule === 'sequential') {
+                    locked = c.course_id !== firstIncomplete && !completion[c.course_id] && !completion[courses[i - 1]?.course_id];
+                    reason = locked ? 'خلص اللي قبلها علشان تفتح' : '';
+                } else if (path.rule === 'single') {
+                    locked = !!activeEnrolled && c.course_id !== activeEnrolled && !completion[c.course_id];
+                    reason = locked ? 'اخلص الدورة الحالية الأول' : '';
+                }
+                return renderTraineeCourseCard(c, enrolled, { locked, reason, completed: completion[c.course_id], active: c.course_id === activeEnrolled || (!activeEnrolled && c.course_id === firstIncomplete) });
+            }).join('') :
                 '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--color-text-secondary);"><i class="ti ti-route" style="font-size:64px;display:block;margin-bottom:16px;opacity:0.3;"></i><h3 style="font-size:20px;font-weight:700;">لا توجد دورات منشورة داخل هذا المسار حاليا</h3></div>');
         }
 
-        function renderTraineeCourseCard(c, enrolled) {
+        async function courseCompletedForUser(email, courseId) {
+            const [pRes, vRes] = await Promise.all([
+                call({ action: 'getProgress', userEmail: email, courseId }),
+                call({ action: 'getVideos', courseId })
+            ]);
+            if (!pRes.success || !vRes.success || !vRes.videos.length) return false;
+            return vRes.videos.every(v => pRes.progress[v.video_id] && pRes.progress[v.video_id].completed === 'yes');
+        }
+
+        function renderTraineeCourseCard(c, enrolled, state = {}) {
             const hasPrereq = c.prerequisite && c.prerequisite !== '';
             const prereqDone = hasPrereq ? enrolled.includes(c.prerequisite) : true;
             const isEnrolled = enrolled.includes(c.course_id);
-            const canEnroll = prereqDone && !isEnrolled;
-            return `<div class="course-card" style="display:flex;flex-direction:column;">
+            const canEnroll = prereqDone && !isEnrolled && !state.locked;
+            const canOpen = isEnrolled && !state.locked;
+            return `<div class="course-card" style="display:flex;flex-direction:column;${state.locked ? 'filter:grayscale(1);opacity:.55;' : state.active ? 'box-shadow:0 0 0 3px rgba(26,115,232,.18),0 12px 28px rgba(26,115,232,.14);' : ''}">
               <div class="course-thumb">
                 ${c.thumbnail_url ? `<img src="${esc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}
                 <i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,0.1);position:relative;z-index:1;"></i>
@@ -6594,8 +7869,10 @@
                 <div class="course-desc" style="flex:1;">${esc(c.description || 'لا يوجد وصف')}</div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                   <span class="badge badge-${effectiveCourseStatus(c) === 'active' ? 'active' : 'suspended'}">${effectiveCourseStatus(c) === 'active' ? 'نشط' : 'مسودة'}</span>
+                  ${state.completed ? '<span class="badge badge-active"><i class="ti ti-circle-check"></i>مكتملة</span>' : ''}
+                  ${state.active && !state.completed ? '<span class="badge" style="background:var(--color-background-info);color:var(--color-text-info);"><i class="ti ti-bulb"></i>الدورة الحالية</span>' : ''}
                   ${hasPrereq ? `<span class="badge" style="background:#fef7e0;color:#ea8600;">متطلب: ${esc(CCACHE.find(cc => cc.course_id === c.prerequisite)?.course_name || c.prerequisite)}</span>` : ''}
-                  ${canEnroll ? `<button class="primary sm" onclick="enrollInCourse('${esc(c.course_id)}')"><i class="ti ti-user-plus"></i>التحاق</button>` : isEnrolled ? '<span class="badge badge-success">مسجل</span>' : '<span class="badge" style="background:#fce8e6;color:#d93025;">متطلب غير مكتمل</span>'}
+                  ${canOpen ? `<button class="primary sm" onclick="openPlayer('${esc(c.course_id)}')"><i class="ti ti-player-play"></i>فتح</button>` : canEnroll ? `<button class="primary sm" onclick="enrollInCourse('${esc(c.course_id)}')"><i class="ti ti-user-plus"></i>التحاق</button>` : isEnrolled ? '<span class="badge badge-success">مسجل</span>' : `<span class="badge" style="background:#fce8e6;color:#d93025;">${esc(state.reason || 'غير متاح الآن')}</span>`}
                 </div>
               </div>
             </div>`;
@@ -6613,6 +7890,7 @@
                 const uSnap = await getDoc(uRef);
                 const current = uSnap.exists() ? (uSnap.data().points || 0) : 0;
                 await setDoc(uRef, { points: current + points }, { merge: true });
+                await logPoints(email, points, 'الاشتراك في دورة', 'system', 'enroll');
                 toast(`+${points} نقطة للاشتراك في الدورة`, 'success');
                 updateTraineePoints();
                 showTraineeTab('home');
@@ -6728,6 +8006,7 @@
                     const uSnap = await getDoc(uRef);
                     const current = uSnap.exists() ? (uSnap.data().points || 0) : 0;
                     await setDoc(uRef, { points: current + points }, { merge: true });
+                    await logPoints(email, points, `إكمال ${v.title || 'فيديو'}`, 'system', 'video');
                     updateTraineePoints();
                     toast(`+${points} نقطة لإكمال الفيديو`, 'success');
                     const pr2 = await call({ action: 'getProgress', userEmail: email, courseId: CCI });
@@ -6854,6 +8133,47 @@
             </div>`;
         }
 
+        async function addAssessmentAttempt(item, score, questions, passed, autoSubmit = false) {
+            if (!item || !CU?.email || !CCI) return;
+            const email = CU.email.trim().toLowerCase();
+            const snaps = await getDocs(collection(db, 'assessment_attempts'));
+            const previous = snaps.docs.map(d => d.data()).filter(a =>
+                a.courseId === CCI && a.videoId === item.video_id && normalizeEmail(a.userEmail) === email
+            );
+            const answers = questions.map((q, qi) => {
+                const checked = document.querySelector(`input[name="assess-${qi}"]:checked`);
+                const value = checked ? checked.value : '';
+                const selectedIndex = q.type === 'truefalse' ? (value === 'true' ? 0 : value === 'false' ? 1 : -1) : parseInt(value, 10);
+                const correctIndex = q.type === 'truefalse' ? (String(q.correct) === 'true' ? 0 : 1) : parseInt(q.correctIndex, 10);
+                return {
+                    question: q.text || '',
+                    type: q.type || 'choice',
+                    selected: selectedIndex >= 0 ? (q.options || [])[selectedIndex] || value : '',
+                    correct: correctIndex >= 0 ? (q.options || [])[correctIndex] || q.correct || '' : '',
+                    isCorrect: selectedIndex === correctIndex
+                };
+            });
+            const now = new Date();
+            await addDoc(collection(db, 'assessment_attempts'), {
+                courseId: CCI,
+                videoId: item.video_id,
+                contentType: item.content_type || 'question',
+                title: item.title || contentTypeLabel(item),
+                userEmail: email,
+                userName: CU.full_name || email,
+                score,
+                total: questions.length,
+                passScore: parseInt(item.pass_score) || questions.length || 1,
+                passed: !!passed,
+                autoSubmit: !!autoSubmit,
+                attemptNo: previous.length + 1,
+                answers,
+                submittedAt: now.getTime(),
+                submittedAtText: now.toLocaleString('ar-EG', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })
+            });
+            await logActivity('assessment_attempt', { email, courseId: CCI, videoId: item.video_id, type: item.content_type || 'question', score, total: questions.length, passed: !!passed });
+        }
+
         async function submitAssessmentItem(autoSubmit = false) {
             const item = CVV[CVI];
             if (!item) return;
@@ -6867,6 +8187,7 @@
                 } else if (parseInt(value, 10) === parseInt(q.correctIndex, 10)) score++;
             });
             const pass = score >= (parseInt(item.pass_score) || questions.length || 1);
+            await addAssessmentAttempt(item, score, questions, pass, autoSubmit);
             if (!pass) {
                 if ((item.content_type || '') === 'exam') {
                     sessionStorage.setItem(examFailKey(item), JSON.stringify({ score, total: questions.length, passScore: parseInt(item.pass_score) || questions.length || 1 }));
@@ -6899,19 +8220,22 @@
             const questions = item.questions || [];
             const answers = questions.map((q, qi) => {
                 if (q.type === 'text') {
-                    return { question: q.text, type: q.type, value: document.querySelector(`.survey-answer[data-index="${qi}"]`)?.value || '' };
+                    return { question: q.text, category: q.category || 'course', type: q.type, value: document.querySelector(`.survey-answer[data-index="${qi}"]`)?.value || '' };
                 }
                 const checked = document.querySelector(`input[name="survey-${qi}"]:checked`);
-                return { question: q.text, type: q.type || 'nps', value: checked ? checked.value : '' };
+                return { question: q.text, category: q.category || 'course', type: q.type || 'nps', value: checked ? checked.value : '' };
             });
             if (answers.some(a => a.value === '')) return toast('جاوب كل أسئلة السيرفاي أولا', 'warning');
+            const now = new Date();
             await setDoc(doc(db, 'survey_answers', `${CCI}_${CU.email.trim().toLowerCase()}_${item.video_id}`), {
                 courseId: CCI,
                 videoId: item.video_id,
                 userEmail: CU.email.trim().toLowerCase(),
                 userName: CU.full_name || CU.email,
                 answers,
-                submittedAt: new Date().toISOString()
+                submittedAt: now.toISOString(),
+                submittedAtMs: now.getTime(),
+                submittedAtText: now.toLocaleString('ar-EG', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })
             }, { merge: true });
             await call({ action: 'saveProgress', userEmail: CU.email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
             toast('تم إرسال السيرفاي');
@@ -6978,6 +8302,7 @@
             const course = CCACHE.find(c => c.course_id === CCI) || (await call({ action: 'getCourse', courseId: CCI })).course;
             if (!isTraineeView) logActivity('complete_course', { email: CU.email, courseId: CCI, courseName: course?.course_name || '' });
             const linkedTemplates = course ? await issueAutoCertificatesForCurrentCourse(course) : [];
+            await issueCompletedPathCertificatesForUser(CU);
             if (course && (linkedTemplates.length || course.certificate_enabled === 'yes')) {
                 const cr = await call({ action: 'getUserCertificates', userEmail: CU.email });
                 const cert = cr.success ? cr.certificates.find(c => c.courseId === CCI || c.course_id === CCI) : null;
@@ -7055,6 +8380,7 @@
                         await setDoc(uRef, { points: current + pts }, { merge: true });
                         await setDoc(doc(db, 'certificates', `${email}_${CCI}`), { points_awarded: pts },
                         { merge: true });
+                        await logPoints(email, pts, `الحصول على شهادة ${cert.course_name || CCI}`, 'system', 'certificate');
                         updateTraineePoints();
                         toast(`+${pts} نقطة للحصول على الشهادة 🏆`, 'success');
                     }
@@ -7112,6 +8438,7 @@
                     const uSnap = await getDoc(uRef);
                     const current = uSnap.exists() ? (uSnap.data().points || 0) : 0;
                     await setDoc(uRef, { points: current + pts }, { merge: true });
+                    await logPoints(email, pts, `تعليق على ${v.title || 'محتوى'}`, 'system', 'comment');
                     updateTraineePoints();
                     toast(`+${pts} نقطة للتعليق`, 'success');
                     // Notify admins
@@ -7209,14 +8536,10 @@
             }
             content.innerHTML = `
             <div class="profile-header">
-              <div class="big-avatar">
+              <div class="big-avatar" onclick="triggerAvatarUpload()" title="تغيير الصورة الشخصية">
                 ${u.avatar_url ? `<img src="${u.avatar_url}" onerror="this.outerHTML='<span style=\\'font-size:32px;font-weight:700;\\'>${(u.full_name || 'U')[0].toUpperCase()}</span>'">` : `<span style="font-size:32px;font-weight:700;">${(u.full_name || 'U')[0].toUpperCase()}</span>`}
-                <div style="position:absolute;bottom:-4px;right:-4px;background:var(--color-background-primary);border-radius:50%;padding:2px;">
-                  <div class="upload-btn-wrapper" style="display:inline-block;">
-                    <button class="icon-btn sm" style="background:var(--color-background-info);color:var(--color-text-info);"><i class="ti ti-camera"></i></button>
-                    <input type="file" accept="image/*" onchange="uploadAvatar(this)">
-                  </div>
-                </div>
+                <div id="tp-avatar-overlay" class="avatar-upload-overlay"><i class="ti ti-camera"></i><span>تغيير الصورة</span></div>
+                <input id="tp-avatar-file" type="file" accept="image/*" onchange="uploadAvatar(this)" onclick="event.stopPropagation()" style="display:none;">
               </div>
               <div class="info">
                 <h2>${u.full_name || '—'}</h2>
@@ -7282,13 +8605,16 @@
         }
 
         // ─── AVATAR UPLOAD ───
+        function triggerAvatarUpload() {
+            document.getElementById('tp-avatar-file')?.click();
+        }
+
         async function uploadAvatar(fileInput) {
             if (!fileInput || !fileInput.files.length) return;
             const file = fileInput.files[0];
-            const btn = fileInput.parentElement.querySelector('button');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '<i class="ti ti-loader ti-spin"></i>';
-            btn.disabled = true;
+            const overlay = document.getElementById('tp-avatar-overlay');
+            const orig = overlay ? overlay.innerHTML : '';
+            if (overlay) overlay.innerHTML = '<i class="ti ti-loader ti-spin"></i><span>جاري الرفع</span>';
             try {
                 const fd = new FormData();
                 fd.append("image", file);
@@ -7302,10 +8628,11 @@
                     document.getElementById('tr-av').innerHTML =
                         `<img src="${json.data.url}" style="width:100%;height:100%;object-fit:cover;">`;
                     toast('تم تحديث الصورة الشخصية', 'success');
+                    openTraineeProfile();
                     loadUsers();
                 } else throw new Error('فشل الرفع');
-            } catch (e) { toast('خطأ: ' + e.message, 'error'); } finally { btn.innerHTML = orig;
-                btn.disabled = false;
+            } catch (e) { toast('خطأ: ' + e.message, 'error'); } finally {
+                if (overlay && orig) overlay.innerHTML = orig;
                 fileInput.value = ""; }
         }
 
@@ -7366,6 +8693,8 @@
             loadActivity,
             logActivity,
             loadAnnouncements,
+            openAnnouncementForm,
+            hideAnnouncementForm,
             saveAnnouncement,
             editAnnouncement,
             deleteAnnouncement,
@@ -7379,7 +8708,11 @@
             openLearningPathForm,
             hideLearningPathForm,
             toggleLearningPathCourse,
+            toggleLearningPathAudience,
+            renderLearningPathAudiencePickers,
             togglePathAudience,
+            openLearningPathOverview,
+            certLinkedPathIds,
             loadTraineeLearningPaths,
             showPathCourses,
             loadUsers,
@@ -7427,12 +8760,21 @@
             deleteCourseFromActions,
             openManualProgressModal,
             markManualCourseComplete,
+            markCourseCompleteForUser,
+            confirmManualProgress,
             openCourseItemModal,
             courseItemAddQuestion,
             renderCourseQuestionOptions,
+            openQuestionBankPicker,
+            renderQuestionBankPicker,
+            toggleQuestionBankPick,
+            toggleQuestionBankGroup,
+            importSelectedBankQuestions,
             saveCourseItem,
             moveContentItem,
             openCourseDetail,
+            openContentResults,
+            exportContentResults,
             openAdminCoursePreview,
             unenrollFromCourse,
             doDeleteVideo,
@@ -7445,6 +8787,8 @@
             submitEnroll,
             downloadEnrollTemplate,
             submitEnrollExcel,
+            showMissingEmails,
+            exportMissingEmails,
             exportCourseProgress,
             loadAllProgress,
             loadProgressCourse,
@@ -7470,19 +8814,33 @@
             deleteCertTemplate,
             openCertLinker,
             toggleCertLinkedCourse,
+            toggleCertLinkedPath,
             renderCertLinkerPreview,
             saveCertLinks,
             deleteCert,
             viewCertificateGroup,
+            printCurrentCertificateView,
             exportCertificates,
             openIssueCert,
             applyIssueTemplate,
             submitIssueCert,
             viewCert,
             loadQA,
+            loadQuestionBank,
+            clearQuestionBankForm,
+            renderQuestionBankOptions,
+            saveQuestionBankItem,
+            editQuestionBankItem,
+            deleteQuestionBankItem,
+            downloadQuestionBankTemplate,
+            importQuestionBankExcel,
+            openQAHistoryOnly,
             openAskQuestion,
             loadMyQA,
             answerQA,
+            saveQAVisibility,
+            editQAResponse,
+            setQAClosed,
             showFollowupBox,
             closeMyQA,
             reopenMyQA,
@@ -7492,6 +8850,10 @@
             loadPointsTab,
             savePointsConfig,
             submitAdjustPoints,
+            renderPointsUsersPicker,
+            togglePointUser,
+            selectPointGroup,
+            openPointsHistory,
             openSurveyAdmin,
             addSurveyQuestion,
             saveSurveyAdmin,
@@ -7537,6 +8899,9 @@
             submitChangePw,
             openModal,
             closeModal,
+            askConfirm,
+            cancelConfirm,
+            confirmYes,
             val,
             set,
             html,
@@ -7544,6 +8909,7 @@
             handleImageUpload,
             handleVideoUpload,
             handleDriveFileUpload,
+            triggerAvatarUpload,
             uploadAvatar,
             openTraineeProfile,
             saveTraineeProfile,
