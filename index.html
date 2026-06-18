@@ -1108,25 +1108,30 @@
             <div style="display:flex;flex:1;min-height:0">
                 <div class="sidebar">
                     <div class="nav-item active" id="nav-dash" onclick="showTab('dash')"><i class="ti ti-layout-dashboard"></i><span>الرئيسية</span></div>
-                    <div class="nav-item" id="nav-users" onclick="showTab('users')"><i class="ti ti-users"></i><span>المتدربون</span></div>
+                    <div class="nav-item" id="nav-users" onclick="toggleUsersMenu()"><i class="ti ti-users"></i><span>المستخدمون</span><i class="ti ti-chevron-down" style="margin-right:auto;"></i></div>
+                    <div id="users-submenu" class="hidden" style="display:grid;gap:4px;margin:-4px 10px 8px 0;">
+                        <button style="justify-content:flex-start;border:none;background:transparent;padding:9px 14px;color:var(--color-text-secondary);" onclick="openUsersRole('trainee')"><i class="ti ti-user"></i>المتدربين</button>
+                        <button style="justify-content:flex-start;border:none;background:transparent;padding:9px 14px;color:var(--color-text-secondary);" onclick="openUsersRole('staff')"><i class="ti ti-shield"></i>المدربين / الأدمن</button>
+                    </div>
                     <div class="nav-item" id="nav-courses" onclick="showTab('courses')"><i class="ti ti-book"></i><span>الدورات</span></div>
+                    <div class="nav-item" id="nav-paths" onclick="showTab('paths')"><i class="ti ti-route"></i><span>المسارات</span></div>
                     <div class="nav-item" id="nav-progress" onclick="showTab('progress')"><i class="ti ti-chart-bar"></i><span>التقدم</span></div>
                     <div class="nav-item" id="nav-groups" onclick="showTab('groups')"><i class="ti ti-users-group"></i><span>الجروبات</span></div>
                     <div class="nav-item" id="nav-certs" onclick="showTab('certs')"><i class="ti ti-certificate"></i><span>الشهادات</span></div>
                     <div class="nav-item" id="nav-qa" onclick="showTab('qa')"><i class="ti ti-messages"></i><span>الأسئلة</span></div>
                     <div class="nav-item" id="nav-points" onclick="showTab('points')"><i class="ti ti-star"></i><span>النقاط</span></div>
-                    <div class="nav-item" onclick="loadSettingsModal()"><i class="ti ti-palette"></i><span>ستايل الأكاديمية</span></div>
+                    <div class="nav-item" id="nav-activity" onclick="showTab('activity')"><i class="ti ti-activity"></i><span>User Activity</span></div>
+                    <div class="nav-item" id="nav-announcements" onclick="showTab('announcements')"><i class="ti ti-speakerphone"></i><span>الإعلانات</span></div>
+                    <div class="nav-item" id="nav-settings" onclick="loadSettingsModal()"><i class="ti ti-palette"></i><span>ستايل الأكاديمية</span></div>
                 </div>
                 <div style="flex:1;overflow-y:auto;padding:2rem;background:var(--color-background-tertiary)">
 
                     <!-- DASH -->
                     <div id="tab-dash">
                         <div style="font-size:22px;font-weight:700;margin-bottom:1.5rem">لوحة التحكم</div>
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:2rem">
-                            <div class="stat-card"><div class="stat-num" id="s-users">—</div><div class="stat-label">إجمالي المتدربين</div></div>
-                            <div class="stat-card"><div class="stat-num" id="s-courses">—</div><div class="stat-label">الدورات المتاحة</div></div>
-                            <div class="stat-card"><div class="stat-num" id="s-active">—</div><div class="stat-label">متدرب نشط</div></div>
-                            <div class="stat-card"><div class="stat-num" id="s-certs">—</div><div class="stat-label">الشهادات المُصدرة</div></div>
+                        <div class="card" style="margin-bottom:2rem;">
+                            <div style="font-size:16px;font-weight:800;margin-bottom:16px;">إحصائيات المحتوى</div>
+                            <div id="dash-content-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;"></div>
                         </div>
                         <div class="card">
                             <div style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
@@ -1140,7 +1145,7 @@
                     <!-- USERS -->
                     <div id="tab-users" class="hidden">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
-                            <div style="font-size:22px;font-weight:700;flex:1">إدارة المتدربين</div>
+                            <div style="font-size:22px;font-weight:700;flex:1">إدارة المستخدمين</div>
                             <div class="seg-tabs">
                                 <button id="user-tab-trainee" class="active" onclick="setUserRoleView('trainee')">المتدربين</button>
                                 <button id="user-tab-staff" onclick="setUserRoleView('staff')">المدربين / الأدمن</button>
@@ -1162,6 +1167,7 @@
                         <div id="users-bulk-toolbar" class="bulk-toolbar">
                             <strong id="selected-users-count">0 محدد</strong>
                             <button class="sm" onclick="bulkEnrollSelected()"><i class="ti ti-book-upload"></i>إلحاق بدورة</button>
+                            <button class="sm" onclick="bulkAddSelectedToPath()"><i class="ti ti-route"></i>إضافة لمسار</button>
                             <button class="sm" onclick="bulkAddSelectedToGroup()"><i class="ti ti-users-plus"></i>إضافة لجروب</button>
                             <button class="sm" onclick="bulkSetStatus('suspended')"><i class="ti ti-player-pause"></i>إيقاف</button>
                             <button class="sm success" onclick="bulkSetStatus('active')"><i class="ti ti-player-play"></i>تفعيل</button>
@@ -1171,7 +1177,7 @@
                         </div>
                         <div class="card table-scroll" style="padding:0">
                             <table style="table-layout:fixed">
-                                <thead><tr><th style="width:42px"><input type="checkbox" id="u-select-all" onchange="toggleAllUsers(this.checked)"></th><th style="width:80px">الرقم</th><th style="width:160px">الاسم</th><th>الإيميل</th><th style="width:100px">الإقليم</th><th style="width:100px">الجروب</th><th style="width:80px">الدور</th><th style="width:90px">الحالة</th><th style="width:150px">إجراءات</th></tr></thead>
+                                <thead><tr><th style="width:42px"><input type="checkbox" id="u-select-all" onchange="toggleAllUsers(this.checked)"></th><th style="width:80px">الرقم</th><th style="width:160px">الاسم</th><th>الإيميل</th><th style="width:110px">الباسورد</th><th style="width:100px">الإقليم</th><th style="width:100px">الجروب</th><th style="width:80px">الدور</th><th style="width:90px">الحالة</th><th style="width:150px">إجراءات</th></tr></thead>
                                 <tbody id="users-tb"></tbody>
                             </table>
                         </div>
@@ -1193,15 +1199,56 @@
                         <div id="courses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
                     </div>
 
+                    <!-- LEARNING PATHS -->
+                    <div id="tab-paths" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">المسارات التعليمية</div>
+                            <button class="primary" onclick="openLearningPathForm()"><i class="ti ti-plus"></i>مسار جديد</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:380px 1fr;gap:16px;">
+                            <div id="path-form" class="card hidden">
+                                <input type="hidden" id="lp-id">
+                                <div class="field"><label>عنوان المسار</label><input id="lp-title"></div>
+                                <div class="field"><label>وصف المسار</label><textarea id="lp-desc" rows="4"></textarea></div>
+                                <div class="field">
+                                    <label>الصورة المصغرة</label>
+                                    <div class="upload-input-group">
+                                        <input id="lp-thumb" class="hidden-upload-url" placeholder="رابط الصورة" dir="ltr" style="text-align:left;">
+                                        <div class="upload-btn-wrapper">
+                                            <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع</button>
+                                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'lp-thumb')">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field"><label>الحالة</label><select id="lp-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
+                                    <div class="field"><label>الرؤية</label><select id="lp-visibility" onchange="togglePathAudience()"><option value="public">عام</option><option value="private">خاص</option></select></div>
+                                </div>
+                                <div class="field"><label>القاعدة</label><select id="lp-rule"><option value="open">مفتوح</option><option value="sequential">بالترتيب</option></select></div>
+                                <div class="field"><label>الدورات داخل المسار</label><div id="lp-course-picker" style="display:grid;gap:6px;max-height:240px;overflow:auto;"></div></div>
+                                <div id="lp-audience-fields" class="hidden">
+                                    <div class="field"><label>جروبات مسموحة</label><select id="lp-groups" multiple size="5"></select></div>
+                                    <div class="field"><label>أقاليم مسموحة</label><select id="lp-regions" multiple size="5"></select></div>
+                                    <div class="field"><label>أشخاص محددين</label><select id="lp-users" multiple size="6"></select></div>
+                                </div>
+                                <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--color-border-tertiary);padding-top:12px;margin-top:12px;">
+                                    <button onclick="hideLearningPathForm()">إلغاء</button>
+                                    <button class="primary" onclick="saveLearningPath()"><i class="ti ti-route"></i>حفظ المسار</button>
+                                </div>
+                            </div>
+                            <div id="paths-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-content:start;grid-column:1/-1;"></div>
+                        </div>
+                    </div>
+
                     <!-- COURSE DETAIL -->
                     <div id="tab-course-detail" class="hidden">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
                             <button onclick="showTab('courses')"><i class="ti ti-arrow-right"></i>رجوع</button>
                             <div style="font-size:22px;font-weight:700;flex:1" id="cd-title">الدورة</div>
-                            <button onclick="openAdminCoursePreview()"><i class="ti ti-eye"></i>معاينة كمتدرب</button>
+                            <button onclick="openAdminCourseContentPreview()"><i class="ti ti-eye"></i>معاينة المحتوى</button>
                             <button onclick="openEditCourse()"><i class="ti ti-edit"></i>تعديل الدورة</button>
                             <button class="danger" onclick="deleteCourse()"><i class="ti ti-trash"></i>حذف الدورة</button>
-                            <button onclick="openSurveyAdmin()"><i class="ti ti-clipboard-list"></i>السيرفاي</button>
+                            <button onclick="openCourseItemModal('survey')"><i class="ti ti-clipboard-list"></i>إضافة سيرفاي</button>
                             <button onclick="exportCourseProgress()" style="background:#107c41;color:#fff;border-color:#107c41;"><i class="ti ti-file-download"></i>تصدير التقرير</button>
                             <button onclick="openEnrollModal()"><i class="ti ti-user-check"></i>تسجيل متدربين</button>
                         </div>
@@ -1214,8 +1261,10 @@
                                 <div id="cd-videos"></div>
                                 <div class="content-builder-actions">
                                     <button class="primary" onclick="openCourseItemModal('video')"><i class="ti ti-video-plus"></i>فيديو</button>
+                                    <button onclick="openCourseItemModal('pdf')"><i class="ti ti-file-type-pdf"></i>PDF</button>
                                     <button onclick="openCourseItemModal('question')"><i class="ti ti-help-circle"></i>سؤال</button>
                                     <button onclick="openCourseItemModal('exam')"><i class="ti ti-clipboard-check"></i>امتحان</button>
+                                    <button onclick="openCourseItemModal('survey')"><i class="ti ti-clipboard-list"></i>سيرفاي</button>
                                 </div>
                             </div>
                             <div class="card">
@@ -1233,11 +1282,17 @@
                             <div style="font-size:22px;font-weight:700;flex:1">تقدم الدورات</div>
                             <button onclick="exportAllProgress()" style="background:#107c41;color:#fff;border-color:#107c41;"><i class="ti ti-file-download"></i>تصدير التقرير الشامل</button>
                         </div>
+                        <div class="filter-row">
+                            <select id="progress-filter-course" onchange="renderAllProgressTable()"><option value="">كل الدورات</option></select>
+                            <select id="progress-filter-region" onchange="renderAllProgressTable()"><option value="">كل الأقاليم</option></select>
+                            <select id="progress-filter-group" onchange="renderAllProgressTable()"><option value="">كل الجروبات</option></select>
+                            <select id="progress-filter-supervisor" onchange="renderAllProgressTable()"><option value="">كل المشرفين</option></select>
+                        </div>
                         <div id="progress-courses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:1.5rem"></div>
                         <div id="progress-selected-title" style="font-size:18px;font-weight:700;margin-bottom:1rem;display:none;"></div>
                         <div class="card table-scroll" style="padding:0">
                             <table>
-                                <thead><tr><th>الاسم</th><th>الإيميل</th><th>الإقليم</th><th>الفرع</th><th>الدروس المكتملة</th><th>التقدم</th><th>الحالة</th></tr></thead>
+                                <thead><tr><th>الاسم</th><th>الإيميل</th><th>الدورة</th><th>الإقليم</th><th>الجروب</th><th>المشرف</th><th>التقدم</th><th>الحالة</th></tr></thead>
                                 <tbody id="progress-tb"></tbody>
                             </table>
                         </div>
@@ -1257,7 +1312,7 @@
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">سجل الشهادات المُصدرة</div>
                             <button class="primary" onclick="openCertTemplateModal()"><i class="ti ti-certificate"></i>إنشاء قالب شهادة</button>
-                            <button onclick="bulkIssueCertificate()"><i class="ti ti-certificate"></i>منح شهادة للمحدد في المستخدمين</button>
+                            <button onclick="openBulkIssueCertModal()"><i class="ti ti-certificate"></i>منح شهادة للمستخدمين</button>
                             <button onclick="exportCertificates()" style="background:#107c41;color:#fff;border-color:#107c41;"><i class="ti ti-file-download"></i>تصدير الشهادات</button>
                         </div>
                         <div id="cert-template-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:1.5rem;"></div>
@@ -1312,6 +1367,102 @@
                         </div>
                     </div>
 
+                    <!-- ANNOUNCEMENTS -->
+                    <div id="tab-announcements" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">الإعلانات</div>
+                            <button class="primary" onclick="saveAnnouncement()"><i class="ti ti-speakerphone"></i>نشر / حفظ الإعلان</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:360px 1fr;gap:16px;">
+                            <div class="card">
+                                <input type="hidden" id="ann-id">
+                                <div class="field"><label>عنوان الإعلان</label><input id="ann-title"></div>
+                                <div class="field"><label>نص الإعلان</label><textarea id="ann-body" rows="5"></textarea></div>
+                                <div class="field">
+                                    <label>صورة الإعلان</label>
+                                    <div class="upload-input-group">
+                                        <input id="ann-img" class="hidden-upload-url" placeholder="رابط الصورة" dir="ltr" style="text-align:left;">
+                                        <div class="upload-btn-wrapper">
+                                            <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع</button>
+                                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'ann-img')">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="field-row">
+                                    <div class="field"><label>النشر من</label><input id="ann-start" type="datetime-local"></div>
+                                    <div class="field"><label>النشر إلى</label><input id="ann-end" type="datetime-local"></div>
+                                </div>
+                                <div class="field"><label>الحالة</label><select id="ann-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
+                                <button onclick="clearAnnouncementForm()"><i class="ti ti-plus"></i>إعلان جديد</button>
+                            </div>
+                            <div id="announcements-list" style="display:grid;gap:10px;align-content:start;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ACADEMY STYLE -->
+                    <div id="tab-settings" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">ستايل الأكاديمية</div>
+                            <button class="primary" onclick="saveSettings()"><i class="ti ti-device-floppy"></i>حفظ الإعدادات</button>
+                        </div>
+                        <div class="card">
+                            <div class="field"><label>اسم الأكاديمية</label><input id="set-name" value="Deraah Academy"></div>
+                            <div class="field">
+                                <label>اللوجو</label>
+                                <div class="upload-input-group">
+                                    <input id="set-logo" class="hidden-upload-url" placeholder="رابط اللوجو" dir="ltr" style="text-align:left;">
+                                    <div class="upload-btn-wrapper">
+                                        <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع اللوجو</button>
+                                        <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-logo')">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>صورة الخلفية للواجهة</label>
+                                <div class="upload-input-group">
+                                    <input id="set-bg" class="hidden-upload-url" placeholder="رابط الخلفية" dir="ltr" style="text-align:left;">
+                                    <div class="upload-btn-wrapper">
+                                        <button class="success sm" type="button"><i class="ti ti-image"></i> ارفع</button>
+                                        <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-bg')">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>صور إعلانية 1920 x 500</label>
+                                <div class="upload-input-group">
+                                    <input id="set-promo" class="hidden-upload-url" placeholder="رابط الصورة الإعلانية" dir="ltr" style="text-align:left;">
+                                    <div class="upload-btn-wrapper">
+                                        <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع صورة</button>
+                                        <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-promo')">
+                                    </div>
+                                    <button type="button" class="sm" onclick="addPromoBanner()"><i class="ti ti-plus"></i>إضافة للقائمة</button>
+                                </div>
+                                <div id="promo-list" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+                            </div>
+                            <div class="field-row-3">
+                                <div class="field"><label>اللون الأساسي</label><input id="set-primary" type="color" value="#1a73e8"></div>
+                                <div class="field"><label>لون النص الأساسي</label><input id="set-text" type="color" value="#202124"></div>
+                                <div class="field"><label>لون الخلفية</label><input id="set-bgcolor" type="color" value="#f1f3f5"></div>
+                            </div>
+                            <div class="field"><label>المظهر</label><select id="set-theme"><option value="light">Light</option><option value="dark">Dark / Glass</option></select></div>
+                            <div class="field"><label>شفافية الخلفية (%)</label><input id="set-bg-opacity" type="range" min="0" max="100" value="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- USER ACTIVITY -->
+                    <div id="tab-activity" class="hidden">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                            <div style="font-size:22px;font-weight:700;flex:1">User Activity</div>
+                            <button onclick="loadActivity()"><i class="ti ti-refresh"></i>تحديث</button>
+                        </div>
+                        <div class="card table-scroll" style="padding:0">
+                            <table>
+                                <thead><tr><th>التاريخ</th><th>المستخدم</th><th>الحدث</th><th>التفاصيل</th></tr></thead>
+                                <tbody id="activity-tb"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -1339,6 +1490,7 @@
                 <div id="tr-home" style="flex:1;padding:2rem;background:var(--color-background-tertiary);overflow-y:auto;">
                 <div id="tr-home-content">
                     <div id="promo-carousel" class="promo-carousel hidden"></div>
+                    <div id="learning-paths-section" style="margin-bottom:1.5rem;"></div>
                     <!-- Greeting -->
                     <div style="font-size:20px;font-weight:700;margin-bottom:1.5rem;" id="tr-greeting">👋 أهلاً بك،</div>
 
@@ -1366,7 +1518,7 @@
                 <div id="tr-available-content" class="hidden">
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem">
                         <button onclick="showTraineeTab('home')"><i class="ti ti-arrow-right"></i>العودة</button>
-                        <div style="font-size:22px;font-weight:700;"><i class="ti ti-books" style="color:var(--color-border-primary);"></i> الدورات المتاحة للالتحاق</div>
+                        <div id="tr-available-title" style="font-size:22px;font-weight:700;"><i class="ti ti-books" style="color:var(--color-border-primary);"></i> الدورات المتاحة للالتحاق</div>
                     </div>
                     <div id="tr-available-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
                 </div>
@@ -1539,7 +1691,7 @@
                     <div style="font-size:18px;font-weight:700">دورة تدريبية جديدة</div>
                     <button class="icon-btn" onclick="closeModal('m-add-course')"><i class="ti ti-x"></i></button>
                 </div>
-                <div class="field"><label>اسم الدورة *</label><input id="nc-name"></div>
+                <div class="field"><label>اسم الدورة *</label><input id="nc-name" oninput="updateCourseThumbPreview()"></div>
                 <div class="field"><label>وصف الدورة</label><textarea id="nc-desc" rows="3"></textarea></div>
                 <div class="field">
                     <label>الصورة المصغرة</label>
@@ -1547,7 +1699,18 @@
                         <input id="nc-thumb" class="hidden-upload-url" placeholder="رابط الصورة" dir="ltr" style="text-align:left;">
                         <div class="upload-btn-wrapper">
                             <button class="success sm" type="button"><i class="ti ti-camera"></i> ارفع</button>
-                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'nc-thumb')">
+                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'nc-thumb').then(updateCourseThumbPreview)">
+                        </div>
+                    </div>
+                    <div id="nc-thumb-preview" class="course-card" style="max-width:320px;margin-top:10px;display:none;cursor:default;">
+                        <div class="course-thumb"><img id="nc-thumb-preview-img" alt="" style="display:block;"></div>
+                        <div class="course-body">
+                            <div class="course-name" id="nc-thumb-preview-name">اسم الدورة</div>
+                            <div class="course-desc">معاينة شكل الصورة داخل كارت الدورة</div>
+                            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                                <span class="badge badge-active">مفتوحة</span>
+                                <span class="badge" style="background:#e3f2fd;color:#0d47a1;">عام</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1567,7 +1730,7 @@
                         <select id="nc-prereq"><option value="">— لا شيء —</option></select>
                     </div>
                 </div>
-                <div style="border-top:1px solid var(--color-border-tertiary);background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);margin-top:10px;">
+                <div style="display:none;border-top:1px solid var(--color-border-tertiary);background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);margin-top:10px;">
                     <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
                         <i class="ti ti-certificate" style="color:var(--color-text-warning);"></i> إعدادات الشهادة
                     </div>
@@ -1576,14 +1739,10 @@
                             <select id="nc-cert" onchange="toggleCertImg()"><option value="no">لا</option><option value="yes">نعم</option></select>
                         </div>
                         <div class="field" id="nc-certimg-f" style="display:none;">
-                            <label>تصميم الشهادة</label>
-                            <div class="upload-input-group">
-                                <input id="nc-certimg" class="hidden-upload-url" placeholder="رابط التصميم" dir="ltr" style="text-align:left;">
-                                <div class="upload-btn-wrapper">
-                                    <button class="success sm" type="button"><i class="ti ti-image"></i> ارفع</button>
-                                    <input type="file" accept="image/*" onchange="handleImageUpload(this,'nc-certimg')">
-                                </div>
-                            </div>
+                            <label>قالب الشهادة</label>
+                            <select id="nc-cert-template"><option value="">— اختر قالب شهادة —</option></select>
+                            <input id="nc-certimg" type="hidden">
+                            <div style="font-size:12px;color:var(--color-text-secondary);margin-top:6px;">القوالب هنا من قسم الشهادات. لو القالب فيه {name} و {course} هيتبدلوا تلقائيا وقت الإصدار.</div>
                         </div>
                     </div>
                 </div>
@@ -1629,6 +1788,83 @@
             </div>
         </div>
 
+        <!-- Add PDF -->
+        <div id="m-add-pdf" class="modal-wrap hidden">
+            <div class="modal">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+                    <div style="font-size:18px;font-weight:700">إضافة ملف PDF</div>
+                    <button class="icon-btn" onclick="closeModal('m-add-pdf')"><i class="ti ti-x"></i></button>
+                </div>
+                <input type="hidden" id="pdf-id">
+                <div class="field"><label>عنوان الملف *</label><input id="pdf-title"></div>
+                <div class="field"><label>وصف قصير</label><textarea id="pdf-desc" rows="2"></textarea></div>
+                <div class="field">
+                    <label>ملف PDF *</label>
+                    <div class="upload-input-group">
+                        <input id="pdf-url" class="hidden-upload-url" placeholder="رابط Google Drive" dir="ltr" style="text-align:left;">
+                        <div class="upload-btn-wrapper">
+                            <button class="success sm" type="button"><i class="ti ti-cloud-upload"></i> ارفع PDF</button>
+                            <input type="file" accept="application/pdf,.pdf" onchange="handleDriveFileUpload(this,'pdf-url')">
+                        </div>
+                    </div>
+                </div>
+                <div class="field"><label>القفل</label><select id="pdf-lock"><option value="yes">بعد السابق</option><option value="no">مفتوح</option></select></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
+                    <button onclick="closeModal('m-add-pdf')">إلغاء</button>
+                    <button class="primary" onclick="submitPdfItem()"><i class="ti ti-device-floppy"></i>حفظ الملف</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Actions -->
+        <div id="m-course-actions" class="modal-wrap hidden">
+            <div class="modal" style="max-width:560px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="course-actions-title">اختيارات الدورة</div>
+                    <button class="icon-btn" onclick="closeModal('m-course-actions')"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="course-actions-meta" style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;"></div>
+                <div style="display:grid;gap:10px;">
+                    <button class="primary" style="justify-content:flex-start;padding:14px;" onclick="openCoursePreviewFromActions()"><i class="ti ti-eye"></i> محتوى الدورة</button>
+                    <button style="justify-content:flex-start;padding:14px;" onclick="openCourseEditFromActions()"><i class="ti ti-edit"></i> إدارة وتعديل الدورة</button>
+                    <button style="justify-content:flex-start;padding:14px;" onclick="openManualProgressModal()"><i class="ti ti-progress-check"></i> تقدم يدوي / Mark Complete</button>
+                    <button class="danger" style="justify-content:flex-start;padding:14px;" onclick="deleteCourseFromActions()"><i class="ti ti-trash"></i> حذف الدورة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Course Content Preview -->
+        <div id="m-admin-content-preview" class="modal-wrap hidden">
+            <div class="modal" style="width:min(1180px,96vw);max-height:92vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="admin-preview-title">محتوى الدورة</div>
+                    <button class="icon-btn" onclick="closeModal('m-admin-content-preview')"><i class="ti ti-x"></i></button>
+                </div>
+                <div style="display:grid;grid-template-columns:280px 1fr;gap:14px;min-height:560px;">
+                    <div id="admin-preview-list" style="display:grid;gap:8px;align-content:start;max-height:620px;overflow:auto;"></div>
+                    <div id="admin-preview-body" style="background:var(--color-background-tertiary);border:1px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:auto;min-height:560px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Progress -->
+        <div id="m-manual-progress" class="modal-wrap hidden">
+            <div class="modal" style="max-width:620px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+                    <div style="font-size:18px;font-weight:700">تقدم يدوي للدورة</div>
+                    <button class="icon-btn" onclick="closeModal('m-manual-progress')"><i class="ti ti-x"></i></button>
+                </div>
+                <div class="field"><label>اختر المتدرب</label><select id="manual-progress-user"></select></div>
+                <div style="font-size:13px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);margin-bottom:12px;">
+                    هذا الاختيار يجعل كل عناصر الدورة مكتملة للمتدرب بنسبة 100%.
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
+                    <button onclick="closeModal('m-manual-progress')">إلغاء</button>
+                    <button class="primary" onclick="markManualCourseComplete()"><i class="ti ti-circle-check"></i>اعتماد الإكمال</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Enroll -->
         <div id="m-enroll" class="modal-wrap hidden">
             <div class="modal">
@@ -1657,6 +1893,15 @@
                         <div class="field"><label>الفرع</label><input id="ef-branch"></div>
                     </div>
                 </div>
+                <div class="glass-panel" style="padding:12px;margin-top:12px;">
+                    <div style="font-weight:800;margin-bottom:8px;"><i class="ti ti-file-spreadsheet"></i> تسجيل متدربين من Excel</div>
+                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">حط الإيميلات تحت عمود email. أول صف عناوين بيتساب تلقائيا.</div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <button class="sm" type="button" onclick="downloadEnrollTemplate()"><i class="ti ti-download"></i>تحميل فورم الالتحاق</button>
+                        <input id="enroll-bulk-file" type="file" accept=".xlsx,.xls,.csv" style="padding:6px;flex:1;">
+                        <button class="primary sm" type="button" onclick="submitEnrollExcel()"><i class="ti ti-upload"></i>رفع وتسجيل</button>
+                    </div>
+                </div>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-enroll')">إلغاء</button>
                     <button class="primary" onclick="submitEnroll()"><i class="ti ti-user-check"></i>تنفيذ التسجيل</button>
@@ -1673,6 +1918,16 @@
                 </div>
                 <div class="field"><label>اسم المجموعة *</label><input id="ng-name"></div>
                 <div class="field"><label>وصف المجموعة</label><input id="ng-desc"></div>
+                <div class="field">
+                    <label>صورة المجموعة</label>
+                    <div class="upload-input-group">
+                        <input id="ng-img" class="hidden-upload-url" placeholder="رابط صورة المجموعة" dir="ltr" style="text-align:left;">
+                        <div class="upload-btn-wrapper">
+                            <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع</button>
+                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'ng-img')">
+                        </div>
+                    </div>
+                </div>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-add-group')">إلغاء</button>
                     <button class="primary" onclick="submitAddGroup()"><i class="ti ti-plus"></i>إنشاء</button>
@@ -1827,6 +2082,59 @@
             </div>
         </div>
 
+        <!-- Certificate Course Links -->
+        <div id="m-cert-linker" class="modal-wrap hidden">
+            <div class="modal" style="width:min(980px,94vw);max-height:92vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="cert-linker-title">ربط الشهادة بالدورات</div>
+                    <button class="icon-btn" onclick="closeModal('m-cert-linker')"><i class="ti ti-x"></i></button>
+                </div>
+                <input type="hidden" id="cert-linker-id">
+                <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;">
+                    <div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                            <div class="glass-panel" style="padding:10px;">
+                                <div style="font-weight:800;margin-bottom:8px;">كل الدورات</div>
+                                <div id="cert-linker-all" style="display:grid;gap:6px;max-height:330px;overflow:auto;"></div>
+                            </div>
+                            <div class="glass-panel" style="padding:10px;border-color:var(--color-text-info);">
+                                <div style="font-weight:800;margin-bottom:8px;">المربوطة بالشهادة</div>
+                                <div id="cert-linker-linked" style="display:grid;gap:6px;max-height:330px;overflow:auto;"></div>
+                            </div>
+                        </div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">اضغط على أي دورة لنقلها بين القائمتين. أي متدرب يخلص دورة مربوطة يحصل على الشهادة تلقائيا.</div>
+                        <button class="primary" style="width:100%;" onclick="saveCertLinks()"><i class="ti ti-link"></i>حفظ الربط وإصدار المستحق</button>
+                    </div>
+                    <div id="cert-linker-preview"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Issue Certificate -->
+        <div id="m-bulk-cert" class="modal-wrap hidden">
+            <div class="modal" style="width:min(920px,94vw);max-height:92vh;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800">منح شهادة للمستخدمين</div>
+                    <button class="icon-btn" onclick="closeModal('m-bulk-cert')"><i class="ti ti-x"></i></button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;">
+                    <div>
+                        <div style="position:relative;margin-bottom:10px;">
+                            <i class="ti ti-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);"></i>
+                            <input id="bulk-cert-search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." style="width:100%;padding-right:36px;" oninput="renderBulkCertUsers()">
+                        </div>
+                        <div id="bulk-cert-users" class="card table-scroll" style="padding:0;max-height:480px;overflow:auto;"></div>
+                    </div>
+                    <div class="glass-panel" style="padding:14px;">
+                        <div class="field"><label>قالب الشهادة</label><select id="bulk-cert-template"></select></div>
+                        <div class="field"><label>الدورة (اختياري)</label><select id="bulk-cert-course"><option value="">بدون ربط بدورة</option></select></div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;">لو اخترت دورة هيتكتب اسمها في الديناميك. لو سبتها فاضية هتتصدر كشهادة يدوية.</div>
+                        <button class="primary" style="width:100%;" onclick="submitBulkIssueCert()"><i class="ti ti-certificate"></i>منح الشهادة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Notifications -->
         <div id="m-notifications" class="modal-wrap hidden">
             <div class="modal" style="max-width:620px;">
@@ -1838,6 +2146,20 @@
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
                     <button onclick="closeModal('m-notifications')">إغلاق</button>
                     <button class="primary" onclick="markNotificationsSeen()"><i class="ti ti-check"></i>تمت المشاهدة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Announcement Popup -->
+        <div id="m-announcement-popup" class="modal-wrap hidden">
+            <div class="modal" style="max-width:760px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800" id="ann-popup-title">إعلان</div>
+                    <button class="icon-btn" onclick="closeAnnouncementPopup()"><i class="ti ti-x"></i></button>
+                </div>
+                <div id="ann-popup-body"></div>
+                <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+                    <button class="primary" onclick="closeAnnouncementPopup()">إغلاق</button>
                 </div>
             </div>
         </div>
@@ -2010,60 +2332,6 @@
             </div>
         </div>
 
-        <!-- Academy Settings -->
-        <div id="m-settings" class="modal-wrap hidden">
-            <div class="modal">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-                    <div style="font-size:18px;font-weight:700">إعدادات الأكاديمية</div>
-                    <button class="icon-btn" onclick="closeModal('m-settings')"><i class="ti ti-x"></i></button>
-                </div>
-                <div class="field"><label>اسم الأكاديمية</label><input id="set-name" value="Deraah Academy"></div>
-                <div class="field">
-                    <label>اللوجو</label>
-                    <div class="upload-input-group">
-                        <input id="set-logo" class="hidden-upload-url" placeholder="رابط اللوجو" dir="ltr" style="text-align:left;">
-                        <div class="upload-btn-wrapper">
-                            <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع اللوجو</button>
-                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-logo')">
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>صورة الخلفية (للواجهة)</label>
-                    <div class="upload-input-group">
-                        <input id="set-bg" class="hidden-upload-url" placeholder="رابط الخلفية" dir="ltr" style="text-align:left;">
-                        <div class="upload-btn-wrapper">
-                            <button class="success sm" type="button"><i class="ti ti-image"></i> ارفع</button>
-                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-bg')">
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>صور إعلانية 1920 x 500</label>
-                    <div class="upload-input-group">
-                        <input id="set-promo" class="hidden-upload-url" placeholder="رابط الصورة الإعلانية" dir="ltr" style="text-align:left;">
-                        <div class="upload-btn-wrapper">
-                            <button class="success sm" type="button"><i class="ti ti-photo-up"></i> ارفع صورة</button>
-                            <input type="file" accept="image/*" onchange="handleImageUpload(this,'set-promo')">
-                        </div>
-                        <button type="button" class="sm" onclick="addPromoBanner()"><i class="ti ti-plus"></i>إضافة للقائمة</button>
-                    </div>
-                    <div id="promo-list" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
-                </div>
-                <div class="field-row-3">
-                    <div class="field"><label>اللون الأساسي</label><input id="set-primary" type="color" value="#1a73e8"></div>
-                    <div class="field"><label>لون النص الأساسي</label><input id="set-text" type="color" value="#202124"></div>
-                    <div class="field"><label>لون الخلفية</label><input id="set-bgcolor" type="color" value="#f1f3f5"></div>
-                </div>
-                <div class="field"><label>المظهر</label><select id="set-theme"><option value="light">Light</option><option value="dark">Dark / Glass</option></select></div>
-                <div class="field"><label>شفافية الخلفية (%)</label><input id="set-bg-opacity" type="range" min="0" max="100" value="100"></div>
-                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:1rem;border-top:1px solid var(--color-border-tertiary);padding-top:1rem;">
-                    <button onclick="closeModal('m-settings')">إلغاء</button>
-                    <button class="primary" onclick="saveSettings()"><i class="ti ti-device-floppy"></i>حفظ الإعدادات</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- ═══ FIREBASE + LOGIC ═══ -->
@@ -2099,6 +2367,7 @@
             UCACHE = [],
             CCACHE = [],
             GCACHE = [],
+            ALL_PROGRESS_ROWS = [],
             CERT_CACHE = [],
             CERT_TEMPLATE_CACHE = [],
             NOTIFS = [],
@@ -2108,7 +2377,13 @@
             VISIBLE_USERS = [],
             EDITING_COURSE_ID = null,
             EDITING_VIDEO_ID = null,
+            COURSE_ACTION_ID = null,
+            ADMIN_PREVIEW_ITEMS = [],
+            CERT_LINKER_IDS = [],
+            LP_SELECTED_COURSES = [],
             COURSE_ITEM_TYPE = 'video',
+            SURVEY_ITEM_CONTEXT = 'course',
+            SURVEY_EDITING_ITEM_ID = null,
             CURRENT_COURSE_FILTER = 'all',
             CERT_BUILDER = { background: '', elements: [] },
             SELECTED_CERT_ELEMENT = null,
@@ -2187,6 +2462,8 @@
             const t = item.content_type || 'video';
             if (t === 'question') return 'سؤال';
             if (t === 'exam') return 'امتحان';
+            if (t === 'pdf') return 'PDF';
+            if (t === 'survey') return 'سيرفاي';
             return 'فيديو';
         }
 
@@ -2194,7 +2471,28 @@
             const t = item.content_type || 'video';
             if (t === 'question') return 'ti-help-circle';
             if (t === 'exam') return 'ti-clipboard-check';
+            if (t === 'pdf') return 'ti-file-type-pdf';
+            if (t === 'survey') return 'ti-clipboard-list';
             return 'ti-video';
+        }
+
+        function randomPassword8() {
+            return String(Math.floor(10000000 + Math.random() * 90000000));
+        }
+
+        function updateCourseThumbPreview() {
+            const box = document.getElementById('nc-thumb-preview');
+            const img = document.getElementById('nc-thumb-preview-img');
+            const name = document.getElementById('nc-thumb-preview-name');
+            if (!box || !img) return;
+            const url = val('nc-thumb');
+            if (!url) {
+                box.style.display = 'none';
+                return;
+            }
+            box.style.display = 'block';
+            img.src = url;
+            if (name) name.textContent = val('nc-name') || 'اسم الدورة';
         }
 
         function toggleDarkMode(force) {
@@ -2329,6 +2627,22 @@
             </div>`;
         }
 
+        function renderPdfItem(item, savedProgress) {
+            const url = item.file_url || item.video_url || '';
+            const id = driveId(url);
+            const done = savedProgress && savedProgress.completed === 'yes';
+            const previewUrl = id ? `https://drive.google.com/file/d/${id}/preview` : url;
+            const openUrl = id ? `https://drive.google.com/file/d/${id}/view` : url;
+            return `<div style="width:100%;height:100%;min-height:450px;display:flex;flex-direction:column;background:var(--color-background-primary);">
+                ${previewUrl ? `<iframe width="100%" height="100%" src="${previewUrl}" frameborder="0" style="display:block;flex:1;min-height:420px;"></iframe>` :
+                '<div style="padding:3rem;text-align:center;color:var(--color-text-secondary);">رابط PDF غير صالح</div>'}
+                <div style="padding:10px;background:var(--color-background-tertiary);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <a href="${openUrl}" target="_blank" style="color:var(--color-text-info);font-weight:700;"><i class="ti ti-external-link"></i> فتح الملف</a>
+                    <button class="success" onclick="markCurrentVideoComplete()" ${done ? 'disabled' : ''}><i class="ti ti-circle-check"></i>${done ? 'تمت القراءة' : 'تمت قراءة الملف'}</button>
+                </div>
+            </div>`;
+        }
+
         // ─── Image Upload (ImgBB) ───
         async function handleImageUpload(fileInput, targetId) {
             if (!fileInput || !fileInput.files.length) return;
@@ -2379,6 +2693,388 @@
             } catch (e) { toast("خطأ في رفع الفيديو: " + e.message, "error"); } finally { btn.innerHTML = orig;
                 btn.disabled = false;
                 fileInput.value = ""; }
+        }
+
+        async function handleDriveFileUpload(fileInput, targetId) {
+            if (!fileInput || !fileInput.files.length) return;
+            const file = fileInput.files[0];
+            const btn = fileInput.parentElement.querySelector('button');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="ti ti-loader ti-spin"></i>';
+            btn.disabled = true;
+            try {
+                const base64 = await new Promise((r, e) => {
+                    const fr = new FileReader();
+                    fr.onload = () => r(fr.result.split(',')[1]);
+                    fr.onerror = e;
+                    fr.readAsDataURL(file);
+                });
+                const resp = await fetch(GAS_API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "uploadVideo", folderId: DRIVE_FOLDER_ID, fileName: file.name, mimeType: file.type,
+                        fileData: base64 })
+                });
+                const result = await resp.json();
+                if (result.success && result.url) {
+                    document.getElementById(targetId).value = result.url;
+                    toast("تم رفع الملف إلى Drive بنجاح", "success");
+                } else throw new Error(result.error === 'Unknown action: uploadVideo' ? "Apps Script الحالي لا يحتوي uploadVideo. استخدم ملف Apps Script المرفق ثم حدّث GAS_API_URL." : (result.error || "فشل الرفع"));
+            } catch (e) { toast("خطأ في رفع الملف: " + e.message, "error"); } finally { btn.innerHTML = orig;
+                btn.disabled = false;
+                fileInput.value = ""; }
+        }
+
+        async function logActivity(type, details = {}, actorEmail = '') {
+            try {
+                await addDoc(collection(db, 'activity_log'), {
+                    type,
+                    details,
+                    actorEmail: actorEmail || (CU?.email || 'system'),
+                    actorName: CU?.full_name || CU?.email || 'system',
+                    createdAt: Date.now(),
+                    createdAtText: new Date().toISOString()
+                });
+            } catch (e) {
+                console.warn('activity log failed', e);
+            }
+        }
+
+        function activityTypeLabel(type) {
+            const map = {
+                delete_user: 'حذف مستخدم',
+                bulk_upload_users: 'رفع مستخدمين',
+                create_course: 'إنشاء دورة',
+                update_course: 'تعديل دورة',
+                delete_course: 'حذف دورة',
+                create_content: 'إضافة محتوى',
+                update_content: 'تعديل محتوى',
+                delete_content: 'حذف محتوى',
+                enroll_user: 'إلحاق مستخدم',
+                unenroll_user: 'إلغاء التحاق',
+                enroll_users_bulk: 'إلحاق جماعي',
+                issue_certificate: 'إصدار شهادة',
+                view_course: 'مشاهدة دورة',
+                complete_course: 'إكمال دورة',
+                manual_complete_course: 'إكمال يدوي'
+            };
+            return map[type] || type || 'نشاط';
+        }
+
+        function activityDetailsText(row) {
+            const d = row.details || {};
+            if (row.type === 'delete_user') return `تم حذف ${d.email || 'مستخدم'} نهائيا من النظام`;
+            if (row.type === 'bulk_upload_users') return `تم رفع ${d.added || 0} مستخدم، وتخطي ${d.skipped || 0} مكرر`;
+            if (row.type === 'create_course') return `تم إنشاء دورة ${d.courseName || d.courseId || ''}`;
+            if (row.type === 'update_course') return `تم تعديل بيانات الدورة ${d.courseId || ''}`;
+            if (row.type === 'delete_course') return `تم حذف الدورة ${d.courseId || ''}`;
+            if (row.type === 'create_content') return `تمت إضافة ${contentTypeLabel({ content_type: d.type })} بعنوان ${d.title || ''}`;
+            if (row.type === 'update_content') return `تم تعديل عنصر محتوى ${d.videoId || ''}`;
+            if (row.type === 'delete_content') return `تم حذف عنصر محتوى ${d.videoId || ''}`;
+            if (row.type === 'enroll_user') return `تم إلحاق ${d.email || ''} بدورة ${d.courseId || ''}`;
+            if (row.type === 'unenroll_user') return `تم حذف التحاق ${d.email || ''} من دورة ${d.courseId || ''}`;
+            if (row.type === 'enroll_users_bulk') return `تم إلحاق ${d.count || 0} مستخدم بدورة ${d.courseId || ''}`;
+            if (row.type === 'issue_certificate') return `تم إصدار شهادة لـ ${d.email || ''} عن ${d.courseName || d.courseId || ''}`;
+            if (row.type === 'view_course') return `فتح ${d.email || ''} الدورة ${d.courseId || ''}`;
+            if (row.type === 'complete_course') return `أكمل ${d.email || ''} دورة ${d.courseName || d.courseId || ''}`;
+            if (row.type === 'manual_complete_course') return `تم اعتماد إكمال الدورة يدويا لـ ${d.email || ''}`;
+            return 'نشاط مسجل على المنصة';
+        }
+
+        async function loadActivity() {
+            try {
+                const snaps = await getDocs(collection(db, 'activity_log'));
+                const rows = snaps.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 200);
+                html('activity-tb', rows.map(r => `
+                    <tr>
+                        <td style="font-size:12px;direction:ltr;text-align:right;">${esc(r.createdAtText || (r.createdAt ? new Date(r.createdAt).toISOString() : ''))}</td>
+                        <td>${esc(r.actorName || r.actorEmail || 'system')}</td>
+                        <td><span class="badge">${esc(activityTypeLabel(r.type))}</span></td>
+                        <td style="font-size:13px;color:var(--color-text-secondary);">${esc(activityDetailsText(r))}</td>
+                    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">لا يوجد نشاط مسجل بعد</td></tr>');
+            } catch (e) {
+                toast('تعذر تحميل سجل النشاط', 'error');
+            }
+        }
+
+        function clearAnnouncementForm() {
+            ['ann-id','ann-title','ann-body','ann-img','ann-start','ann-end'].forEach(id => set(id, ''));
+            set('ann-status', 'published');
+        }
+
+        async function loadAnnouncements() {
+            const snaps = await getDocs(collection(db, 'announcements'));
+            const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            html('announcements-list', rows.length ? rows.map(a => `
+                <div class="card" style="display:flex;gap:12px;align-items:center;">
+                    ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:110px;height:70px;object-fit:cover;border-radius:8px;">` : '<div style="width:110px;height:70px;background:var(--color-background-secondary);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-speakerphone"></i></div>'}
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:800;">${esc(a.title || 'إعلان')}</div>
+                        <div style="font-size:13px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(a.body || '')}</div>
+                        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">${a.status === 'published' ? 'منشور' : 'مسودة'}${a.start_at ? ` - من ${esc(a.start_at)}` : ''}${a.end_at ? ` إلى ${esc(a.end_at)}` : ''}</div>
+                    </div>
+                    <button class="sm" onclick="editAnnouncement('${a.id}')"><i class="ti ti-edit"></i>تعديل</button>
+                    <button class="sm danger" onclick="deleteAnnouncement('${a.id}')"><i class="ti ti-trash"></i>حذف</button>
+                </div>`).join('') :
+                '<div class="card" style="text-align:center;color:var(--color-text-secondary);">لا توجد إعلانات بعد</div>');
+        }
+
+        async function saveAnnouncement() {
+            const id = val('ann-id') || doc(collection(db, 'announcements')).id;
+            const announcement = {
+                id,
+                title: val('ann-title') || 'إعلان',
+                body: val('ann-body'),
+                image_url: val('ann-img'),
+                start_at: val('ann-start'),
+                end_at: val('ann-end'),
+                status: val('ann-status') || 'published',
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+            await setDoc(doc(db, 'announcements', id), announcement, { merge: true });
+            toast('تم حفظ الإعلان');
+            clearAnnouncementForm();
+            loadAnnouncements();
+        }
+
+        async function editAnnouncement(id) {
+            const snap = await getDoc(doc(db, 'announcements', id));
+            if (!snap.exists()) return toast('الإعلان غير موجود', 'error');
+            const a = snap.data();
+            set('ann-id', id);
+            set('ann-title', a.title || '');
+            set('ann-body', a.body || '');
+            set('ann-img', a.image_url || '');
+            set('ann-start', a.start_at || '');
+            set('ann-end', a.end_at || '');
+            set('ann-status', a.status || 'published');
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('حذف الإعلان؟')) return;
+            await deleteDoc(doc(db, 'announcements', id));
+            toast('تم حذف الإعلان');
+            loadAnnouncements();
+        }
+
+        function announcementIsActive(a) {
+            if (a.status !== 'published') return false;
+            const now = Date.now();
+            const start = a.start_at ? new Date(a.start_at).getTime() : 0;
+            const end = a.end_at ? new Date(a.end_at).getTime() : Infinity;
+            return now >= start && now <= end;
+        }
+
+        async function showTraineeAnnouncements() {
+            if (!CU?.email) return;
+            const snaps = await getDocs(collection(db, 'announcements'));
+            const seen = JSON.parse(localStorage.getItem(`deraah_seen_ann_${CU.email}`) || '[]');
+            const rows = snaps.docs.map(d => ({ ...d.data(), id: d.id })).filter(announcementIsActive).filter(a => !seen.includes(a.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (!rows.length) return;
+            const a = rows[0];
+            document.getElementById('ann-popup-title').textContent = a.title || 'إعلان';
+            html('ann-popup-body', `
+                ${a.image_url ? `<img src="${esc(a.image_url)}" style="width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-bottom:12px;">` : ''}
+                <div style="font-size:15px;line-height:1.8;color:var(--color-text-secondary);white-space:pre-wrap;">${esc(a.body || '')}</div>
+                <input type="hidden" id="ann-popup-id" value="${esc(a.id)}">
+            `);
+            openModal('m-announcement-popup');
+        }
+
+        function closeAnnouncementPopup() {
+            const id = document.getElementById('ann-popup-id')?.value || '';
+            if (CU?.email && id) {
+                const key = `deraah_seen_ann_${CU.email}`;
+                const seen = JSON.parse(localStorage.getItem(key) || '[]');
+                if (!seen.includes(id)) seen.push(id);
+                localStorage.setItem(key, JSON.stringify(seen));
+            }
+            closeModal('m-announcement-popup');
+        }
+
+        async function loadLearningPaths() {
+            hideLearningPathForm();
+            const [courses, pathsSnap] = await Promise.all([
+                call({ action: 'getCourses' }),
+                getDocs(collection(db, 'learning_paths'))
+            ]);
+            if (courses.success) CCACHE = courses.courses;
+            await populateLearningPathFormOptions();
+            const paths = pathsSnap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+            html('paths-list', paths.length ? paths.map(p => `
+                <div class="course-card" style="cursor:default;">
+                    <div class="course-thumb">${p.thumbnail_url ? `<img src="${esc(p.thumbnail_url)}" onerror="this.style.display='none'">` : '<i class="ti ti-route" style="font-size:48px;color:rgba(0,0,0,0.1);"></i>'}</div>
+                    <div class="course-body">
+                        <div class="course-name">${esc(p.title || 'مسار تعليمي')}</div>
+                        <div class="course-desc">${esc(p.description || 'بدون وصف')}</div>
+                        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                            <span class="badge ${p.status === 'published' ? 'badge-active' : 'badge-suspended'}">${p.status === 'published' ? 'منشور' : 'مسودة'}</span>
+                            <span class="badge">${p.visibility === 'private' ? 'خاص' : 'عام'}</span>
+                            <span class="badge"><i class="ti ti-book"></i> ${(p.courseIds || []).length} دورة</span>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:12px;">
+                            <button class="sm" onclick="editLearningPath('${p.id}')"><i class="ti ti-edit"></i>تعديل</button>
+                            <button class="sm danger" onclick="deleteLearningPath('${p.id}')"><i class="ti ti-trash"></i>حذف</button>
+                        </div>
+                    </div>
+                </div>`).join('') : '<div class="card" style="text-align:center;color:var(--color-text-secondary);">لا توجد مسارات بعد</div>');
+        }
+
+        async function populateLearningPathFormOptions() {
+            if (!CCACHE.length) {
+                const courses = await call({ action: 'getCourses' });
+                if (courses.success) CCACHE = courses.courses;
+            }
+            renderLearningPathCoursePicker();
+            const [users, groups] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' })]);
+            if (users.success) {
+                UCACHE = users.users;
+                const userSel = document.getElementById('lp-users');
+                if (userSel) userSel.innerHTML = UCACHE.map(u => `<option value="${esc(u.email)}">${esc(u.full_name || u.email)} (${esc(u.email)})</option>`).join('');
+                const regions = [...new Set(UCACHE.map(u => u.region).filter(Boolean))].sort();
+                const regionSel = document.getElementById('lp-regions');
+                if (regionSel) regionSel.innerHTML = regions.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join('');
+            }
+            if (groups.success) {
+                GCACHE = groups.groups;
+                const groupSel = document.getElementById('lp-groups');
+                if (groupSel) groupSel.innerHTML = GCACHE.map(g => `<option value="${esc(g.group_name || g.group_id)}">${esc(g.group_name)}</option>`).join('');
+            }
+        }
+
+        function renderLearningPathCoursePicker() {
+            const box = document.getElementById('lp-course-picker');
+            if (!box) return;
+            box.innerHTML = CCACHE.map(c => {
+                const selected = LP_SELECTED_COURSES.includes(c.course_id);
+                return `<button type="button" class="sm ${selected ? 'primary' : ''}" style="justify-content:flex-start;text-align:right;white-space:normal;" onclick="toggleLearningPathCourse('${esc(c.course_id)}')">
+                    <i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i>${esc(c.course_name)}
+                </button>`;
+            }).join('') || '<div style="color:var(--color-text-secondary);font-size:13px;">لا توجد دورات</div>';
+        }
+
+        function toggleLearningPathCourse(courseId) {
+            if (LP_SELECTED_COURSES.includes(courseId)) LP_SELECTED_COURSES = LP_SELECTED_COURSES.filter(id => id !== courseId);
+            else LP_SELECTED_COURSES.push(courseId);
+            renderLearningPathCoursePicker();
+        }
+
+        function selectedOptionsValues(id) {
+            return [...(document.getElementById(id)?.selectedOptions || [])].map(o => o.value).filter(Boolean);
+        }
+
+        function togglePathAudience() {
+            const box = document.getElementById('lp-audience-fields');
+            if (box) box.classList.toggle('hidden', val('lp-visibility') !== 'private');
+        }
+
+        function openLearningPathForm() {
+            clearLearningPathForm();
+            document.getElementById('path-form')?.classList.remove('hidden');
+            const list = document.getElementById('paths-list');
+            if (list) list.style.gridColumn = '';
+            populateLearningPathFormOptions();
+        }
+
+        function hideLearningPathForm() {
+            document.getElementById('path-form')?.classList.add('hidden');
+            const list = document.getElementById('paths-list');
+            if (list) list.style.gridColumn = '1/-1';
+        }
+
+        function clearLearningPathForm() {
+            ['lp-id','lp-title','lp-desc','lp-thumb'].forEach(id => set(id, ''));
+            set('lp-status', 'published');
+            set('lp-visibility', 'public');
+            set('lp-rule', 'open');
+            LP_SELECTED_COURSES = [];
+            renderLearningPathCoursePicker();
+            ['lp-groups','lp-regions','lp-users'].forEach(id => [...(document.getElementById(id)?.options || [])].forEach(o => o.selected = false));
+            togglePathAudience();
+        }
+
+        async function saveLearningPath() {
+            const id = val('lp-id') || doc(collection(db, 'learning_paths')).id;
+            const path = {
+                id,
+                title: val('lp-title') || 'مسار تعليمي',
+                description: val('lp-desc'),
+                thumbnail_url: val('lp-thumb'),
+                status: val('lp-status'),
+                visibility: val('lp-visibility'),
+                rule: val('lp-rule'),
+                courseIds: [...LP_SELECTED_COURSES],
+                audienceGroups: selectedOptionsValues('lp-groups'),
+                audienceRegions: selectedOptionsValues('lp-regions'),
+                audienceUsers: selectedOptionsValues('lp-users'),
+                updatedAt: Date.now(),
+                createdAt: Date.now()
+            };
+            await setDoc(doc(db, 'learning_paths', id), path, { merge: true });
+            toast('تم حفظ المسار');
+            clearLearningPathForm();
+            hideLearningPathForm();
+            loadLearningPaths();
+        }
+
+        async function editLearningPath(id) {
+            const snap = await getDoc(doc(db, 'learning_paths', id));
+            if (!snap.exists()) return toast('المسار غير موجود', 'error');
+            const p = snap.data();
+            set('lp-id', id);
+            set('lp-title', p.title || '');
+            set('lp-desc', p.description || '');
+            set('lp-thumb', p.thumbnail_url || '');
+            set('lp-status', p.status || 'published');
+            set('lp-visibility', p.visibility || 'public');
+            set('lp-rule', p.rule || 'open');
+            LP_SELECTED_COURSES = p.courseIds || [];
+            document.getElementById('path-form')?.classList.remove('hidden');
+            const list = document.getElementById('paths-list');
+            if (list) list.style.gridColumn = '';
+            await populateLearningPathFormOptions();
+            ['lp-groups','lp-regions','lp-users'].forEach(idName => {
+                const key = idName === 'lp-groups' ? 'audienceGroups' : idName === 'lp-regions' ? 'audienceRegions' : 'audienceUsers';
+                const vals = p[key] || [];
+                [...(document.getElementById(idName)?.options || [])].forEach(o => o.selected = vals.includes(o.value));
+            });
+            togglePathAudience();
+        }
+
+        async function deleteLearningPath(id) {
+            if (!confirm('حذف المسار التعليمي؟')) return;
+            await deleteDoc(doc(db, 'learning_paths', id));
+            toast('تم حذف المسار');
+            loadLearningPaths();
+        }
+
+        async function loadTraineeLearningPaths() {
+            const snaps = await getDocs(collection(db, 'learning_paths'));
+            const paths = snaps.docs.map(d => d.data()).filter(p => p.status === 'published' && pathVisibleToTrainee(p));
+            const box = document.getElementById('learning-paths-section');
+            if (!box) return;
+            box.innerHTML = paths.length ? `
+                <div style="font-size:18px;font-weight:800;margin-bottom:12px;">المسارات التعليمية</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+                    ${paths.map(p => `<div class="course-card" onclick="showPathCourses('${esc(p.id)}')">
+                        <div class="course-thumb">${p.thumbnail_url ? `<img src="${esc(p.thumbnail_url)}">` : '<i class="ti ti-route" style="font-size:48px;color:rgba(0,0,0,0.1);"></i>'}</div>
+                        <div class="course-body">
+                            <div class="course-name">${esc(p.title || 'مسار تعليمي')}</div>
+                            <div class="course-desc">${esc(p.description || 'بدون وصف')}</div>
+                            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"><span class="badge">${p.rule === 'sequential' ? 'بالترتيب' : 'مفتوح'}</span><span class="badge"><i class="ti ti-book"></i> ${(p.courseIds || []).length} دورة</span></div>
+                        </div>
+                    </div>`).join('')}
+                </div>` : '';
+        }
+
+        function pathVisibleToTrainee(path) {
+            if (path.visibility !== 'private') return true;
+            const email = (CU?.email || '').trim().toLowerCase();
+            const userGroup = CU?.group || '';
+            const userRegion = CU?.region || '';
+            return (path.audienceUsers || []).includes(email) ||
+                (path.audienceGroups || []).includes(userGroup) ||
+                (path.audienceRegions || []).includes(userRegion);
         }
 
         // ─── API Router ───
@@ -2444,6 +3140,7 @@
                 if (action === 'deleteUser') {
                     const email = p.email.trim().toLowerCase();
                     await hardDeleteUser(email);
+                    await logActivity('delete_user', { email });
                     return { success: true };
                 }
                 if (action === 'setUsersStatus') {
@@ -2472,7 +3169,7 @@
                         const email = u.email.trim().toLowerCase();
                         const foundUser = await findUserByEmail(email);
                         if (foundUser && foundUser.data.status !== 'deleted') { skipped++; continue; }
-                        batch.set(doc(db, 'users', email), { ...u, email, status: 'active', points: 0 });
+                        batch.set(doc(db, 'users', email), { ...u, email, password: String(u.password || '').trim() || randomPassword8(), status: 'active', points: 0 });
                         added++;
                         count++;
                         if (count >= 400) { await batch.commit();
@@ -2480,6 +3177,7 @@
                             count = 0; }
                     }
                     if (count > 0) await batch.commit();
+                    await logActivity('bulk_upload_users', { added, skipped });
                     return { success: true, added, skipped };
                 }
                 if (action === 'changePassword') {
@@ -2506,10 +3204,12 @@
                 if (action === 'addCourse') {
                     const ref = doc(collection(db, 'courses'));
                     await setDoc(ref, { ...p.course, course_id: ref.id });
+                    await logActivity('create_course', { courseId: ref.id, courseName: p.course.course_name || '' });
                     return { success: true };
                 }
                 if (action === 'updateCourse') {
                     await setDoc(doc(db, 'courses', p.courseId), p.updates, { merge: true });
+                    await logActivity('update_course', { courseId: p.courseId, fields: Object.keys(p.updates || {}) });
                     return { success: true };
                 }
                 if (action === 'deleteCourse') {
@@ -2524,6 +3224,7 @@
                     enrollSnap.forEach(d => batch.delete(doc(db, 'enrollments', d.id)));
                     progSnap.forEach(d => batch.delete(doc(db, 'progress', d.id)));
                     await batch.commit();
+                    await logActivity('delete_course', { courseId: p.courseId });
                     return { success: true };
                 }
                 if (action === 'getCourse') {
@@ -2539,14 +3240,17 @@
                 if (action === 'addVideo') {
                     const ref = doc(collection(db, 'videos'));
                     await setDoc(ref, { ...p.video, video_id: ref.id, createdAt: Date.now() });
+                    await logActivity('create_content', { courseId: p.video.course_id, videoId: ref.id, type: p.video.content_type || 'video', title: p.video.title || '' });
                     return { success: true };
                 }
                 if (action === 'updateVideo') {
                     await setDoc(doc(db, 'videos', p.videoId), p.updates, { merge: true });
+                    await logActivity('update_content', { videoId: p.videoId, type: p.updates?.content_type || '' });
                     return { success: true };
                 }
                 if (action === 'deleteVideo') {
                     await deleteDoc(doc(db, 'videos', p.videoId));
+                    await logActivity('delete_content', { videoId: p.videoId });
                     return { success: true };
                 }
                 if (action === 'getGroups') {
@@ -2556,7 +3260,7 @@
                 if (action === 'addGroup') {
                     const ref = doc(collection(db, 'groups'));
                     await setDoc(ref, { group_name: p.groupName, description: p.description, group_id: ref.id,
-                        members: [] });
+                        image_url: p.imageUrl || '', members: [] });
                     return { success: true };
                 }
                 if (action === 'deleteGroup') {
@@ -2597,6 +3301,7 @@
                     const email = p.userEmail.trim().toLowerCase();
                     await setDoc(doc(db, 'enrollments', `${email}_${p.courseId}`), { userEmail: email,
                         courseId: p.courseId, enrolled_at: Date.now() });
+                    await logActivity('enroll_user', { email, courseId: p.courseId });
                     return { success: true };
                 }
                 if (action === 'unenrollUser') {
@@ -2607,6 +3312,7 @@
                     progSnap.forEach(d => batch.delete(d.ref));
                     batch.delete(doc(db, 'certificates', `${email}_${p.courseId}`));
                     await batch.commit();
+                    await logActivity('unenroll_user', { email, courseId: p.courseId });
                     return { success: true };
                 }
                 if (action === 'enrollUsers') {
@@ -2618,6 +3324,7 @@
                             courseId: p.courseId, enrolled_at: Date.now() });
                     }
                     await batch.commit();
+                    await logActivity('enroll_users_bulk', { count: (p.emails || []).length, courseId: p.courseId });
                     return { success: true, message: `تم تسجيل ${p.emails.length} مستخدم في الدورة` };
                 }
                 if (action === 'enrollGroup') {
@@ -2770,7 +3477,7 @@
                         });
                         if (userCourses.length > 0) {
                             summary.push({ email, full_name: user.full_name, region: user.region,
-                                branch: user.branch, supervisor: user.supervisor, courses: userCourses });
+                                branch: user.branch, group: user.group, supervisor: user.supervisor, courses: userCourses });
                         }
                     }
                     return { success: true, summary };
@@ -2786,7 +3493,7 @@
                 if (action === 'saveCertTemplate') {
                     const ref = p.template.id ? doc(db, 'certificate_templates', p.template.id) : doc(collection(db, 'certificate_templates'));
                     await setDoc(ref, { ...p.template, id: ref.id, updated_at: Date.now() }, { merge: true });
-                    return { success: true };
+                    return { success: true, id: ref.id };
                 }
                 if (action === 'deleteCertTemplate') {
                     await deleteDoc(doc(db, 'certificate_templates', p.templateId));
@@ -2821,6 +3528,7 @@
                         const current = uSnap.exists() ? (uSnap.data().points || 0) : 0;
                         await setDoc(uRef, { points: current + parseInt(p.pointsAwarded) }, { merge: true });
                     }
+                    await logActivity('issue_certificate', { email, courseId: p.courseId, courseName: p.courseName || '', templateId: p.templateId || '' });
                     return { success: true };
                 }
                 if (action === 'deleteCertificate') {
@@ -3173,9 +3881,9 @@
         }
 
         function showTab(t) {
-            const tabs = ['dash', 'users', 'courses', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'points'];
+            const tabs = ['dash', 'users', 'courses', 'paths', 'course-detail', 'progress', 'groups', 'certs', 'qa', 'points', 'settings', 'activity', 'announcements'];
             tabs.forEach(x => { const el = document.getElementById('tab-' + x); if (el) el.classList.add('hidden'); });
-            const navs = ['dash', 'users', 'courses', 'progress', 'groups', 'certs', 'qa', 'points'];
+            const navs = ['dash', 'users', 'courses', 'paths', 'progress', 'groups', 'certs', 'qa', 'points', 'settings', 'activity', 'announcements'];
             navs.forEach(x => { const el = document.getElementById('nav-' + x); if (el) el.classList.remove('active'); });
             const te = document.getElementById('tab-' + t);
             if (te) te.classList.remove('hidden');
@@ -3184,11 +3892,15 @@
             if (t === 'dash') loadDash();
             else if (t === 'users') loadUsers();
             else if (t === 'courses') loadCourses();
+            else if (t === 'paths') loadLearningPaths();
             else if (t === 'progress') loadAllProgress();
             else if (t === 'groups') loadGroups();
             else if (t === 'certs') loadAllCerts();
             else if (t === 'qa') loadQA();
             else if (t === 'points') loadPointsTab();
+            else if (t === 'settings') loadSettingsModal(false);
+            else if (t === 'activity') loadActivity();
+            else if (t === 'announcements') loadAnnouncements();
         }
 
         async function loadDash() {
@@ -3201,12 +3913,61 @@
             if (ur.success) {
                 UCACHE = ur.users;
                 const trainees = ur.users.filter(u => u.role === 'trainee');
-                document.getElementById('s-users').textContent = trainees.length;
-                document.getElementById('s-active').textContent = trainees.filter(u => u.status === 'active').length;
+                const su = document.getElementById('s-users');
+                const sa = document.getElementById('s-active');
+                if (su) su.textContent = trainees.length;
+                if (sa) sa.textContent = trainees.filter(u => u.status === 'active').length;
             }
             if (cr.success) { CCACHE = cr.courses;
-                document.getElementById('s-courses').textContent = cr.courses.length; }
-            if (certr.success) document.getElementById('s-certs').textContent = certr.certificates.length;
+                const sc = document.getElementById('s-courses');
+                if (sc) sc.textContent = cr.courses.length; }
+            if (certr.success) {
+                const sce = document.getElementById('s-certs');
+                if (sce) sce.textContent = certr.certificates.length;
+            }
+            try {
+                const [videosSnap, enrollSnap, progressSnap, commentsSnap, qaSnap, surveySnap, templatesSnap] = await Promise.all([
+                    getDocs(collection(db, 'videos')),
+                    getDocs(collection(db, 'enrollments')),
+                    getDocs(collection(db, 'progress')),
+                    getDocs(collection(db, 'comments')),
+                    getDocs(collection(db, 'qa')),
+                    getDocs(collection(db, 'survey_answers')),
+                    getDocs(collection(db, 'certificate_templates'))
+                ]);
+                const users = ur.success ? ur.users : [];
+                const courses = cr.success ? cr.courses : [];
+                const contents = videosSnap.docs.map(d => d.data());
+                const qaRows = qaSnap.docs.map(d => d.data());
+                const stats = [
+                    ['الالتحاقات', enrollSnap.size, '#5b8def'],
+                    ['المتدربون', users.filter(u => (u.role || 'trainee') === 'trainee').length, '#f39c35'],
+                    ['المدربون', users.filter(u => u.role === 'trainer').length, '#55a868'],
+                    ['الأدمن', users.filter(u => u.role === 'admin').length, '#6b6eea'],
+                    ['الدورات', courses.length, '#f2ad00'],
+                    ['الدورات المفتوحة', courses.filter(c => effectiveCourseStatus(c) === 'active').length, '#0f9d58'],
+                    ['الدورات الخاصة', courses.filter(c => c.visibility !== 'public').length, '#7a5cff'],
+                    ['عناصر المحتوى', contents.length, '#5f6caf'],
+                    ['الفيديوهات', contents.filter(v => (v.content_type || 'video') === 'video').length, '#4285f4'],
+                    ['ملفات PDF', contents.filter(v => v.content_type === 'pdf').length, '#d93025'],
+                    ['الامتحانات', contents.filter(v => v.content_type === 'exam').length, '#8e44ad'],
+                    ['السيرفاي', contents.filter(v => v.content_type === 'survey').length + surveySnap.size, '#d650b7'],
+                    ['سجلات التقدم', progressSnap.size, '#45b8c7'],
+                    ['الشهادات', certr.success ? certr.certificates.length : 0, '#5b8def'],
+                    ['قوالب الشهادات', templatesSnap.size, '#b07d62'],
+                    ['أسئلة المتدربين', qaRows.length, '#5b8def'],
+                    ['التعليقات', commentsSnap.size, '#6d4c41']
+                ];
+                html('dash-content-stats', stats.map(([label, value, color]) => `
+                    <div>
+                        <div style="display:flex;align-items:center;gap:6px;color:var(--color-text-secondary);font-size:12px;margin-bottom:4px;">
+                            <span style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;"></span>${label}
+                        </div>
+                        <div style="font-size:24px;font-weight:900;">${value}</div>
+                    </div>`).join(''));
+            } catch (e) {
+                html('dash-content-stats', '<div style="color:var(--color-text-secondary);">تعذر تحميل بعض الإحصائيات الآن.</div>');
+            }
             const recent = (UCACHE.filter(u => u.role === 'trainee').slice(-5)).reverse();
             html('dash-users-tb', recent.map(u =>
                 `<tr><td style="cursor:pointer;color:var(--color-text-info);font-weight:700;" onclick="viewAdminProfile('${u.email}')">${u.full_name || '—'}</td><td style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${u.email}</td><td>${u.region || '—'}</td><td><span class="badge badge-${u.status}">${u.status === 'active' ? 'نشط' : 'موقوف'}</span></td></tr>`
@@ -3219,6 +3980,24 @@
             UCACHE = r.users.map(u => ({ ...u, email: (u.email || '').trim().toLowerCase() }));
             populateUserFilters();
             filterUsers();
+        }
+
+        function toggleUsersMenu() {
+            const menu = document.getElementById('users-submenu');
+            if (!menu) return;
+            menu.classList.toggle('hidden');
+            menu.style.display = menu.classList.contains('hidden') ? 'none' : 'grid';
+        }
+
+        function openUsersRole(view) {
+            const menu = document.getElementById('users-submenu');
+            if (menu) {
+                menu.classList.add('hidden');
+                menu.style.display = 'none';
+            }
+            USER_ROLE_VIEW = view || 'trainee';
+            showTab('users');
+            setUserRoleView(USER_ROLE_VIEW);
         }
 
         function setUserRoleView(view) {
@@ -3279,6 +4058,7 @@
                 </div>
               </td>
               <td style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${esc(u.email)}</td>
+              <td style="font-size:12px;font-family:monospace;direction:ltr;text-align:right;">${esc(u.password || '—')}</td>
               <td style="font-size:13px;">${esc(u.region || '—')}</td>
               <td style="font-size:13px;">${esc(u.group || '—')}</td>
               <td><span class="badge badge-${u.role === 'admin' ? 'admin' : 'trainee'}">${roleLabel(u.role)}</span></td>
@@ -3292,7 +4072,7 @@
                 </div>
               </td>
             </tr>`
-            ).join('') || '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--color-text-secondary)"><i class="ti ti-user-x" style="font-size:32px;display:block;margin-bottom:8px;"></i>لا توجد بيانات</td></tr>');
+            ).join('') || '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--color-text-secondary)"><i class="ti ti-user-x" style="font-size:32px;display:block;margin-bottom:8px;"></i>لا توجد بيانات</td></tr>');
         }
 
         function filterUsers() {
@@ -3395,38 +4175,88 @@
             });
         }
 
-        async function bulkIssueCertificate() {
+        async function bulkAddSelectedToPath() {
             const emails = selectedUserEmails();
             if (!emails.length) return toast('اختار مستخدمين أولا', 'warning');
-            const tr = await call({ action: 'getCertTemplates' });
-            if (!tr.success || !tr.templates.length) return toast('أنشئ قالب شهادة أولا من سيكشن الشهادات', 'warning');
-            openPicker('اختار قالب الشهادة', tr.templates.map(t => ({
-                label: t.name,
-                sub: t.courseId ? 'مرتبط بدورة' : 'يدوي',
-                icon: 'ti-certificate',
-                value: t
-            })), async (template) => {
-                let done = 0;
-                for (const email of emails) {
-                    const u = UCACHE.find(x => x.email === email) || { email };
-                    const courseName = CCACHE.find(c => c.course_id === template.courseId)?.course_name || template.name;
-                    const r = await call({
-                        action: 'issueCertificate',
-                        userEmail: email,
-                        userName: u.full_name || email,
-                        courseId: template.courseId || `manual_${Date.now()}_${email.replace(/[^a-z0-9]/gi, '_')}`,
-                        courseName,
-                        certificateImageUrl: template.imageUrl || '',
-                        certificateBody: template.body || '',
-                        certificateBuilder: template.builder || null,
-                        templateId: template.id,
-                        pointsAwarded: 0
-                    });
-                    if (r.success) done++;
-                }
-                toast(`تم منح ${done} شهادة`);
-                loadAllCerts();
+            const snaps = await getDocs(collection(db, 'learning_paths'));
+            const paths = snaps.docs.map(d => ({ ...d.data(), id: d.id }));
+            if (!paths.length) return toast('لا توجد مسارات تعليمية', 'warning');
+            openPicker('اختار المسار', paths.map(p => ({
+                label: p.title || 'مسار تعليمي',
+                sub: p.visibility === 'private' ? 'خاص' : 'عام',
+                icon: 'ti-route',
+                value: p
+            })), async (path) => {
+                const audienceUsers = [...new Set([...(path.audienceUsers || []), ...emails])];
+                await setDoc(doc(db, 'learning_paths', path.id), { visibility: 'private', audienceUsers, updatedAt: Date.now() }, { merge: true });
+                toast(`تمت إضافة ${emails.length} مستخدم للمسار`);
+                SELECTED_USERS.clear();
+                filterUsers();
             });
+        }
+
+        async function bulkIssueCertificate() {
+            openBulkIssueCertModal();
+        }
+
+        async function openBulkIssueCertModal() {
+            const [ur, tr, cr] = await Promise.all([
+                call({ action: 'getUsers' }),
+                call({ action: 'getCertTemplates' }),
+                call({ action: 'getCourses' })
+            ]);
+            if (ur.success) UCACHE = ur.users;
+            if (tr.success) CERT_TEMPLATE_CACHE = tr.templates;
+            if (cr.success) CCACHE = cr.courses;
+            if (!CERT_TEMPLATE_CACHE.length) return toast('أنشئ قالب شهادة أولا', 'warning');
+            html('bulk-cert-template', CERT_TEMPLATE_CACHE.map(t => `<option value="${esc(t.id)}">${esc(t.name || 'قالب شهادة')}</option>`).join(''));
+            html('bulk-cert-course', '<option value="">بدون ربط بدورة</option>' + CCACHE.map(c => `<option value="${esc(c.course_id)}">${esc(c.course_name)}</option>`).join(''));
+            renderBulkCertUsers();
+            openModal('m-bulk-cert');
+        }
+
+        function renderBulkCertUsers() {
+            const q = (val('bulk-cert-search') || '').toLowerCase();
+            const users = UCACHE.filter(u => u.status !== 'deleted').filter(u =>
+                !q || (u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || (u.employee_id || '').toLowerCase().includes(q)
+            );
+            html('bulk-cert-users', `<table><thead><tr><th style="width:42px"></th><th>الاسم</th><th>الإيميل</th><th>الدور</th></tr></thead><tbody>
+                ${users.map(u => `<tr>
+                    <td><input type="checkbox" class="bulk-cert-user" value="${esc(u.email)}" ${SELECTED_USERS.has(u.email) ? 'checked' : ''}></td>
+                    <td style="font-weight:700;">${esc(u.full_name || '—')}</td>
+                    <td style="font-size:12px;direction:ltr;text-align:right;color:var(--color-text-secondary);">${esc(u.email)}</td>
+                    <td>${roleLabel(u.role)}</td>
+                </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:18px;color:var(--color-text-secondary);">لا توجد نتائج</td></tr>'}
+            </tbody></table>`);
+        }
+
+        async function submitBulkIssueCert() {
+            const emails = [...document.querySelectorAll('.bulk-cert-user:checked')].map(i => i.value);
+            const template = CERT_TEMPLATE_CACHE.find(t => t.id === val('bulk-cert-template'));
+            const courseId = val('bulk-cert-course');
+            const course = CCACHE.find(c => c.course_id === courseId);
+            if (!emails.length) return toast('اختار مستخدم واحد على الأقل', 'warning');
+            if (!template) return toast('اختار قالب شهادة', 'warning');
+            let done = 0;
+            for (const email of emails) {
+                const u = UCACHE.find(x => x.email === email) || { email };
+                const r = await call({
+                    action: 'issueCertificate',
+                    userEmail: email,
+                    userName: u.full_name || email,
+                    courseId: courseId || `manual_${template.id}_${Date.now()}_${email.replace(/[^a-z0-9]/gi, '_')}`,
+                    courseName: course?.course_name || template.name || 'شهادة',
+                    certificateImageUrl: template.imageUrl || template.builder?.background || '',
+                    certificateBody: template.body || '',
+                    certificateBuilder: template.builder || null,
+                    templateId: template.id,
+                    pointsAwarded: 0
+                });
+                if (r.success) done++;
+            }
+            closeModal('m-bulk-cert');
+            toast(`تم منح ${done} شهادة`);
+            loadAllCerts();
         }
 
         function exportVisibleUsers() {
@@ -3554,7 +4384,7 @@
                 employee_id: r[0] || '',
                 full_name: r[1] || '',
                 email: r[2]?.trim().toLowerCase() || '',
-                password: r[3] || '',
+                password: String(r[3] || '').trim() || randomPassword8(),
                 job_description: r[4] || '',
                 phone: r[5] || '',
                 title: r[6] || '',
@@ -3606,14 +4436,14 @@
                     '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-secondary)"><i class="ti ti-books" style="font-size:48px;display:block;margin-bottom:12px;opacity:0.5;"></i>لا توجد دورات</div>';
                 return; }
             grid.innerHTML = courses.map(c =>
-                `<div class="course-card" onclick="openCourseDetail('${c.course_id}')">
+                `<div class="course-card" onclick="openCourseActions('${c.course_id}')">
               <div class="course-thumb">
                 ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" onerror="this.style.display='none'">` : ''}
                 <i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,0.1);position:relative;z-index:1;"></i>
               </div>
               <div class="course-body">
-                <div class="course-name">${c.course_name}</div>
-                <div class="course-desc">${c.description || 'لا يوجد وصف'}</div>
+                <div class="course-name">${esc(c.course_name)}</div>
+                <div class="course-desc">${esc(c.description || 'لا يوجد وصف')}</div>
                 <div class="course-meta-row">
                   <span><i class="ti ti-calendar-play"></i> ${c.start_date || 'بدون بداية'}</span>
                   <span><i class="ti ti-calendar-off"></i> ${c.end_date || 'بدون نهاية'}</span>
@@ -3629,18 +4459,20 @@
             ).join('');
         }
 
-        function openAddCourseModal() {
+        async function openAddCourseModal() {
             EDITING_COURSE_ID = null;
             ['nc-name','nc-desc','nc-thumb','nc-start','nc-end','nc-release','nc-certimg'].forEach(id => set(id, ''));
             set('nc-status', 'active');
             set('nc-visibility', 'public');
             set('nc-prereq', '');
             set('nc-cert', 'no');
+            await loadCourseCertTemplateOptions('');
             toggleCertImg();
+            updateCourseThumbPreview();
             openModal('m-add-course');
         }
 
-        function openEditCourse() {
+        async function openEditCourse() {
             const c = CCACHE.find(x => x.course_id === CCI);
             if (!c) return toast('الدورة غير موجودة', 'error');
             EDITING_COURSE_ID = c.course_id;
@@ -3655,12 +4487,15 @@
             set('nc-prereq', c.prerequisite || '');
             set('nc-cert', c.certificate_enabled || 'no');
             set('nc-certimg', c.certificate_image_url || '');
+            await loadCourseCertTemplateOptions(c.certificate_template_id || '');
             toggleCertImg();
+            updateCourseThumbPreview();
             openModal('m-add-course');
         }
 
         function toggleCertImg() {
             const f = document.getElementById('nc-certimg-f');
+            if (!f) return;
             if (val('nc-cert') === 'yes') { f.style.display = 'block';
                 f.style.animation = 'fadeUp 0.3s ease'; } else { f.style.display = 'none'; }
         }
@@ -3673,7 +4508,21 @@
                 `<option value="${c.course_id}">${c.course_name}</option>`).join('');
         }
 
+        async function loadCourseCertTemplateOptions(selectedId = '') {
+            const sel = document.getElementById('nc-cert-template');
+            if (!sel) return;
+            if (!CERT_TEMPLATE_CACHE.length) {
+                const tr = await call({ action: 'getCertTemplates' });
+                if (tr.success) CERT_TEMPLATE_CACHE = tr.templates;
+            }
+            sel.innerHTML = '<option value="">— اختر قالب شهادة —</option>' + CERT_TEMPLATE_CACHE.map(t =>
+                `<option value="${esc(t.id)}">${esc(t.name || 'قالب شهادة')}</option>`).join('');
+            sel.value = selectedId || '';
+        }
+
         async function submitAddCourse() {
+            const certTemplateId = val('nc-cert-template');
+            const certTemplate = CERT_TEMPLATE_CACHE.find(t => t.id === certTemplateId);
             const course = {
                 course_name: val('nc-name'),
                 description: val('nc-desc'),
@@ -3682,7 +4531,10 @@
                 end_date: val('nc-end'),
                 release_date: val('nc-release'),
                 certificate_enabled: val('nc-cert'),
-                certificate_image_url: val('nc-certimg'),
+                certificate_template_id: certTemplateId || '',
+                certificate_image_url: certTemplate ? (certTemplate.imageUrl || '') : val('nc-certimg'),
+                certificate_builder: certTemplate ? (certTemplate.builder || null) : null,
+                certificate_body: certTemplate ? (certTemplate.body || '') : '',
                 status: val('nc-status'),
                 visibility: val('nc-visibility'),
                 prerequisite: val('nc-prereq') || ''
@@ -3722,12 +4574,22 @@
                 openModal('m-add-video');
                 return;
             }
+            if (COURSE_ITEM_TYPE === 'pdf') {
+                ['pdf-id','pdf-title','pdf-desc','pdf-url'].forEach(id => set(id, ''));
+                set('pdf-lock', 'yes');
+                openModal('m-add-pdf');
+                return;
+            }
+            if (COURSE_ITEM_TYPE === 'survey') {
+                openSurveyItemEditor();
+                return;
+            }
             set('ci-type', COURSE_ITEM_TYPE);
-            set('ci-name', COURSE_ITEM_TYPE === 'exam' ? 'امتحان' : 'سؤال');
-            set('ci-pass', COURSE_ITEM_TYPE === 'exam' ? 1 : 1);
+            set('ci-name', COURSE_ITEM_TYPE === 'exam' ? 'امتحان' : COURSE_ITEM_TYPE === 'survey' ? 'سيرفاي' : 'سؤال');
+            set('ci-pass', COURSE_ITEM_TYPE === 'survey' ? 0 : 1);
             set('ci-minutes', COURSE_ITEM_TYPE === 'exam' ? 30 : 0);
             set('ci-lock', 'yes');
-            document.getElementById('ci-title').innerHTML = COURSE_ITEM_TYPE === 'exam' ? '<i class="ti ti-clipboard-check"></i> إضافة امتحان' : '<i class="ti ti-help-circle"></i> إضافة سؤال';
+            document.getElementById('ci-title').innerHTML = COURSE_ITEM_TYPE === 'exam' ? '<i class="ti ti-clipboard-check"></i> إضافة امتحان' : COURSE_ITEM_TYPE === 'survey' ? '<i class="ti ti-clipboard-list"></i> إضافة سيرفاي' : '<i class="ti ti-help-circle"></i> إضافة سؤال';
             html('ci-questions', '');
             courseItemAddQuestion();
             openModal('m-course-item');
@@ -3735,6 +4597,7 @@
 
         function courseItemAddQuestion(q = {}) {
             const idx = document.querySelectorAll('.ci-question').length;
+            const isSurvey = val('ci-type') === 'survey';
             const wrap = document.createElement('div');
             wrap.className = 'ci-question glass-panel';
             wrap.style.padding = '12px';
@@ -3742,8 +4605,7 @@
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
                     <strong style="flex:1;">سؤال ${idx + 1}</strong>
                     <select class="ci-q-type" style="width:160px;" onchange="renderCourseQuestionOptions(this.closest('.ci-question'))">
-                        <option value="choice">اختيارات</option>
-                        <option value="truefalse">صح / غلط</option>
+                        ${isSurvey ? '<option value="nps">NPS 0-10</option><option value="text">إجابة نصية</option>' : '<option value="choice">اختيارات</option><option value="truefalse">صح / غلط</option>'}
                     </select>
                     <button class="icon-btn danger" onclick="this.closest('.ci-question').remove()"><i class="ti ti-trash"></i></button>
                 </div>
@@ -3757,6 +4619,14 @@
         function renderCourseQuestionOptions(wrap, q = {}) {
             const type = wrap.querySelector('.ci-q-type').value;
             const box = wrap.querySelector('.ci-q-options');
+            if (type === 'nps') {
+                box.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);">المتدرب هيجاوب من 0 إلى 10، والنتيجة تدخل في حساب NPS.</div>';
+                return;
+            }
+            if (type === 'text') {
+                box.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);">المتدرب هيكتب إجابة نصية مفتوحة.</div>';
+                return;
+            }
             if (type === 'truefalse') {
                 box.innerHTML = `<div class="field"><label>الإجابة الصحيحة</label><select class="ci-q-correct"><option value="true">صح</option><option value="false">غلط</option></select></div>`;
                 box.querySelector('.ci-q-correct').value = q.correct ?? 'true';
@@ -3778,10 +4648,12 @@
             return [...document.querySelectorAll('.ci-question')].map(wrap => {
                 const type = wrap.querySelector('.ci-q-type').value;
                 const text = wrap.querySelector('.ci-q-text').value.trim();
+                if (type === 'nps') return { type, text, options: [] };
+                if (type === 'text') return { type, text, options: [] };
                 if (type === 'truefalse') return { type, text, options: ['صح', 'غلط'], correct: wrap.querySelector('.ci-q-correct').value };
                 const options = [...wrap.querySelectorAll('.ci-q-opt')].map(i => i.value.trim()).filter(Boolean);
                 return { type, text, options, correctIndex: parseInt(wrap.querySelector('.ci-q-correct').value) || 0 };
-            }).filter(q => q.text && q.options.length >= 2);
+            }).filter(q => q.text && (q.type === 'nps' || q.type === 'text' || q.options.length >= 2));
         }
 
         async function saveCourseItem() {
@@ -3792,9 +4664,9 @@
             const item = {
                 course_id: CCI,
                 content_type: val('ci-type'),
-                title: val('ci-name') || (val('ci-type') === 'exam' ? 'امتحان' : 'سؤال'),
+                title: val('ci-name') || (val('ci-type') === 'exam' ? 'امتحان' : val('ci-type') === 'survey' ? 'سيرفاي' : 'سؤال'),
                 questions,
-                pass_score: Math.max(1, parseInt(val('ci-pass')) || 1),
+                pass_score: val('ci-type') === 'survey' ? 0 : Math.max(1, parseInt(val('ci-pass')) || 1),
                 time_minutes: parseInt(val('ci-minutes')) || 0,
                 require_previous: val('ci-lock'),
                 progress_mode: 'manual',
@@ -3823,6 +4695,131 @@
                 call({ action: 'updateVideo', videoId: a.video_id, updates: { order: b.order ?? j + 1 } }),
                 call({ action: 'updateVideo', videoId: b.video_id, updates: { order: a.order ?? i + 1 } })
             ]);
+            openCourseDetail(CCI);
+        }
+
+        function openCourseActions(courseId) {
+            COURSE_ACTION_ID = courseId;
+            CCI = courseId;
+            const c = CCACHE.find(x => x.course_id === courseId);
+            document.getElementById('course-actions-title').textContent = c ? c.course_name : 'اختيارات الدورة';
+            html('course-actions-meta', c ? `
+                <span class="badge ${effectiveCourseStatus(c) === 'active' ? 'badge-active' : 'badge-suspended'}">${effectiveCourseStatus(c) === 'active' ? 'مفتوحة' : 'مسودة'}</span>
+                <span class="badge">${c.visibility === 'public' ? 'عامة' : 'خاصة'}</span>
+                <span class="badge"><i class="ti ti-users"></i> ${c._enrolled_count || 0} مسجل</span>
+            ` : '');
+            openModal('m-course-actions');
+        }
+
+        function openCourseEditFromActions() {
+            closeModal('m-course-actions');
+            openCourseDetail(COURSE_ACTION_ID || CCI);
+        }
+
+        async function openCoursePreviewFromActions() {
+            closeModal('m-course-actions');
+            CCI = COURSE_ACTION_ID || CCI;
+            await openAdminCourseContentPreview();
+        }
+
+        async function openAdminCourseContentPreview() {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            const course = CCACHE.find(c => c.course_id === CCI) || (await call({ action: 'getCourse', courseId: CCI })).course;
+            const vr = await call({ action: 'getVideos', courseId: CCI });
+            ADMIN_PREVIEW_ITEMS = vr.success ? vr.videos : [];
+            document.getElementById('admin-preview-title').textContent = course?.course_name || 'محتوى الدورة';
+            html('admin-preview-list', ADMIN_PREVIEW_ITEMS.length ? ADMIN_PREVIEW_ITEMS.map((item, i) => `
+                <button id="admin-preview-item-${i}" style="justify-content:flex-start;text-align:right;padding:12px;" onclick="playAdminPreviewItem(${i})">
+                    <i class="ti ${contentTypeIcon(item)}"></i>
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${esc(item.title || contentTypeLabel(item))}</span>
+                </button>`).join('') :
+                '<div style="padding:16px;color:var(--color-text-secondary);text-align:center;">لا يوجد محتوى في هذه الدورة</div>');
+            openModal('m-admin-content-preview');
+            if (ADMIN_PREVIEW_ITEMS.length) playAdminPreviewItem(0);
+            else html('admin-preview-body', '');
+        }
+
+        async function playAdminPreviewItem(index) {
+            const item = ADMIN_PREVIEW_ITEMS[index];
+            if (!item) return;
+            document.querySelectorAll('[id^="admin-preview-item-"]').forEach((el, i) => {
+                el.classList.toggle('primary', i === index);
+            });
+            html('admin-preview-body', await renderAdminPreviewItem(item));
+        }
+
+        async function renderAdminPreviewItem(item) {
+            const t = item.content_type || 'video';
+            if (t === 'video') {
+                const id = driveId(item.video_url || '');
+                const previewUrl = id ? `https://drive.google.com/file/d/${id}/preview` : item.video_url;
+                const openUrl = id ? `https://drive.google.com/file/d/${id}/view` : item.video_url;
+                return `<iframe width="100%" height="520" src="${previewUrl || ''}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <div style="padding:10px;background:var(--color-background-secondary);"><a href="${openUrl || '#'}" target="_blank" style="color:var(--color-text-info);font-weight:700;">فتح في Drive</a></div>`;
+            }
+            if (t === 'pdf') {
+                const url = item.file_url || item.video_url || '';
+                const id = driveId(url);
+                const previewUrl = id ? `https://drive.google.com/file/d/${id}/preview` : url;
+                return `<iframe width="100%" height="560" src="${previewUrl || ''}" frameborder="0"></iframe>`;
+            }
+            if (t === 'survey') {
+                const snap = await getDocs(query(collection(db, 'survey_answers'), where('courseId', '==', CCI), where('videoId', '==', item.video_id)));
+                const rows = snap.docs.map(d => d.data());
+                const answers = rows.flatMap(r => r.answers || []).filter(a => a.type === 'nps');
+                const promoters = answers.filter(a => Number(a.value) >= 9).length;
+                const passives = answers.filter(a => Number(a.value) >= 7 && Number(a.value) <= 8).length;
+                const detractors = answers.filter(a => Number(a.value) <= 6).length;
+                const nps = answers.length ? Math.round(((promoters - detractors) / answers.length) * 100) : 0;
+                return `<div style="padding:22px;">
+                    <div style="font-size:22px;font-weight:900;margin-bottom:14px;">${esc(item.title || 'سيرفاي')}</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+                        <div class="stat-card"><div class="stat-num">${nps}</div><div class="stat-label">NPS</div></div>
+                        <div class="stat-card"><div class="stat-num">${detractors}</div><div class="stat-label">Detractors</div></div>
+                        <div class="stat-card"><div class="stat-num">${passives}</div><div class="stat-label">Passives</div></div>
+                        <div class="stat-card"><div class="stat-num">${promoters}</div><div class="stat-label">Promoters</div></div>
+                    </div>
+                    ${(item.questions || []).map((q, i) => `<div class="glass-panel" style="padding:12px;margin-bottom:8px;"><strong>${i + 1}. ${esc(q.text)}</strong><div style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;">${q.type === 'text' ? 'إجابة نصية' : 'NPS 0-10'} - ${q.category === 'trainer' ? 'المدرب' : q.category === 'academy' ? 'الأكاديمية' : 'الدورة'}</div></div>`).join('')}
+                </div>`;
+            }
+            return `<div style="padding:22px;">
+                <div style="font-size:22px;font-weight:900;margin-bottom:8px;">${esc(item.title || contentTypeLabel(item))}</div>
+                <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;">${contentTypeLabel(item)}${item.time_minutes ? ` - ${item.time_minutes} دقيقة` : ''}${item.pass_score ? ` - درجة النجاح ${item.pass_score}` : ''}</div>
+                ${(item.questions || []).map((q, i) => `<div class="glass-panel" style="padding:12px;margin-bottom:10px;">
+                    <strong>${i + 1}. ${esc(q.text)}</strong>
+                    <div style="margin-top:8px;display:grid;gap:6px;">${(q.options || []).map((opt, oi) => `<div class="quiz-option" style="${(q.type === 'truefalse' && String(q.correct) === (oi === 0 ? 'true' : 'false')) || parseInt(q.correctIndex, 10) === oi ? 'border-color:var(--color-text-success);' : ''}">${esc(opt)}</div>`).join('')}</div>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        async function deleteCourseFromActions() {
+            closeModal('m-course-actions');
+            CCI = COURSE_ACTION_ID || CCI;
+            await deleteCourse();
+        }
+
+        async function openManualProgressModal() {
+            CCI = COURSE_ACTION_ID || CCI;
+            const pr = await call({ action: 'getCourseProgress', courseId: CCI });
+            const sel = document.getElementById('manual-progress-user');
+            const rows = pr.success ? pr.progress : [];
+            sel.innerHTML = rows.length ? rows.map(p => `<option value="${esc(p.email)}">${esc(p.full_name || p.email)} - ${Math.round(p.progress_percent || 0)}%</option>`).join('') :
+                '<option value="">لا يوجد متدربين مسجلين</option>';
+            closeModal('m-course-actions');
+            openModal('m-manual-progress');
+        }
+
+        async function markManualCourseComplete() {
+            const email = val('manual-progress-user');
+            if (!email) return toast('اختر متدرب أولا', 'warning');
+            const vr = await call({ action: 'getVideos', courseId: CCI });
+            if (!vr.success || !vr.videos.length) return toast('لا يوجد محتوى في الدورة', 'warning');
+            for (const item of vr.videos) {
+                await call({ action: 'saveProgress', userEmail: email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
+            }
+            await logActivity('manual_complete_course', { email, courseId: CCI, items: vr.videos.length });
+            closeModal('m-manual-progress');
+            toast('تم اعتماد إكمال الدورة للمتدرب');
             openCourseDetail(CCI);
         }
 
@@ -3909,6 +4906,20 @@
             const vr = await call({ action: 'getVideos', courseId: CCI });
             const v = vr.success ? vr.videos.find(x => x.video_id === videoId) : null;
             if (!v) return toast('المحتوى غير موجود', 'error');
+            if ((v.content_type || 'video') === 'pdf') {
+                EDITING_VIDEO_ID = videoId;
+                set('pdf-id', videoId);
+                set('pdf-title', v.title || '');
+                set('pdf-desc', v.description || '');
+                set('pdf-url', v.file_url || v.video_url || '');
+                set('pdf-lock', v.require_previous || 'yes');
+                openModal('m-add-pdf');
+                return;
+            }
+            if ((v.content_type || 'video') === 'survey') {
+                openSurveyItemEditor(v);
+                return;
+            }
             if ((v.content_type || 'video') !== 'video') {
                 COURSE_ITEM_TYPE = v.content_type;
                 set('ci-type', v.content_type);
@@ -3947,6 +4958,32 @@
             if (r.success) { toast('تم تعديل الفيديو');
                 closeModal('m-edit-video');
                 openCourseDetail(CCI); } else toast(r.error, 'error');
+        }
+
+        async function submitPdfItem() {
+            const existing = await call({ action: 'getVideos', courseId: CCI });
+            const oldItem = existing.success && EDITING_VIDEO_ID ? existing.videos.find(x => x.video_id === EDITING_VIDEO_ID) : null;
+            const item = {
+                course_id: CCI,
+                content_type: 'pdf',
+                title: val('pdf-title'),
+                description: val('pdf-desc'),
+                file_url: val('pdf-url'),
+                video_url: val('pdf-url'),
+                require_previous: val('pdf-lock'),
+                progress_mode: 'manual',
+                order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now())
+            };
+            if (!item.title || !item.file_url) return toast('العنوان ورفع ملف PDF مطلوبان', 'warning');
+            const r = EDITING_VIDEO_ID ?
+                await call({ action: 'updateVideo', videoId: EDITING_VIDEO_ID, updates: item }) :
+                await call({ action: 'addVideo', video: item });
+            if (r.success) {
+                closeModal('m-add-pdf');
+                EDITING_VIDEO_ID = null;
+                toast('تم حفظ ملف PDF');
+                openCourseDetail(CCI);
+            } else toast(r.error, 'error');
         }
 
         async function submitVideo(close) {
@@ -4032,6 +5069,38 @@
                 openCourseDetail(CCI); } else toast(r.error, 'error');
         }
 
+        function downloadEnrollTemplate() {
+            if (!window.XLSX) return toast('مكتبة Excel لم تكتمل بعد', 'warning');
+            const rows = [
+                { email: 'trainee1@example.com' },
+                { email: 'trainee2@example.com' }
+            ];
+            const ws = window.XLSX.utils.json_to_sheet(rows);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, 'enroll');
+            window.XLSX.writeFile(wb, 'deraah_course_enrollment_template.xlsx');
+        }
+
+        async function submitEnrollExcel() {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            const file = document.getElementById('enroll-bulk-file')?.files?.[0];
+            if (!file) return toast('اختار ملف Excel أولا', 'warning');
+            if (!window.XLSX) return toast('مكتبة Excel لم تكتمل بعد', 'warning');
+            const data = await file.arrayBuffer();
+            const wb = window.XLSX.read(data);
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = window.XLSX.utils.sheet_to_json(ws, { header: 1 });
+            const emails = rows.slice(1).map(r => String(r[0] || '').trim().toLowerCase()).filter(Boolean);
+            if (!emails.length) return toast('لا توجد إيميلات في الملف', 'warning');
+            const r = await call({ action: 'enrollUsers', emails, courseId: CCI });
+            if (r.success) {
+                document.getElementById('enroll-bulk-file').value = '';
+                closeModal('m-enroll');
+                toast(r.message || `تم تسجيل ${emails.length} متدرب`);
+                openCourseDetail(CCI);
+            } else toast(r.error, 'error');
+        }
+
         async function exportCourseProgress() {
             toast('جاري التصدير...', 'info');
             const r = await call({ action: 'getCourseProgress', courseId: CCI });
@@ -4055,19 +5124,92 @@
         }
 
         async function loadAllProgress() {
-            const courses = await call({ action: 'getCourses' });
+            const [courses, all] = await Promise.all([
+                call({ action: 'getCourses' }),
+                call({ action: 'getAllProgress' })
+            ]);
             if (!courses.success) return toast(courses.error, 'error');
+            if (!all.success) return toast(all.error || 'تعذر تحميل التقدم', 'error');
             CCACHE = courses.courses;
+            ALL_PROGRESS_ROWS = [];
+            all.summary.forEach(u => {
+                (u.courses || []).forEach(c => {
+                    ALL_PROGRESS_ROWS.push({
+                        email: u.email,
+                        full_name: u.full_name,
+                        region: u.region || '',
+                        branch: u.branch || '',
+                        group: u.group || '',
+                        supervisor: u.supervisor || '',
+                        course_id: c.course_id,
+                        course_name: c.course_name,
+                        progress_percent: c.progress_percent || 0,
+                        completed: !!c.completed
+                    });
+                });
+            });
             const grid = document.getElementById('progress-courses-grid');
             grid.innerHTML = CCACHE.length ? CCACHE.map(c =>
-                `<div class="card" style="cursor:pointer;padding:1rem;" onclick="loadProgressCourse('${c.course_id}')">
+                `<div class="card" style="cursor:pointer;padding:1rem;" onclick="setProgressCourseFilter('${c.course_id}')">
                     <div style="font-weight:700;margin-bottom:6px;">${esc(c.course_name)}</div>
-                    <div style="font-size:13px;color:var(--color-text-secondary);">${esc(c.description || 'اضغط لعرض المتدربين والتقدم')}</div>
+                    <div style="font-size:13px;color:var(--color-text-secondary);">${esc(c.description || 'اضغط للفلترة بهذه الدورة')}</div>
                  </div>`).join('') :
                 '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--color-text-secondary)">لا توجد دورات</div>';
-            html('progress-tb', '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">اختر دورة من الأعلى لعرض التقدم</td></tr>');
+            populateProgressFilters();
+            renderAllProgressTable();
             const title = document.getElementById('progress-selected-title');
-            title.style.display = 'none';
+            title.style.display = 'block';
+            title.innerHTML = '<i class="ti ti-chart-bar"></i> التقدم العام';
+        }
+
+        function populateProgressFilters() {
+            const fill = (id, values, label) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const cur = el.value;
+                el.innerHTML = `<option value="">${label}</option>` + values.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+                if (values.includes(cur)) el.value = cur;
+            };
+            fill('progress-filter-course', CCACHE.map(c => c.course_id), 'كل الدورات');
+            const courseSel = document.getElementById('progress-filter-course');
+            if (courseSel) {
+                const cur = courseSel.value;
+                courseSel.innerHTML = '<option value="">كل الدورات</option>' + CCACHE.map(c => `<option value="${esc(c.course_id)}">${esc(c.course_name)}</option>`).join('');
+                courseSel.value = CCACHE.some(c => c.course_id === cur) ? cur : '';
+            }
+            fill('progress-filter-region', [...new Set(ALL_PROGRESS_ROWS.map(r => r.region).filter(Boolean))].sort(), 'كل الأقاليم');
+            fill('progress-filter-group', [...new Set(ALL_PROGRESS_ROWS.map(r => r.group).filter(Boolean))].sort(), 'كل الجروبات');
+            fill('progress-filter-supervisor', [...new Set(ALL_PROGRESS_ROWS.map(r => r.supervisor).filter(Boolean))].sort(), 'كل المشرفين');
+        }
+
+        function setProgressCourseFilter(courseId) {
+            set('progress-filter-course', courseId || '');
+            renderAllProgressTable();
+        }
+
+        function renderAllProgressTable() {
+            const courseId = val('progress-filter-course');
+            const region = val('progress-filter-region');
+            const group = val('progress-filter-group');
+            const supervisor = val('progress-filter-supervisor');
+            let rows = ALL_PROGRESS_ROWS.filter(r =>
+                (!courseId || r.course_id === courseId) &&
+                (!region || r.region === region) &&
+                (!group || r.group === group) &&
+                (!supervisor || r.supervisor === supervisor)
+            );
+            html('progress-tb', rows.length ? rows.map(u =>
+                `<tr>
+              <td style="font-weight:700;cursor:pointer;color:var(--color-text-info);" onclick="viewAdminProfile('${u.email}')">${esc(u.full_name || '—')}</td>
+              <td style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${esc(u.email)}</td>
+              <td>${esc(u.course_name || '—')}</td>
+              <td style="font-size:13px;">${esc(u.region || '—')}</td>
+              <td style="font-size:13px;">${esc(u.group || '—')}</td>
+              <td style="font-size:13px;">${esc(u.supervisor || '—')}</td>
+              <td><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(u.progress_percent)}%;background:${u.completed ? '#0f9d58' : '#1a73e8'};"></div></div><div style="font-size:12px;font-weight:700;margin-top:4px;">${Math.round(u.progress_percent)}%</div></td>
+              <td><span class="badge badge-${u.completed ? 'active' : 'suspended'}">${u.completed ? 'مكتمل' : 'قيد التقدم'}</span></td>
+            </tr>`).join('') :
+            '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">لا توجد بيانات مطابقة للفلاتر</td></tr>');
         }
 
         async function loadProgressCourse(courseId) {
@@ -4128,7 +5270,7 @@
                 return; }
             grid.innerHTML = r.groups.map(g =>
                 `<div class="card" style="display:flex;align-items:center;gap:12px;padding:1rem;cursor:pointer;" onclick="openGroupMembers('${g.group_id}','${esc(g.group_name)}')">
-              <div style="width:48px;height:48px;border-radius:12px;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-users" style="color:var(--color-text-info);font-size:24px;"></i></div>
+              <div style="width:48px;height:48px;border-radius:12px;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${g.image_url ? `<img src="${esc(g.image_url)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="ti ti-users" style="color:var(--color-text-info);font-size:24px;"></i>'}</div>
               <div style="flex:1;min-width:0;"><div style="font-size:16px;font-weight:700;">${g.group_name}</div><div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">${g.description || 'بدون وصف'} (${(g.members || []).length} عضو)</div></div>
               <button class="icon-btn sm" style="background:#e3f2fd;color:#0d47a1;" onclick="event.stopPropagation();openGroupMembers('${g.group_id}','${esc(g.group_name)}')"><i class="ti ti-users"></i></button>
               <button class="icon-btn danger" onclick="event.stopPropagation();doDeleteGroup('${g.group_id}')"><i class="ti ti-trash"></i></button>
@@ -4138,8 +5280,9 @@
         }
 
         async function submitAddGroup() {
-            const r = await call({ action: 'addGroup', groupName: val('ng-name'), description: val('ng-desc') });
+            const r = await call({ action: 'addGroup', groupName: val('ng-name'), description: val('ng-desc'), imageUrl: val('ng-img') });
             if (r.success) { closeModal('m-add-group');
+                ['ng-name','ng-desc','ng-img'].forEach(id => set(id, ''));
                 toast('تم إنشاء المجموعة');
                 loadGroups(); } else toast(r.error, 'error');
         }
@@ -4415,16 +5558,23 @@
             '<tr><td colspan="5" style="text-align:center;padding:3rem;color:var(--color-text-secondary)"><i class="ti ti-certificate" style="font-size:48px;display:block;margin-bottom:12px;opacity:0.5;"></i>لا توجد شهادات</td></tr>');
         }
 
+        function certLinkedCourseIds(template) {
+            const ids = Array.isArray(template?.courseIds) ? template.courseIds.filter(Boolean) : [];
+            if (template?.courseId && !ids.includes(template.courseId)) ids.push(template.courseId);
+            return ids;
+        }
+
         function renderCertTemplates() {
             const el = document.getElementById('cert-template-list');
             if (!el) return;
             el.innerHTML = CERT_TEMPLATE_CACHE.length ? CERT_TEMPLATE_CACHE.map(t =>
                 `<div class="card" style="padding:1rem;">
                     <div style="font-weight:700;margin-bottom:6px;">${esc(t.name || 'قالب شهادة')}</div>
-                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${t.courseId ? `مرتبط بدورة: ${esc(CCACHE.find(c => c.course_id === t.courseId)?.course_name || t.courseId)}` : 'غير مرتبط بدورة'}</div>
-                    ${(t.builder?.background || t.imageUrl) ? `<img src="${esc(t.builder?.background || t.imageUrl)}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;">` : ''}
+                    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${certLinkedCourseIds(t).length ? `مرتبطة بـ ${certLinkedCourseIds(t).length} دورة` : 'غير مرتبطة بدورة'}</div>
+                    ${(t.builder?.background || t.imageUrl) ? `<img src="${esc(t.builder?.background || t.imageUrl)}" onclick="openCertLinker('${t.id}')" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;cursor:pointer;">` : `<div onclick="openCertLinker('${t.id}')" style="height:80px;border-radius:8px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;margin-bottom:10px;cursor:pointer;color:var(--color-text-secondary);"><i class="ti ti-certificate" style="font-size:28px;"></i></div>`}
                     <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">${(t.builder?.elements || []).length || 0} عنصر تصميم</div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <button class="sm primary" onclick="openCertLinker('${t.id}')"><i class="ti ti-link"></i>ربط الدورات</button>
                         <button class="sm" onclick="openCertTemplateModal('${t.id}')"><i class="ti ti-edit"></i>تعديل</button>
                         <button class="sm danger" onclick="deleteCertTemplate('${t.id}')"><i class="ti ti-trash"></i>حذف</button>
                     </div>
@@ -4454,6 +5604,7 @@
                 id: val('ct-id') || undefined,
                 name: val('ct-name').trim(),
                 courseId: val('ct-course') || '',
+                courseIds: val('ct-course') ? [val('ct-course')] : [],
                 imageUrl: CERT_BUILDER.background || val('ct-img'),
                 body: val('ct-body') || 'تشهد Deraah Academy بأن {name} قد أتم {course} بتاريخ {date}',
                 builder: CERT_BUILDER
@@ -4474,6 +5625,121 @@
                 toast('تم حذف القالب');
                 loadAllCerts();
             } else toast(r.error, 'error');
+        }
+
+        async function openCertLinker(templateId) {
+            const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
+            if (!t) return toast('قالب الشهادة غير موجود', 'error');
+            const courses = await call({ action: 'getCourses' });
+            if (courses.success) CCACHE = courses.courses;
+            set('cert-linker-id', templateId);
+            document.getElementById('cert-linker-title').textContent = `ربط "${t.name || 'قالب شهادة'}" بالدورات`;
+            CERT_LINKER_IDS = certLinkedCourseIds(t);
+            renderCertLinkerPreview();
+            openModal('m-cert-linker');
+        }
+
+        function toggleCertLinkedCourse(courseId) {
+            if (CERT_LINKER_IDS.includes(courseId)) CERT_LINKER_IDS = CERT_LINKER_IDS.filter(id => id !== courseId);
+            else CERT_LINKER_IDS.push(courseId);
+            renderCertLinkerPreview();
+        }
+
+        function renderCertCoursePill(c, linked) {
+            return `<button class="sm ${linked ? 'primary' : ''}" style="justify-content:flex-start;text-align:right;width:100%;white-space:normal;" onclick="toggleCertLinkedCourse('${esc(c.course_id)}')">
+                <i class="ti ${linked ? 'ti-link' : 'ti-plus'}"></i>
+                <span>${esc(c.course_name)}</span>
+            </button>`;
+        }
+
+        function renderCertLinkerPreview() {
+            const templateId = val('cert-linker-id');
+            const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
+            if (!t) return;
+            const ids = CERT_LINKER_IDS;
+            html('cert-linker-all', CCACHE.filter(c => !ids.includes(c.course_id)).map(c => renderCertCoursePill(c, false)).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px;">كل الدورات مربوطة</div>');
+            html('cert-linker-linked', CCACHE.filter(c => ids.includes(c.course_id)).map(c => renderCertCoursePill(c, true)).join('') || '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px;">لا توجد دورات مربوطة</div>');
+            const course = CCACHE.find(c => c.course_id === ids[0]) || CCACHE[0] || {};
+            const previewName = 'اسم المتدرب';
+            const previewCourse = course.course_name || 'اسم الدورة';
+            html('cert-linker-preview', `
+                <div style="font-weight:800;margin-bottom:10px;">معاينة الشهادة مع الدورة المختارة</div>
+                <div style="display:flex;justify-content:center;">${renderCertificateCanvas(t.builder || normalizeCertBuilder(null, t.imageUrl || '', t.body || ''), previewName, previewCourse)}</div>
+                <div style="margin-top:12px;">
+                    <div style="font-weight:700;margin-bottom:8px;">الدورات المرتبطة حاليا</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">${ids.map(id => `<span class="badge">${esc(CCACHE.find(c => c.course_id === id)?.course_name || id)}</span>`).join('') || '<span style="color:var(--color-text-secondary);font-size:13px;">لم يتم اختيار دورات</span>'}</div>
+                </div>
+            `);
+        }
+
+        async function saveCertLinks() {
+            const templateId = val('cert-linker-id');
+            const t = CERT_TEMPLATE_CACHE.find(x => x.id === templateId);
+            if (!t) return toast('قالب الشهادة غير موجود', 'error');
+            const courseIds = [...CERT_LINKER_IDS];
+            const updated = { ...t, courseIds, courseId: courseIds[0] || '' };
+            const r = await call({ action: 'saveCertTemplate', template: updated });
+            if (!r.success) return toast(r.error, 'error');
+            toast('تم حفظ ربط الشهادة بالدورات');
+            for (const courseId of courseIds) {
+                await issueTemplateToCompletedUsers(updated, courseId);
+            }
+            closeModal('m-cert-linker');
+            await loadAllCerts();
+        }
+
+        async function issueTemplateToCompletedUsers(template, courseId) {
+            const course = CCACHE.find(c => c.course_id === courseId) || (await call({ action: 'getCourse', courseId })).course;
+            const pr = await call({ action: 'getCourseProgress', courseId });
+            if (!pr.success) return;
+            const done = pr.progress.filter(p => p.completed);
+            for (const row of done) {
+                await call({
+                    action: 'issueCertificate',
+                    userEmail: row.email,
+                    userName: row.full_name || row.email,
+                    courseId,
+                    courseName: course?.course_name || courseId,
+                    certificateImageUrl: template.imageUrl || template.builder?.background || '',
+                    certificateBody: template.body || '',
+                    certificateBuilder: template.builder || null,
+                    templateId: template.id || '',
+                    pointsAwarded: 0
+                });
+            }
+        }
+
+        async function linkedCertificateTemplatesForCourse(course) {
+            if (!CERT_TEMPLATE_CACHE.length) {
+                const tr = await call({ action: 'getCertTemplates' });
+                if (tr.success) CERT_TEMPLATE_CACHE = tr.templates;
+            }
+            const courseId = course?.course_id || CCI;
+            return CERT_TEMPLATE_CACHE.filter(t =>
+                certLinkedCourseIds(t).includes(courseId) ||
+                (course?.certificate_template_id && t.id === course.certificate_template_id)
+            );
+        }
+
+        async function issueAutoCertificatesForCurrentCourse(course) {
+            const templates = await linkedCertificateTemplatesForCourse(course);
+            if (!templates.length || !CU?.email) return [];
+            const email = CU.email.trim().toLowerCase();
+            for (const t of templates) {
+                await call({
+                    action: 'issueCertificate',
+                    userEmail: email,
+                    userName: CU.full_name || email,
+                    courseId: course.course_id || CCI,
+                    courseName: course.course_name || '',
+                    certificateImageUrl: t.imageUrl || t.builder?.background || '',
+                    certificateBody: t.body || '',
+                    certificateBuilder: t.builder || null,
+                    templateId: t.id || '',
+                    pointsAwarded: 0
+                });
+            }
+            return templates;
         }
 
         function viewCertificateGroup(name) {
@@ -4543,6 +5809,13 @@
               </div>`;
             } else prev.innerHTML =
                 '<div style="padding:16px;background:#fff8e1;color:#f57f17;border-radius:8px;font-size:13px;"><i class="ti ti-info-circle"></i> لا يوجد تصميم مخصص، سيتم إصدار الشهادة الافتراضية.</div>';
+            if (course?.certificate_template_id && templateSel) {
+                templateSel.value = course.certificate_template_id;
+                applyIssueTemplate();
+            } else if (course?.certificate_builder) {
+                ISSUE_CERT_BUILDER = course.certificate_builder;
+                prev.innerHTML = renderCertificateCanvas(ISSUE_CERT_BUILDER, name, course.course_name || '');
+            }
             if (!document.getElementById('ic-points')) {
                 const div = document.createElement('div');
                 div.className = 'field';
@@ -4844,19 +6117,37 @@
         }
 
         // ─── SURVEYS ───
+        function defaultSurveyQuestions() {
+            return [
+                { text: 'ما مدى ترشيحك لهذه الدورة؟', category: 'course', type: 'nps' },
+                { text: 'ما رأيك في المدرب؟', category: 'trainer', type: 'nps' },
+                { text: 'ما رأيك في تجربة الأكاديمية؟', category: 'academy', type: 'nps' }
+            ];
+        }
+
+        async function openSurveyItemEditor(item = null) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            SURVEY_ITEM_CONTEXT = 'content';
+            SURVEY_EDITING_ITEM_ID = item?.video_id || null;
+            html('survey-admin-questions', '');
+            const qs = item?.questions?.length ? item.questions : defaultSurveyQuestions();
+            qs.forEach(addSurveyQuestion);
+            const snaps = item?.video_id ? await getDocs(query(collection(db, 'survey_answers'), where('courseId', '==', CCI), where('videoId', '==', item.video_id))) : { docs: [] };
+            renderSurveyResults(snaps.docs.map(d => d.data()));
+            openModal('m-survey-admin');
+        }
+
         async function openSurveyAdmin() {
             if (!CCI) return toast('افتح دورة أولا', 'warning');
+            SURVEY_ITEM_CONTEXT = 'course';
+            SURVEY_EDITING_ITEM_ID = null;
             const [survey, results] = await Promise.all([
                 call({ action: 'getCourseSurvey', courseId: CCI }),
                 call({ action: 'getSurveyResults', courseId: CCI })
             ]);
             html('survey-admin-questions', '');
             const qs = survey.success ? (survey.survey.questions || []) : [];
-            (qs.length ? qs : [
-                { text: 'ما مدى ترشيحك لهذه الدورة؟', category: 'course', type: 'nps' },
-                { text: 'ما رأيك في المدرب؟', category: 'trainer', type: 'nps' },
-                { text: 'ما رأيك في تجربة الأكاديمية؟', category: 'academy', type: 'nps' }
-            ]).forEach(addSurveyQuestion);
+            (qs.length ? qs : defaultSurveyQuestions()).forEach(addSurveyQuestion);
             renderSurveyResults(results.success ? results.answers : []);
             openModal('m-survey-admin');
         }
@@ -4888,6 +6179,32 @@
 
         async function saveSurveyAdmin() {
             const questions = collectSurveyQuestions();
+            if (SURVEY_ITEM_CONTEXT === 'content') {
+                if (!questions.length) return toast('ضيف سؤال واحد على الأقل', 'warning');
+                const existing = await call({ action: 'getVideos', courseId: CCI });
+                const oldItem = existing.success && SURVEY_EDITING_ITEM_ID ? existing.videos.find(x => x.video_id === SURVEY_EDITING_ITEM_ID) : null;
+                const item = {
+                    course_id: CCI,
+                    content_type: 'survey',
+                    title: 'سيرفاي الدورة',
+                    questions,
+                    pass_score: 0,
+                    time_minutes: 0,
+                    require_previous: 'yes',
+                    progress_mode: 'manual',
+                    order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now())
+                };
+                const r = SURVEY_EDITING_ITEM_ID ?
+                    await call({ action: 'updateVideo', videoId: SURVEY_EDITING_ITEM_ID, updates: item }) :
+                    await call({ action: 'addVideo', video: item });
+                if (r.success) {
+                    closeModal('m-survey-admin');
+                    SURVEY_EDITING_ITEM_ID = null;
+                    toast('تم حفظ السيرفاي داخل محتوى الدورة');
+                    openCourseDetail(CCI);
+                } else toast(r.error, 'error');
+                return;
+            }
             const r = await call({ action: 'saveCourseSurvey', courseId: CCI, questions });
             if (r.success) toast('تم حفظ السيرفاي');
             else toast(r.error, 'error');
@@ -4957,11 +6274,11 @@
             };
             const r = await call({ action: 'saveSettings', settings });
             if (r.success) { toast('تم حفظ الإعدادات');
-                applySettings(settings);
-                closeModal('m-settings'); } else toast(r.error, 'error');
+                applySettings(settings); } else toast(r.error, 'error');
         }
 
-        async function loadSettingsModal() {
+        async function loadSettingsModal(showPage = true) {
+            if (showPage) { showTab('settings'); return; }
             const r = await call({ action: 'getSettings' });
             if (r.success) {
                 document.getElementById('set-name').value = r.settings.academy_name || 'Deraah Academy';
@@ -4975,7 +6292,6 @@
                 document.getElementById('set-bgcolor').value = r.settings.bg_color || '#f1f3f5';
                 document.getElementById('set-theme').value = r.settings.theme || (document.body.classList.contains('dark-mode') ? 'dark' : 'light');
             }
-            openModal('m-settings');
         }
 
         async function refreshNotifications() {
@@ -5115,6 +6431,8 @@
             updateTraineePoints();
             startNotificationPolling();
             showTraineeTab('home');
+            loadTraineeLearningPaths();
+            setTimeout(showTraineeAnnouncements, 500);
         }
 
         async function updateTraineePoints() {
@@ -5137,11 +6455,13 @@
             if (t === 'home' || t === 'my-courses') {
                 show('tr-home-content');
                 loadTraineeCourses();
+                loadTraineeLearningPaths();
             } else if (t === 'my-certs') {
                 show('tr-certs-content');
                 loadTraineeCerts();
             } else if (t === 'available') {
                 show('tr-available-content');
+                html('tr-available-title', '<i class="ti ti-books" style="color:var(--color-border-primary);"></i> الدورات المتاحة للالتحاق');
                 loadAvailableCourses();
             }
             document.getElementById('tr-greeting').textContent = `👋 أهلاً بك، ${CU.full_name || CU.email}`;
@@ -5237,6 +6557,50 @@
             '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-secondary);"><i class="ti ti-check" style="font-size:48px;display:block;margin-bottom:12px;color:var(--color-text-success);"></i>أنت مسجل في جميع الدورات المتاحة</div>';
         }
 
+        async function showPathCourses(pathId) {
+            const snap = await getDoc(doc(db, 'learning_paths', pathId));
+            if (!snap.exists()) return toast('المسار غير موجود', 'error');
+            const path = snap.data();
+            const email = CU.email.trim().toLowerCase();
+            const [coursesRes, enrSnaps] = await Promise.all([
+                call({ action: 'getCourses' }),
+                getDocs(query(collection(db, 'enrollments'), where('userEmail', '==', email)))
+            ]);
+            if (!coursesRes.success) return toast('تعذر تحميل دورات المسار', 'error');
+            CCACHE = coursesRes.courses;
+            const enrolled = enrSnaps.docs.map(d => d.data().courseId);
+            const ids = path.courseIds || [];
+            const courses = ids.map(id => CCACHE.find(c => c.course_id === id)).filter(Boolean).filter(c => effectiveCourseStatus(c) === 'active');
+            hide('tr-home-content');
+            hide('tr-certs-content');
+            show('tr-available-content');
+            html('tr-available-title', `<i class="ti ti-route" style="color:var(--color-border-primary);"></i> ${esc(path.title || 'المسار التعليمي')}`);
+            html('tr-available-grid', courses.length ? courses.map(c => renderTraineeCourseCard(c, enrolled)).join('') :
+                '<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--color-text-secondary);"><i class="ti ti-route" style="font-size:64px;display:block;margin-bottom:16px;opacity:0.3;"></i><h3 style="font-size:20px;font-weight:700;">لا توجد دورات منشورة داخل هذا المسار حاليا</h3></div>');
+        }
+
+        function renderTraineeCourseCard(c, enrolled) {
+            const hasPrereq = c.prerequisite && c.prerequisite !== '';
+            const prereqDone = hasPrereq ? enrolled.includes(c.prerequisite) : true;
+            const isEnrolled = enrolled.includes(c.course_id);
+            const canEnroll = prereqDone && !isEnrolled;
+            return `<div class="course-card" style="display:flex;flex-direction:column;">
+              <div class="course-thumb">
+                ${c.thumbnail_url ? `<img src="${esc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}
+                <i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,0.1);position:relative;z-index:1;"></i>
+              </div>
+              <div class="course-body" style="flex:1;display:flex;flex-direction:column;">
+                <div class="course-name">${esc(c.course_name)}</div>
+                <div class="course-desc" style="flex:1;">${esc(c.description || 'لا يوجد وصف')}</div>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                  <span class="badge badge-${effectiveCourseStatus(c) === 'active' ? 'active' : 'suspended'}">${effectiveCourseStatus(c) === 'active' ? 'نشط' : 'مسودة'}</span>
+                  ${hasPrereq ? `<span class="badge" style="background:#fef7e0;color:#ea8600;">متطلب: ${esc(CCACHE.find(cc => cc.course_id === c.prerequisite)?.course_name || c.prerequisite)}</span>` : ''}
+                  ${canEnroll ? `<button class="primary sm" onclick="enrollInCourse('${esc(c.course_id)}')"><i class="ti ti-user-plus"></i>التحاق</button>` : isEnrolled ? '<span class="badge badge-success">مسجل</span>' : '<span class="badge" style="background:#fce8e6;color:#d93025;">متطلب غير مكتمل</span>'}
+                </div>
+              </div>
+            </div>`;
+        }
+
         async function enrollInCourse(courseId) {
             const email = CU.email.trim().toLowerCase();
             const r = await call({ action: 'enrollUser', userEmail: email, courseId });
@@ -5275,6 +6639,7 @@
             ]);
             if (!vr.success || !vr.videos.length) { toast('لا يوجد محتوى لهذه الدورة', 'warning'); return; }
             CVV = vr.videos;
+            if (!isTraineeView) logActivity('view_course', { email, courseId });
             const prog = pr.success ? pr.progress : {};
             let startIdx = 0;
             for (let i = 0; i < CVV.length; i++) {
@@ -5321,13 +6686,14 @@
             nextBtn.innerHTML = idx === CVV.length - 1 ? '<i class="ti ti-flag-check"></i>إنهاء الدورة' : '<i class="ti ti-player-track-next"></i>الدرس التالي';
             const savedPct = prog && prog[v.video_id] ? parseFloat(prog[v.video_id].progressPercent) || 0 : 0;
             updatePBar(savedPct);
-            document.getElementById('yt-frame').innerHTML = (v.content_type && v.content_type !== 'video') ? renderAssessmentItem(v, prog?.[v.video_id]) : renderDriveVideo(v);
+            document.getElementById('yt-frame').innerHTML = renderPlayerItem(v, prog?.[v.video_id]);
             document.querySelectorAll('.vcard').forEach((el, i) => el.classList.toggle('active-v', i === idx));
             loadComments(v.video_id);
             loadLikes(v.video_id);
             updateCoursePBar(prog);
             if (PROG_INT) clearInterval(PROG_INT);
             if (v.content_type && v.content_type !== 'video') {
+                if (v.content_type === 'exam' && !isExamStarted(v) && savedPct < 100) return;
                 if (v.time_minutes && savedPct < 100) {
                     const endAt = Date.now() + (parseInt(v.time_minutes) * 60 * 1000);
                     PROG_INT = setInterval(() => {
@@ -5383,9 +6749,86 @@
             playAt(idx, pr.success ? pr.progress : {});
         }
 
+        function examSessionKey(item) {
+            return `exam_started_${CCI}_${CU?.email || 'user'}_${item.video_id}`;
+        }
+
+        function examFailKey(item) {
+            return `exam_fail_${CCI}_${CU?.email || 'user'}_${item.video_id}`;
+        }
+
+        function isExamStarted(item) {
+            return sessionStorage.getItem(examSessionKey(item)) === '1';
+        }
+
+        function renderPlayerItem(item, savedProgress) {
+            const t = item.content_type || 'video';
+            if (t === 'pdf') return renderPdfItem(item, savedProgress);
+            if (t === 'survey') return renderSurveyItem(item, savedProgress);
+            if (t !== 'video') return renderAssessmentItem(item, savedProgress);
+            return renderDriveVideo(item);
+        }
+
+        async function startExamItem() {
+            const item = CVV[CVI];
+            if (!item) return;
+            sessionStorage.removeItem(examFailKey(item));
+            sessionStorage.setItem(examSessionKey(item), '1');
+            const pr = await call({ action: 'getProgress', userEmail: CU.email, courseId: CCI });
+            playAt(CVI, pr.success ? pr.progress : {});
+        }
+
+        function renderSurveyItem(item, savedProgress) {
+            const done = savedProgress && savedProgress.completed === 'yes';
+            const questions = item.questions || [];
+            return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--color-background-tertiary);overflow:auto;">
+                <div class="quiz-card">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                        <span class="content-type-badge"><i class="ti ${contentTypeIcon(item)}"></i></span>
+                        <div style="flex:1;">
+                            <div style="font-size:20px;font-weight:800;">${esc(item.title || 'سيرفاي')}</div>
+                            <div style="font-size:13px;color:var(--color-text-secondary);">تقييم سريع ضمن ترتيب محتوى الدورة</div>
+                        </div>
+                        ${done ? '<span class="badge badge-active">تم الإرسال</span>' : ''}
+                    </div>
+                    ${questions.map((q, qi) => `
+                        <div style="margin-bottom:18px;">
+                            <div style="font-weight:700;margin-bottom:8px;">${qi + 1}. ${esc(q.text)}</div>
+                            ${q.type === 'text' ? `<textarea class="survey-answer" data-index="${qi}" rows="3" style="width:100%;" ${done ? 'disabled' : ''}></textarea>` :
+                            `<div style="display:flex;gap:6px;flex-wrap:wrap;">${Array.from({ length: 11 }, (_, n) => `
+                                <label class="quiz-option" style="width:auto;padding:8px 10px;">
+                                    <input type="radio" name="survey-${qi}" value="${n}" ${done ? 'disabled' : ''}>
+                                    <span>${n}</span>
+                                </label>`).join('')}</div>`}
+                        </div>`).join('')}
+                    <button class="primary" style="width:100%;" onclick="submitSurveyItem()" ${done ? 'disabled' : ''}><i class="ti ti-send"></i>إرسال السيرفاي</button>
+                </div>
+            </div>`;
+        }
+
         function renderAssessmentItem(item, savedProgress) {
             const done = savedProgress && savedProgress.completed === 'yes';
             const questions = item.questions || [];
+            if ((item.content_type || '') === 'exam' && !done && !isExamStarted(item)) {
+                const fail = safeJson(sessionStorage.getItem(examFailKey(item)), null);
+                return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--color-background-tertiary);">
+                    <div class="quiz-card" style="text-align:center;">
+                        <span class="content-type-badge" style="margin:auto;margin-bottom:12px;"><i class="ti ti-clipboard-check"></i></span>
+                        <div style="font-size:22px;font-weight:900;margin-bottom:8px;">${esc(item.title || 'امتحان')}</div>
+                        ${fail ? `<div style="background:var(--color-background-danger);color:var(--color-text-danger);border-radius:var(--border-radius-md);padding:12px;margin:12px 0;text-align:right;">
+                            <strong>للأسف لم تجتز الامتحان.</strong><br>
+                            نتيجتك ${fail.score}/${fail.total}، ودرجة النجاح ${fail.passScore}/${fail.total}.
+                        </div>` : ''}
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0;">
+                            <div class="stat-card" style="padding:14px;"><div class="stat-num" style="font-size:24px;">${questions.length}</div><div class="stat-label">أسئلة</div></div>
+                            <div class="stat-card" style="padding:14px;"><div class="stat-num" style="font-size:24px;">${item.pass_score || questions.length}</div><div class="stat-label">درجة النجاح</div></div>
+                            <div class="stat-card" style="padding:14px;"><div class="stat-num" style="font-size:24px;">${item.time_minutes || '—'}</div><div class="stat-label">دقيقة</div></div>
+                        </div>
+                        <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px;">لو لم تحقق درجة النجاح يمكنك إعادة المحاولة حتى تجتاز الامتحان.</div>
+                        <button class="primary" style="width:100%;" onclick="startExamItem()"><i class="ti ti-player-play"></i>${fail ? 'إعادة الامتحان' : 'ابدأ الامتحان'}</button>
+                    </div>
+                </div>`;
+            }
             return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--color-background-tertiary);overflow:auto;">
                 <div class="quiz-card">
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
@@ -5425,11 +6868,53 @@
             });
             const pass = score >= (parseInt(item.pass_score) || questions.length || 1);
             if (!pass) {
-                toast(autoSubmit ? `انتهى الوقت. نتيجتك ${score}/${questions.length}` : `النتيجة ${score}/${questions.length}. لازم تحقق درجة النجاح`, 'warning');
+                if ((item.content_type || '') === 'exam') {
+                    sessionStorage.setItem(examFailKey(item), JSON.stringify({ score, total: questions.length, passScore: parseInt(item.pass_score) || questions.length || 1 }));
+                    sessionStorage.removeItem(examSessionKey(item));
+                    const pr = await call({ action: 'getProgress', userEmail: CU.email, courseId: CCI });
+                    playAt(CVI, pr.success ? pr.progress : {});
+                } else {
+                    toast(autoSubmit ? `انتهى الوقت. نتيجتك ${score}/${questions.length}` : `النتيجة ${score}/${questions.length}. لازم تحقق درجة النجاح`, 'warning');
+                }
                 return;
+            }
+            if ((item.content_type || '') === 'exam') {
+                sessionStorage.removeItem(examSessionKey(item));
+                sessionStorage.removeItem(examFailKey(item));
             }
             await call({ action: 'saveProgress', userEmail: CU.email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
             toast(`تم الاجتياز: ${score}/${questions.length}`, 'success');
+            const pr = await call({ action: 'getProgress', userEmail: CU.email, courseId: CCI });
+            const prog = pr.success ? pr.progress : {};
+            renderPlaylist(prog);
+            updateCoursePBar(prog);
+            const allDone = CVV.every(vi => prog[vi.video_id] && prog[vi.video_id].completed === 'yes');
+            if (allDone) await showCourseCompletePopup();
+            playAt(CVI, prog);
+        }
+
+        async function submitSurveyItem() {
+            const item = CVV[CVI];
+            if (!item) return;
+            const questions = item.questions || [];
+            const answers = questions.map((q, qi) => {
+                if (q.type === 'text') {
+                    return { question: q.text, type: q.type, value: document.querySelector(`.survey-answer[data-index="${qi}"]`)?.value || '' };
+                }
+                const checked = document.querySelector(`input[name="survey-${qi}"]:checked`);
+                return { question: q.text, type: q.type || 'nps', value: checked ? checked.value : '' };
+            });
+            if (answers.some(a => a.value === '')) return toast('جاوب كل أسئلة السيرفاي أولا', 'warning');
+            await setDoc(doc(db, 'survey_answers', `${CCI}_${CU.email.trim().toLowerCase()}_${item.video_id}`), {
+                courseId: CCI,
+                videoId: item.video_id,
+                userEmail: CU.email.trim().toLowerCase(),
+                userName: CU.full_name || CU.email,
+                answers,
+                submittedAt: new Date().toISOString()
+            }, { merge: true });
+            await call({ action: 'saveProgress', userEmail: CU.email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
+            toast('تم إرسال السيرفاي');
             const pr = await call({ action: 'getProgress', userEmail: CU.email, courseId: CCI });
             const prog = pr.success ? pr.progress : {};
             renderPlaylist(prog);
@@ -5491,14 +6976,32 @@
             const certBox = document.getElementById('course-complete-cert');
             if (certBox) certBox.innerHTML = '';
             const course = CCACHE.find(c => c.course_id === CCI) || (await call({ action: 'getCourse', courseId: CCI })).course;
-            if (course && course.certificate_enabled === 'yes') {
+            if (!isTraineeView) logActivity('complete_course', { email: CU.email, courseId: CCI, courseName: course?.course_name || '' });
+            const linkedTemplates = course ? await issueAutoCertificatesForCurrentCourse(course) : [];
+            if (course && (linkedTemplates.length || course.certificate_enabled === 'yes')) {
                 const cr = await call({ action: 'getUserCertificates', userEmail: CU.email });
                 const cert = cr.success ? cr.certificates.find(c => c.courseId === CCI || c.course_id === CCI) : null;
                 if (cert && certBox) {
+                    const certName = cert.user_name || CU.full_name || CU.email;
+                    const certCourse = cert.course_name || course.course_name || '';
+                    const builder = cert.certificate_builder || null;
                     certBox.innerHTML = `
                         <div class="glass-panel" style="padding:12px;">
-                            <div style="font-weight:700;margin-bottom:8px;"><i class="ti ti-certificate"></i>شهادتك جاهزة</div>
-                            <button class="primary sm" onclick="viewCert('${cert.certificate_image_url || ''}','${(cert.user_name || CU.full_name || CU.email).replace(/'/g,'\\\'')}','${(cert.course_name || course.course_name || '').replace(/'/g,'\\\'')}','${(cert.certificate_body || '').replace(/'/g,'\\\'')}','${encodeURIComponent(JSON.stringify(cert.certificate_builder || null))}')"><i class="ti ti-eye"></i>عرض الشهادة</button>
+                            <div style="font-weight:700;margin-bottom:10px;"><i class="ti ti-certificate"></i>شهادتك جاهزة</div>
+                            <div style="display:flex;justify-content:center;max-height:420px;overflow:auto;">
+                                ${builder ? renderCertificateCanvas(builder, certName, certCourse) : cert.certificate_image_url ? `
+                                    <div style="text-align:center;">
+                                        <img src="${esc(cert.certificate_image_url)}" style="max-width:100%;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,0.15);">
+                                        <div style="font-weight:800;font-size:20px;margin-top:10px;">${esc(certName)}</div>
+                                        <div style="color:var(--color-text-secondary);">${esc(certCourse)}</div>
+                                    </div>` : `
+                                    <div style="background:#fff;border:6px solid #1a73e8;border-radius:14px;padding:28px;text-align:center;">
+                                        <i class="ti ti-military-award" style="font-size:56px;color:#f57f17;"></i>
+                                        <div style="font-size:24px;font-weight:900;color:#1a73e8;">شهادة إتمام</div>
+                                        <div style="font-size:22px;font-weight:800;margin:12px 0;">${esc(certName)}</div>
+                                        <div>${esc(certCourse)}</div>
+                                    </div>`}
+                            </div>
                         </div>`;
                 } else if (certBox) {
                     certBox.innerHTML = '<div style="color:var(--color-text-secondary);font-size:13px;">الشهادة سيتم إصدارها من الأدمن عند مراجعة الإكمال.</div>';
@@ -5534,7 +7037,9 @@
 
         async function checkAndShowCert() {
             const course = CCACHE.find(c => c.course_id === CCI);
-            if (!course || course.certificate_enabled !== 'yes') return;
+            if (!course) return;
+            const linked = await linkedCertificateTemplatesForCourse(course);
+            if (course.certificate_enabled !== 'yes' && !linked.length) return;
             const email = CU.email.trim().toLowerCase();
             const cr = await call({ action: 'getUserCertificates', userEmail: email });
             if (cr.success) {
@@ -5858,7 +7363,28 @@
             logout,
             showTab,
             loadDash,
+            loadActivity,
+            logActivity,
+            loadAnnouncements,
+            saveAnnouncement,
+            editAnnouncement,
+            deleteAnnouncement,
+            clearAnnouncementForm,
+            closeAnnouncementPopup,
+            loadLearningPaths,
+            saveLearningPath,
+            editLearningPath,
+            deleteLearningPath,
+            clearLearningPathForm,
+            openLearningPathForm,
+            hideLearningPathForm,
+            toggleLearningPathCourse,
+            togglePathAudience,
+            loadTraineeLearningPaths,
+            showPathCourses,
             loadUsers,
+            toggleUsersMenu,
+            openUsersRole,
             setUserRoleView,
             renderUsers,
             filterUsers,
@@ -5867,7 +7393,11 @@
             bulkSetStatus,
             bulkEnrollSelected,
             bulkAddSelectedToGroup,
+            bulkAddSelectedToPath,
             bulkIssueCertificate,
+            openBulkIssueCertModal,
+            renderBulkCertUsers,
+            submitBulkIssueCert,
             exportVisibleUsers,
             exportSelectedUsers,
             enrollSingleFromProfile,
@@ -5881,12 +7411,22 @@
             loadCourses,
             openAddCourseModal,
             openEditCourse,
+            updateCourseThumbPreview,
             toggleCertImg,
             loadPrereqOptions,
+            loadCourseCertTemplateOptions,
             submitAddCourse,
             setCourseFilter,
             renderCoursesGrid,
             deleteCourse,
+            openCourseActions,
+            openCourseEditFromActions,
+            openCoursePreviewFromActions,
+            openAdminCourseContentPreview,
+            playAdminPreviewItem,
+            deleteCourseFromActions,
+            openManualProgressModal,
+            markManualCourseComplete,
             openCourseItemModal,
             courseItemAddQuestion,
             renderCourseQuestionOptions,
@@ -5898,13 +7438,18 @@
             doDeleteVideo,
             editVideo,
             saveEditVideo,
+            submitPdfItem,
             submitVideo,
             setEnrollTab,
             openEnrollModal,
             submitEnroll,
+            downloadEnrollTemplate,
+            submitEnrollExcel,
             exportCourseProgress,
             loadAllProgress,
             loadProgressCourse,
+            renderAllProgressTable,
+            setProgressCourseFilter,
             exportAllProgress,
             loadGroups,
             submitAddGroup,
@@ -5923,6 +7468,10 @@
             openCertTemplateModal,
             saveCertTemplate,
             deleteCertTemplate,
+            openCertLinker,
+            toggleCertLinkedCourse,
+            renderCertLinkerPreview,
+            saveCertLinks,
             deleteCert,
             viewCertificateGroup,
             exportCertificates,
@@ -5969,7 +7518,9 @@
             renderPlaylist,
             playAt,
             playFromPlaylist,
+            startExamItem,
             submitAssessmentItem,
+            submitSurveyItem,
             showCourseCompletePopup,
             finishCourseAndGoHome,
             markCurrentVideoComplete,
@@ -5992,6 +7543,7 @@
             toast,
             handleImageUpload,
             handleVideoUpload,
+            handleDriveFileUpload,
             uploadAvatar,
             openTraineeProfile,
             saveTraineeProfile,
