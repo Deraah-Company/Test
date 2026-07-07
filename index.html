@@ -4784,6 +4784,7 @@
                             mode: p.mode || 'grant',
                             reason: p.reason || '',
                             by: p.by || '',
+                            source: p.source || (p.by && p.by !== 'system' ? 'manual' : 'automatic'),
                             createdAt: Date.now()
                         });
                     }
@@ -11502,6 +11503,7 @@
                     <div class="adv-folder-card" onclick="advRenderPointsHome('grant')"><i class="ti ti-coins"></i><div><strong>منح النقاط</strong><div class="adv-sub">اختيار أفراد أو جروب ومنح/خصم.</div></div></div>
                     <div class="adv-folder-card" onclick="advRenderPointsHome('leaderboard')"><i class="ti ti-trophy"></i><div><strong>ترتيب المتدربين</strong><div class="adv-sub">Leaderboard حسب النقاط.</div></div></div>
                     <div class="adv-folder-card" onclick="advRenderPointsHome('rules')"><i class="ti ti-ruler"></i><div><strong>Rules</strong><div class="adv-sub">حد يومي، منع duplicate، بونص deadline.</div></div></div>
+                    <div class="adv-folder-card" onclick="openPointsHistory()"><i class="ti ti-history"></i><div><strong>History النقاط</strong><div class="adv-sub">مين ادا/خصم، السبب، وتصدير Excel.</div></div></div>
                 </div>
                 <div id="adv-points-body"></div>
             `;
@@ -11525,7 +11527,7 @@
                     <button class="primary" onclick="saveExtendedPointsRules()"><i class="ti ti-device-floppy"></i>حفظ الرولز</button>
                 </div>`);
             } else if (mode === 'grant') {
-                advHtml('adv-points-body', document.querySelector('#tab-points') ? `<div class="card"><div class="adv-title" style="font-size:18px;">منح / خصم نقاط</div><div class="field-row"><div class="field"><label>بحث المستخدمين</label><input id="pt-user-search" oninput="renderPointsUsersPicker()" placeholder="بحث بالاسم أو الإيميل..."><select id="pt-group-filter" style="margin-top:8px;" onchange="selectPointGroup()"></select><div id="pt-users-picker" class="pick-list" style="margin-top:8px;max-height:320px;"></div></div><div><div class="field"><label>العملية</label><select id="pt-action"><option value="grant">منح نقاط</option><option value="deduct">خصم نقاط</option></select></div><div class="field"><label>عدد النقاط</label><input id="pt-amount" type="number" min="1" value="10"></div><div class="field"><label>السبب</label><input id="pt-reason"></div><button class="primary" onclick="submitAdjustPoints()"><i class="ti ti-check"></i>تنفيذ</button></div></div></div>` : '');
+                advHtml('adv-points-body', document.querySelector('#tab-points') ? `<div class="card"><div class="adv-title" style="font-size:18px;">منح / خصم نقاط</div><div class="adv2-toolbar" style="margin:0 0 12px;gap:8px;flex-wrap:wrap;align-items:center;"><button class="primary" onclick="openPointsHistory()"><i class="ti ti-history"></i> History النقاط</button><button onclick="exportPointsHistoryAll()"><i class="ti ti-file-spreadsheet"></i> تصدير كل History Excel</button><span class="adv-sub">مين منح/خصم، لمين، والسبب.</span></div><div class="field-row"><div class="field"><label>بحث المستخدمين</label><input id="pt-user-search" oninput="renderPointsUsersPicker()" placeholder="بحث بالاسم أو الإيميل..."><select id="pt-group-filter" style="margin-top:8px;" onchange="selectPointGroup()"></select><div id="pt-users-picker" class="pick-list" style="margin-top:8px;max-height:320px;"></div></div><div><div class="field"><label>العملية</label><select id="pt-action"><option value="grant">منح نقاط</option><option value="deduct">خصم نقاط</option></select></div><div class="field"><label>عدد النقاط</label><input id="pt-amount" type="number" min="1" value="10"></div><div class="field"><label>السبب</label><input id="pt-reason"></div><button class="primary" onclick="submitAdjustPoints()"><i class="ti ti-check"></i>تنفيذ</button></div></div></div>` : '');
                 const [ur, gr] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' })]);
                 if (ur.success) UCACHE = ur.users;
                 if (gr.success) GCACHE = gr.groups;
@@ -14030,6 +14032,7 @@
                     <div class="adv-folder-card" onclick="advRenderPointsHome('leaderboard')"><i class="ti ti-trophy"></i><div><strong>ترتيب المتدربين</strong><div class="adv-sub">ترتيب حسب الرصيد مع تصدير Excel.</div></div></div>
                     <div class="adv-folder-card" onclick="advRenderPointsHome('rules')"><i class="ti ti-ruler"></i><div><strong>رولز النقاط</strong><div class="adv-sub">حدود يومية، تكرار التعليقات، انتهاء الرصيد.</div></div></div>
                     <div class="adv-folder-card" onclick="advRenderPointsHome('bonus')"><i class="ti ti-gift"></i><div><strong>بونص انتهاء</strong><div class="adv-sub">بونصات متعددة حسب الدورة والوقت مع هيستوري.</div></div></div>
+                    <div class="adv-folder-card" onclick="openPointsHistory()"><i class="ti ti-history"></i><div><strong>History النقاط</strong><div class="adv-sub">مين ادا/خصم، السبب، وتصدير Excel.</div></div></div>
                 </div>
                 <div id="adv-points-body"></div>
             `;
@@ -14040,7 +14043,7 @@
                     return `<div class="adv-mini-row"><div><strong>${advEsc(label)}</strong><div class="adv-sub">${advEsc(key)}</div></div><div style="display:flex;gap:10px;align-items:center;">${adv2Switch(`ptx-on-${key}`, item.enabled !== false)}<input id="ptx-val-${key}" type="number" min="0" value="${Number(item.points ?? def)}" style="width:110px;"></div></div>`;
                 }).join('')}<div style="display:flex;justify-content:flex-end;margin-top:12px;"><button class="primary" onclick="saveExtendedPointsConfig()"><i class="ti ti-device-floppy"></i>حفظ أوزان النقاط</button></div></div>`);
             } else if (mode === 'grant') {
-                advHtml('adv-points-body', `<div class="card"><div class="adv-title" style="font-size:18px;">منح / خصم نقاط</div><div class="field-row"><div class="field"><label>بحث المستخدمين</label><input id="pt-user-search" oninput="renderPointsUsersPicker()" placeholder="بحث بالاسم أو الإيميل..."><select id="pt-group-filter" style="margin-top:8px;" onchange="selectPointGroup()"></select><div id="pt-users-picker" class="pick-list" style="margin-top:8px;max-height:320px;"></div></div><div><div class="field"><label>العملية</label><select id="pt-action"><option value="grant">منح نقاط</option><option value="deduct">خصم نقاط</option></select></div><div class="field"><label>عدد النقاط</label><input id="pt-amount" type="number" min="1" value="10"></div><div class="field"><label>السبب</label><input id="pt-reason"></div><button class="primary" onclick="submitAdjustPoints()"><i class="ti ti-check"></i>تنفيذ</button></div></div></div>`);
+                advHtml('adv-points-body', `<div class="card"><div class="adv-title" style="font-size:18px;">منح / خصم نقاط</div><div class="adv2-toolbar" style="margin:0 0 12px;gap:8px;flex-wrap:wrap;align-items:center;"><button class="primary" onclick="openPointsHistory()"><i class="ti ti-history"></i> History النقاط</button><button onclick="exportPointsHistoryAll()"><i class="ti ti-file-spreadsheet"></i> تصدير كل History Excel</button><span class="adv-sub">مين منح/خصم، لمين، والسبب.</span></div><div class="field-row"><div class="field"><label>بحث المستخدمين</label><input id="pt-user-search" oninput="renderPointsUsersPicker()" placeholder="بحث بالاسم أو الإيميل..."><select id="pt-group-filter" style="margin-top:8px;" onchange="selectPointGroup()"></select><div id="pt-users-picker" class="pick-list" style="margin-top:8px;max-height:320px;"></div></div><div><div class="field"><label>العملية</label><select id="pt-action"><option value="grant">منح نقاط</option><option value="deduct">خصم نقاط</option></select></div><div class="field"><label>عدد النقاط</label><input id="pt-amount" type="number" min="1" value="10"></div><div class="field"><label>السبب</label><input id="pt-reason"></div><button class="primary" onclick="submitAdjustPoints()"><i class="ti ti-check"></i>تنفيذ</button></div></div></div>`);
                 const [ur, gr] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getGroups' })]);
                 if (ur.success) UCACHE = ur.users;
                 if (gr.success) GCACHE = gr.groups;
@@ -20964,6 +20967,673 @@
         window.openRegistrationPreview = openRegistrationPreview;
         window.saveRegistrationPreview = saveRegistrationPreview;
         // ═════════ END HOTFIX V2 ═════════
+
+
+
+        // ═════════ HOTFIX V3: Trainee attendance button for Sessions + Conference Rooms ═════════
+        // المطلوب: لو المتدرب مضاف في سيشن أو Conference Room يظهر له زر فوق لتأكيد الحضور.
+        (function(){
+            function attEsc(v) {
+                return typeof advEsc === 'function' ? advEsc(v ?? '') : String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+            }
+            function attEmail(v) {
+                return typeof normalizeEmail === 'function' ? normalizeEmail(v || '') : String(v || '').trim().toLowerCase();
+            }
+            function attSafeId(v) {
+                return typeof advSafeId === 'function' ? advSafeId(v || '') : String(v || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/gi, '_');
+            }
+            function attDate(v) {
+                return typeof advDate === 'function' ? advDate(v) : (v || '');
+            }
+            function attBadge(label, type) {
+                return typeof advBadge === 'function' ? advBadge(label, type) : `<span class="badge badge-${type || ''}">${attEsc(label)}</span>`;
+            }
+            function attConfirmed(rows, kind, id, email) {
+                const em = attEmail(email);
+                return (rows || []).some(a => {
+                    if (!a?.confirmed || attEmail(a.userEmail) !== em) return false;
+                    if (kind === 'room') {
+                        return a.roomId === id || a.sessionId === `room_${id}` || (a.itemType === 'room' && a.sessionId === id);
+                    }
+                    return a.sessionId === id && a.itemType !== 'room';
+                });
+            }
+            async function attAudienceIncludes(item, email) {
+                try {
+                    const aud = await advSessionAudience(item);
+                    const em = attEmail(email);
+                    return (aud || []).some(u => attEmail(u.email) === em);
+                } catch(e) {
+                    console.warn('attendance audience check failed', e);
+                    return false;
+                }
+            }
+            async function getTraineeAttendanceItems() {
+                if (!CU?.email) return [];
+                const email = attEmail(CU.email);
+                const [sessions, rooms] = await Promise.all([
+                    advDocs('sessions').catch(() => []),
+                    advDocs('conference_rooms').catch(() => [])
+                ]);
+                const items = [];
+                for (const s of (sessions || []).filter(x => (x.status || 'active') !== 'completed')) {
+                    if (await attAudienceIncludes(s, email)) {
+                        items.push({ kind:'session', id:s.id, title:s.title || 'سيشن', type:s.type || 'online', startAt:s.startAt || '', instructor:s.instructor || '', info:s.info || '', link:s.link || '', place:s.place || '', roomId:s.roomId || '' });
+                    }
+                }
+                for (const r of (rooms || []).filter(x => (x.status || 'active') !== 'completed')) {
+                    if (await attAudienceIncludes({ ...r, title: r.name || r.title || 'Conference Room' }, email)) {
+                        items.push({ kind:'room', id:r.id, title:r.name || r.title || 'Conference Room', type:'offline', startAt:r.startAt || r.date || '', instructor:r.instructor || '', info:r.info || r.description || '', link:r.mapUrl || '', place:r.address || r.branch || '', capacity:r.capacity || 0 });
+                    }
+                }
+                return items.sort((a,b) => String(a.startAt || '').localeCompare(String(b.startAt || '')) || String(a.title || '').localeCompare(String(b.title || ''), 'ar'));
+            }
+            function ensureAttendanceTopHost() {
+                let host = document.getElementById('adv2-trainee-top-links');
+                if (!host) {
+                    host = document.createElement('div');
+                    host.id = 'adv2-trainee-top-links';
+                    host.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;';
+                    const top = document.getElementById('trainee-topbar');
+                    top?.insertBefore(host, document.getElementById('tr-points-badge'));
+                }
+                return host;
+            }
+            async function refreshAttendanceTopButton() {
+                const host = ensureAttendanceTopHost();
+                if (!host || !CU?.email) return;
+                [...host.querySelectorAll('[data-attendance-top-link="1"]')].forEach(b => b.remove());
+                const items = await getTraineeAttendanceItems();
+                if (!items.length) return;
+                const label = items.length === 1 ? `حضور: ${items[0].title}` : `تأكيد الحضور (${items.length})`;
+                const icon = items.length === 1 && items[0].kind === 'room' ? 'ti-building-community' : 'ti-calendar-event';
+                host.insertAdjacentHTML('beforeend', `<button data-attendance-top-link="1" class="adv2-top-link" title="${attEsc(items.map(x => x.title).join('، '))}" onclick="showTraineeTab('sessions')"><i class="ti ${icon}"></i> ${attEsc(label)}</button>`);
+            }
+            const prevAvailabilityV3 = typeof adv2TraineeAvailability === 'function' ? adv2TraineeAvailability : null;
+            adv2TraineeAvailability = async function() {
+                let base = { paid:false, sessions:false, faq:false };
+                try { if (prevAvailabilityV3) base = await prevAvailabilityV3(); } catch(e) {}
+                try { base.sessions = (await getTraineeAttendanceItems()).length > 0; } catch(e) {}
+                return base;
+            };
+            const prevRefreshLinksV3 = typeof adv2RefreshTraineeTopLinks === 'function' ? adv2RefreshTraineeTopLinks : null;
+            adv2RefreshTraineeTopLinks = async function() {
+                if (prevRefreshLinksV3) {
+                    try { await prevRefreshLinksV3(); } catch(e) { console.warn('previous top links refresh failed', e); }
+                }
+                const host = ensureAttendanceTopHost();
+                if (host) {
+                    [...host.querySelectorAll('button')].forEach(b => {
+                        const txt = (b.textContent || '').trim();
+                        if (!b.dataset.attendanceTopLink && (txt.includes('جلساتي') || txt.includes('تأكيد الحضور') || txt.includes('حضور:'))) b.remove();
+                    });
+                }
+                await refreshAttendanceTopButton();
+            };
+            loadTraineeSessions = async function() {
+                const email = attEmail(CU?.email || '');
+                const [items, attendance] = await Promise.all([
+                    getTraineeAttendanceItems(),
+                    advDocs('session_attendance').catch(() => [])
+                ]);
+                const htmlItems = items.map(item => {
+                    const confirmed = attConfirmed(attendance, item.kind, item.id, email);
+                    const isRoom = item.kind === 'room';
+                    const icon = isRoom ? 'ti-building-community' : 'ti-calendar-event';
+                    const typeLabel = isRoom ? 'Conference Room' : (item.type === 'offline' ? 'Offline Session' : 'Online Session');
+                    const extraLink = item.link
+                        ? `<a href="${attEsc(item.link)}" target="_blank" class="badge" style="text-decoration:none;"><i class="ti ${isRoom ? 'ti-map-pin' : 'ti-video'}"></i>${isRoom ? 'خريطة المكان' : 'Meeting Link'}</a>`
+                        : '';
+                    return `<div class="card" style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="display:flex;align-items:start;gap:10px;justify-content:space-between;">
+                            <div>
+                                <div class="adv-title" style="font-size:18px;margin:0;"><i class="ti ${icon}"></i> ${attEsc(item.title)}</div>
+                                <div class="adv-sub">${typeLabel}${item.startAt ? ` • ${attDate(item.startAt)}` : ''}${item.instructor ? `<br>المحاضر: ${attEsc(item.instructor)}` : ''}${item.place ? `<br>المكان: ${attEsc(item.place)}` : ''}${item.capacity ? `<br>السعة: ${Number(item.capacity) || 0}` : ''}${item.info ? `<br>${attEsc(item.info)}` : ''}</div>
+                            </div>
+                            ${confirmed ? attBadge('تم التأكيد','active') : attBadge('منتظر تأكيدك','suspended')}
+                        </div>
+                        ${extraLink}
+                        <div style="margin-top:auto;"><button class="primary" ${confirmed ? 'disabled' : ''} onclick="confirmSessionAttendance('${attEsc(item.id)}','${item.kind}')"><i class="ti ti-check"></i>${confirmed ? 'تم تأكيد الحضور' : 'تأكيد الحضور'}</button></div>
+                    </div>`;
+                }).join('');
+                advHtml('tr-sessions-content', `<div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap;"><button onclick="showTraineeTab('home')"><i class="ti ti-arrow-right"></i>العودة</button><div class="adv-title" style="margin:0;flex:1;">تأكيد الحضور</div></div><div class="adv-grid">${htmlItems || '<div class="card adv-sub">لا توجد سيشنز أو Conference Rooms مضافة لك حالياً.</div>'}</div>`);
+                await refreshAttendanceTopButton();
+            };
+            confirmSessionAttendance = async function(id, kind = 'session') {
+                const email = attEmail(CU?.email || '');
+                if (!id || !email) return;
+                const isRoom = kind === 'room';
+                const docId = `${isRoom ? 'room_' : ''}${id}_${attSafeId(email)}`;
+                await setDoc(doc(db, 'session_attendance', docId), {
+                    itemType: isRoom ? 'room' : 'session',
+                    sessionId: isRoom ? `room_${id}` : id,
+                    roomId: isRoom ? id : '',
+                    userEmail: email,
+                    userName: CU.full_name || CU.email,
+                    confirmed: true,
+                    confirmedAt: Date.now()
+                }, { merge: true });
+                toast(isRoom ? 'تم تأكيد حضورك للقاعة' : 'تم تأكيد حضورك للسيشن');
+                await loadTraineeSessions();
+                await adv2RefreshTraineeTopLinks();
+            };
+            const prevOpenRoomAttendanceV3 = typeof openRoomAttendance === 'function' ? openRoomAttendance : null;
+            openRoomAttendance = async function(id) {
+                const snap = await getDoc(doc(db, 'conference_rooms', id));
+                if (!snap.exists()) return prevOpenRoomAttendanceV3 ? prevOpenRoomAttendanceV3(id) : undefined;
+                const room = { ...snap.data(), id };
+                const audience = await advSessionAudience({ ...room, title: room.name });
+                const attendance = await advDocs('session_attendance').catch(() => []);
+                ensureSessionModal();
+                document.getElementById('session-modal-title').textContent = `حضور القاعة: ${room.name || 'Conference Room'}`;
+                advHtml('session-modal-body', `<div class="adv-table-wrap"><table><thead><tr><th>المستخدم</th><th>الإيميل</th><th>تأكيد المتدرب</th><th>الحضور الفعلي</th></tr></thead><tbody>${audience.map(u => {
+                    const em = attEmail(u.email);
+                    const confirmed = attConfirmed(attendance, 'room', id, em);
+                    const actual = (room.actualAttendees || []).map(attEmail).includes(em);
+                    return `<tr><td>${attEsc(u.full_name || u.email)}</td><td dir="ltr">${attEsc(u.email)}</td><td>${confirmed ? attBadge('أكد الحضور','active') : attBadge('لم يؤكد','suspended')}</td><td>${actual ? attBadge('حضر فعلياً','active') : attBadge('لم ينهَ بعد','suspended')}</td></tr>`;
+                }).join('') || '<tr><td colspan="4" style="text-align:center;padding:2rem;">لا يوجد حضور محدد</td></tr>'}</tbody></table></div>`);
+                openModal('m-session-detail');
+            };
+            const prevCompleteRoomV3 = typeof completeRoom === 'function' ? completeRoom : null;
+            completeRoom = async function(id) {
+                const snap = await getDoc(doc(db, 'conference_rooms', id));
+                if (!snap.exists()) return prevCompleteRoomV3 ? prevCompleteRoomV3(id) : undefined;
+                const room = { ...snap.data(), id };
+                ADV_COMPLETING_ROOM_ID = id;
+                ADV_ROOM_AUDIENCE = await advSessionAudience({ ...room, title: room.name });
+                const attendance = await advDocs('session_attendance').catch(() => []);
+                ensureSessionModal();
+                document.getElementById('session-modal-title').textContent = `إنهاء القاعة: ${room.name || 'Conference Room'}`;
+                advHtml('session-modal-body', `<div class="adv-sub" style="margin-bottom:12px;">اختار الحضور الفعلي. اللي أكد حضوره معمول عليه تحديد تلقائيًا وتقدر تعدله.</div><div class="pick-list" style="max-height:420px;">${ADV_ROOM_AUDIENCE.map(u => {
+                    const em = attEmail(u.email);
+                    const confirmed = attConfirmed(attendance, 'room', id, em);
+                    return `<label class="pick-chip"><input type="checkbox" class="room-actual" value="${attEsc(em)}" style="width:auto;" ${confirmed ? 'checked' : ''}>${attEsc(u.full_name || u.email)}<span dir="ltr" class="adv-sub">${attEsc(u.email)}</span>${confirmed ? attBadge('أكد حضوره','active') : ''}</label>`;
+                }).join('') || '<div class="adv-sub">لا يوجد مستخدمين محددين.</div>'}</div><div style="text-align:left;margin-top:12px;"><button class="primary" onclick="finishRoomNow()"><i class="ti ti-flag-check"></i> إنهاء القاعة</button></div>`);
+                openModal('m-session-detail');
+            };
+            window.getTraineeAttendanceItems = getTraineeAttendanceItems;
+            window.refreshAttendanceTopButton = refreshAttendanceTopButton;
+            window.adv2RefreshTraineeTopLinks = adv2RefreshTraineeTopLinks;
+            window.loadTraineeSessions = loadTraineeSessions;
+            window.confirmSessionAttendance = confirmSessionAttendance;
+            window.openRoomAttendance = openRoomAttendance;
+            window.completeRoom = completeRoom;
+            setTimeout(() => adv2RefreshTraineeTopLinks?.(), 700);
+            setTimeout(() => adv2RefreshTraineeTopLinks?.(), 1800);
+        })();
+        // ═════════ END HOTFIX V3 ═════════
+
+
+
+        // ═════════ HOTFIX V4: Robust trainee attendance visibility ═════════
+        // إصلاح ظهور زر الحضور للمتدرب بعد إضافته مباشرة في السيشن أو Conference Room.
+        // السبب كان إن فحص الجمهور كان معتمد على قائمة المستخدمين فقط؛ هنا بنفحص الإيميل المخزن مباشرة + الجروبات + أي أسماء حقول محتملة.
+        (function(){
+            function att4Esc(v) {
+                return typeof advEsc === 'function' ? advEsc(v ?? '') : String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+            }
+            function att4Email(v) {
+                return typeof normalizeEmail === 'function' ? normalizeEmail(v || '') : String(v || '').trim().toLowerCase();
+            }
+            function att4SafeId(v) {
+                return typeof advSafeId === 'function' ? advSafeId(v || '') : String(v || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/gi, '_');
+            }
+            function att4Date(v) {
+                return typeof advDate === 'function' ? advDate(v) : (v || '');
+            }
+            function att4Badge(label, type) {
+                return typeof advBadge === 'function' ? advBadge(label, type) : `<span class="badge badge-${type || ''}">${att4Esc(label)}</span>`;
+            }
+            function att4Array(value) {
+                if (!value) return [];
+                if (Array.isArray(value)) return value;
+                if (value instanceof Set) return [...value];
+                if (typeof value === 'object') return Object.values(value);
+                return [value];
+            }
+            function att4EmailFromAny(x) {
+                if (!x) return '';
+                if (typeof x === 'string') return att4Email(x);
+                return att4Email(x.email || x.userEmail || x.mail || x.value || x.id || x.uid || '');
+            }
+            function att4DirectEmails(item) {
+                const fields = ['userEmails','users','selectedUsers','audienceEmails','traineeEmails','emails','attendees','members','participants','allowedEmails'];
+                const out = new Set();
+                fields.forEach(f => att4Array(item?.[f]).forEach(x => {
+                    const em = att4EmailFromAny(x);
+                    if (em) out.add(em);
+                }));
+                const one = att4EmailFromAny(item?.userEmail || item?.email || item?.traineeEmail);
+                if (one) out.add(one);
+                return out;
+            }
+            function att4GroupIds(item) {
+                const fields = ['groupIds','groups','selectedGroups','audienceGroups','groupId'];
+                const out = new Set();
+                fields.forEach(f => att4Array(item?.[f]).forEach(x => {
+                    let id = '';
+                    if (typeof x === 'string') id = x;
+                    else if (x) id = x.group_id || x.groupId || x.id || x.value || x.name || '';
+                    if (id) out.add(String(id));
+                }));
+                return out;
+            }
+            function att4GroupMatches(g, wantedId) {
+                return String(g?.group_id || g?.groupId || g?.id || g?.name || g?.group_name || '') === String(wantedId);
+            }
+            function att4GroupHasEmail(g, email) {
+                const em = att4Email(email);
+                const members = att4Array(g?.members || g?.userEmails || g?.emails || g?.users);
+                return members.some(m => att4EmailFromAny(m) === em);
+            }
+            async function att4AudienceIncludes(item, email) {
+                const em = att4Email(email);
+                if (!em) return false;
+
+                // 1) أسرع وأضمن فحص: الإيميل محفوظ جوه السيشن/القاعة نفسها.
+                if (att4DirectEmails(item).has(em)) return true;
+
+                // 2) فحص الجروبات لو العنصر مضاف له جروب.
+                const gids = [...att4GroupIds(item)];
+                if (gids.length) {
+                    try {
+                        const gr = await call({ action: 'getGroups' });
+                        const groups = gr?.success ? (gr.groups || []) : [];
+                        if (groups.some(g => gids.some(id => att4GroupMatches(g, id)) && att4GroupHasEmail(g, em))) return true;
+                    } catch(e) { console.warn('attendance group check failed', e); }
+                }
+
+                // 3) fallback للمنطق القديم لو موجود.
+                try {
+                    if (typeof advSessionAudience === 'function') {
+                        const aud = await advSessionAudience(item);
+                        if ((aud || []).some(u => att4Email(u.email || u.userEmail) === em)) return true;
+                    }
+                } catch(e) { console.warn('attendance audience fallback failed', e); }
+
+                return false;
+            }
+            function att4Confirmed(rows, kind, id, email) {
+                const em = att4Email(email);
+                return (rows || []).some(a => {
+                    if (!a?.confirmed || att4Email(a.userEmail) !== em) return false;
+                    if (kind === 'room') return a.roomId === id || a.sessionId === `room_${id}` || (a.itemType === 'room' && a.sessionId === id);
+                    return a.sessionId === id && a.itemType !== 'room';
+                });
+            }
+            async function att4Items() {
+                if (!CU?.email) return [];
+                const email = att4Email(CU.email);
+                const [sessions, rooms] = await Promise.all([
+                    (typeof advDocs === 'function' ? advDocs('sessions') : Promise.resolve([])).catch(() => []),
+                    (typeof advDocs === 'function' ? advDocs('conference_rooms') : Promise.resolve([])).catch(() => [])
+                ]);
+                const items = [];
+                for (const s of (sessions || []).filter(x => (x.status || 'active') !== 'completed')) {
+                    if (await att4AudienceIncludes(s, email)) {
+                        items.push({ kind:'session', id:s.id, title:s.title || s.name || 'سيشن', type:s.type || 'online', startAt:s.startAt || s.date || '', instructor:s.instructor || s.trainer || '', info:s.info || s.description || '', link:s.link || s.meetingLink || '', place:s.place || s.address || '', roomId:s.roomId || '' });
+                    }
+                }
+                for (const r of (rooms || []).filter(x => (x.status || 'active') !== 'completed')) {
+                    if (await att4AudienceIncludes({ ...r, title:r.name || r.title || 'Conference Room' }, email)) {
+                        items.push({ kind:'room', id:r.id, title:r.name || r.title || 'Conference Room', type:'offline', startAt:r.startAt || r.date || '', instructor:r.instructor || r.trainer || '', info:r.info || r.description || '', link:r.mapUrl || r.link || '', place:r.address || r.branch || r.place || '', capacity:r.capacity || 0 });
+                    }
+                }
+                const seen = new Set();
+                return items.filter(x => {
+                    const key = `${x.kind}:${x.id}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                }).sort((a,b) => String(a.startAt || '').localeCompare(String(b.startAt || '')) || String(a.title || '').localeCompare(String(b.title || ''), 'ar'));
+            }
+            function att4EnsureTopHost() {
+                let host = document.getElementById('adv2-trainee-top-links');
+                if (!host) {
+                    host = document.createElement('div');
+                    host.id = 'adv2-trainee-top-links';
+                    host.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;';
+                    document.getElementById('trainee-topbar')?.insertBefore(host, document.getElementById('tr-points-badge'));
+                }
+                return host;
+            }
+            async function att4RefreshTopButton() {
+                const host = att4EnsureTopHost();
+                if (!host || !CU?.email) return;
+                [...host.querySelectorAll('[data-attendance-top-link="1"]')].forEach(b => b.remove());
+                const items = await att4Items();
+                if (!items.length) return;
+                const label = items.length === 1 ? `حضور: ${items[0].title}` : `تأكيد الحضور (${items.length})`;
+                const icon = items.length === 1 && items[0].kind === 'room' ? 'ti-building-community' : 'ti-calendar-event';
+                host.insertAdjacentHTML('beforeend', `<button data-attendance-top-link="1" class="adv2-top-link" title="${att4Esc(items.map(x => x.title).join('، '))}" onclick="showTraineeTab('sessions')"><i class="ti ${icon}"></i> ${att4Esc(label)}</button>`);
+            }
+            const att4PrevAvailability = typeof adv2TraineeAvailability === 'function' ? adv2TraineeAvailability : null;
+            adv2TraineeAvailability = async function() {
+                let base = { paid:false, sessions:false, faq:false };
+                try { if (att4PrevAvailability) base = await att4PrevAvailability(); } catch(e) {}
+                try { base.sessions = (await att4Items()).length > 0; } catch(e) {}
+                return base;
+            };
+            const att4PrevRefresh = typeof adv2RefreshTraineeTopLinks === 'function' ? adv2RefreshTraineeTopLinks : null;
+            adv2RefreshTraineeTopLinks = async function() {
+                const host = att4EnsureTopHost();
+                if (att4PrevRefresh) {
+                    try { await att4PrevRefresh(); } catch(e) { console.warn('previous top links refresh failed', e); }
+                }
+                if (host) {
+                    [...host.querySelectorAll('button')].forEach(b => {
+                        const txt = (b.textContent || '').trim();
+                        if (!b.dataset.attendanceTopLink && (txt.includes('جلساتي') || txt.includes('تأكيد الحضور') || txt.includes('حضور:'))) b.remove();
+                    });
+                }
+                await att4RefreshTopButton();
+            };
+            loadTraineeSessions = async function() {
+                const email = att4Email(CU?.email || '');
+                const [items, attendance] = await Promise.all([att4Items(), (typeof advDocs === 'function' ? advDocs('session_attendance') : Promise.resolve([])).catch(() => [])]);
+                const htmlItems = items.map(item => {
+                    const confirmed = att4Confirmed(attendance, item.kind, item.id, email);
+                    const isRoom = item.kind === 'room';
+                    const icon = isRoom ? 'ti-building-community' : 'ti-calendar-event';
+                    const typeLabel = isRoom ? 'Conference Room' : (item.type === 'offline' ? 'Offline Session' : 'Online Session');
+                    const extraLink = item.link ? `<a href="${att4Esc(item.link)}" target="_blank" class="badge" style="text-decoration:none;"><i class="ti ${isRoom ? 'ti-map-pin' : 'ti-video'}"></i>${isRoom ? 'خريطة المكان' : 'Meeting Link'}</a>` : '';
+                    return `<div class="card" style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="display:flex;align-items:start;gap:10px;justify-content:space-between;">
+                            <div>
+                                <div class="adv-title" style="font-size:18px;margin:0;"><i class="ti ${icon}"></i> ${att4Esc(item.title)}</div>
+                                <div class="adv-sub">${typeLabel}${item.startAt ? ` • ${att4Date(item.startAt)}` : ''}${item.instructor ? `<br>المحاضر: ${att4Esc(item.instructor)}` : ''}${item.place ? `<br>المكان: ${att4Esc(item.place)}` : ''}${item.capacity ? `<br>السعة: ${Number(item.capacity) || 0}` : ''}${item.info ? `<br>${att4Esc(item.info)}` : ''}</div>
+                            </div>
+                            ${confirmed ? att4Badge('تم التأكيد','active') : att4Badge('منتظر تأكيدك','suspended')}
+                        </div>
+                        ${extraLink}
+                        <div style="margin-top:auto;"><button class="primary" ${confirmed ? 'disabled' : ''} onclick="confirmSessionAttendance('${att4Esc(item.id)}','${item.kind}')"><i class="ti ti-check"></i>${confirmed ? 'تم تأكيد الحضور' : 'تأكيد الحضور'}</button></div>
+                    </div>`;
+                }).join('');
+                if (!document.getElementById('tr-sessions-content')) {
+                    document.getElementById('tr-home')?.insertAdjacentHTML('beforeend', '<div id="tr-sessions-content" class="hidden"></div>');
+                }
+                if (typeof advHtml === 'function') {
+                    advHtml('tr-sessions-content', `<div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap;"><button onclick="showTraineeTab('home')"><i class="ti ti-arrow-right"></i>العودة</button><div class="adv-title" style="margin:0;flex:1;">تأكيد الحضور</div></div><div class="adv-grid">${htmlItems || '<div class="card adv-sub">لا توجد سيشنز أو Conference Rooms مضافة لك حالياً.</div>'}</div>`);
+                }
+                await att4RefreshTopButton();
+            };
+            confirmSessionAttendance = async function(id, kind = 'session') {
+                const email = att4Email(CU?.email || '');
+                if (!id || !email) return;
+                const isRoom = kind === 'room';
+                const docId = `${isRoom ? 'room_' : ''}${id}_${att4SafeId(email)}`;
+                await setDoc(doc(db, 'session_attendance', docId), {
+                    itemType: isRoom ? 'room' : 'session',
+                    sessionId: isRoom ? `room_${id}` : id,
+                    roomId: isRoom ? id : '',
+                    userEmail: email,
+                    userName: CU.full_name || CU.email,
+                    confirmed: true,
+                    confirmedAt: Date.now()
+                }, { merge: true });
+                toast(isRoom ? 'تم تأكيد حضورك للقاعة' : 'تم تأكيد حضورك للسيشن');
+                await loadTraineeSessions();
+                await adv2RefreshTraineeTopLinks?.();
+            };
+            window.getTraineeAttendanceItems = att4Items;
+            window.refreshAttendanceTopButton = att4RefreshTopButton;
+            window.adv2RefreshTraineeTopLinks = adv2RefreshTraineeTopLinks;
+            window.loadTraineeSessions = loadTraineeSessions;
+            window.confirmSessionAttendance = confirmSessionAttendance;
+            setTimeout(() => window.adv2RefreshTraineeTopLinks?.(), 300);
+            setTimeout(() => window.adv2RefreshTraineeTopLinks?.(), 1000);
+            setTimeout(() => window.adv2RefreshTraineeTopLinks?.(), 2500);
+        })();
+        // ═════════ END HOTFIX V4 ═════════
+
+
+
+
+
+
+
+
+
+        // ═════════ CLEAN FIX: Points History + Single Toolbar + Clickable Details ═════════
+        (function(){
+            const CLEAN_POINTS_MODAL_ID = 'm-points-history-clean';
+            let CLEAN_POINTS_ROWS = [];
+            let CLEAN_POINTS_CURRENT_TITLE = 'History النقاط';
+
+            function ptsCleanEmail(v) {
+                try { return typeof normalizeEmail === 'function' ? normalizeEmail(v) : String(v || '').trim().toLowerCase(); }
+                catch(e) { return String(v || '').trim().toLowerCase(); }
+            }
+            function ptsCleanEsc(v) {
+                const s = String(v ?? '');
+                if (typeof advEsc === 'function') return advEsc(s);
+                return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+            function ptsCleanDate(v) {
+                const n = Number(v || 0);
+                if (!n) return '—';
+                try { return new Date(n).toLocaleString('ar-EG', { timeZone:'Asia/Riyadh', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+                catch(e) { return new Date(n).toLocaleString('ar-EG'); }
+            }
+            function ptsCleanBadge(delta) {
+                const n = Number(delta || 0);
+                const bg = n < 0 ? 'var(--color-background-danger)' : 'var(--color-background-success)';
+                const col = n < 0 ? 'var(--color-text-danger)' : 'var(--color-text-success)';
+                return `<span class="badge" style="background:${bg};color:${col};font-weight:800;direction:ltr;">${n > 0 ? '+' : ''}${n}</span>`;
+            }
+            function ptsCleanSourceLabel(v, by) {
+                const s = String(v || '').toLowerCase();
+                if (s === 'manual') return 'يدوي من مستخدم';
+                if (s === 'system' || s === 'automatic' || String(by || '').toLowerCase() === 'system') return 'أوتوماتيك من النظام';
+                return v || '—';
+            }
+            function ptsCleanUserName(email) {
+                const e = ptsCleanEmail(email);
+                const u = (UCACHE || []).find(x => ptsCleanEmail(x.email) === e);
+                return u ? (u.full_name || u.name || u.email || e) : e;
+            }
+            function ptsCleanActorName(by) {
+                const b = ptsCleanEmail(by);
+                if (!b || b === 'system') return 'system';
+                const u = (UCACHE || []).find(x => ptsCleanEmail(x.email) === b);
+                return u ? (u.full_name || u.name || u.email || b) : by;
+            }
+            async function ptsCleanEnsureUsers() {
+                if (Array.isArray(UCACHE) && UCACHE.length) return;
+                try {
+                    const ur = await call({ action:'getUsers' });
+                    if (ur?.success) UCACHE = ur.users || [];
+                } catch(e) {}
+            }
+            async function ptsCleanFetchRows(email = '') {
+                await ptsCleanEnsureUsers();
+                const docs = await getDocs(collection(db, 'points_log'));
+                const target = ptsCleanEmail(email);
+                return docs.docs.map(d => ({ id:d.id, ...d.data() }))
+                    .filter(r => !target || ptsCleanEmail(r.userEmail || r.email) === target)
+                    .sort((a,b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+            }
+            function ptsCleanEnsureModal() {
+                if (document.getElementById(CLEAN_POINTS_MODAL_ID)) return;
+                document.body.insertAdjacentHTML('beforeend', `
+                    <div id="${CLEAN_POINTS_MODAL_ID}" class="modal-wrap hidden">
+                        <div class="modal" style="width:min(1080px,96vw);">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:1rem;">
+                                <div style="font-size:18px;font-weight:900;"><i class="ti ti-history"></i> <span id="points-history-clean-title">History النقاط</span></div>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <button class="primary" onclick="exportCurrentPointsHistory()"><i class="ti ti-file-spreadsheet"></i>تصدير Excel</button>
+                                    <button class="icon-btn" onclick="closeModal('${CLEAN_POINTS_MODAL_ID}')"><i class="ti ti-x"></i></button>
+                                </div>
+                            </div>
+                            <div id="points-history-clean-list" class="card table-scroll" style="padding:0;max-height:620px;overflow:auto;"></div>
+                        </div>
+                    </div>`);
+            }
+            function ptsCleanRenderRows(rows, title = 'History النقاط') {
+                CLEAN_POINTS_ROWS = rows || [];
+                CLEAN_POINTS_CURRENT_TITLE = title;
+                ptsCleanEnsureModal();
+                const titleEl = document.getElementById('points-history-clean-title');
+                if (titleEl) titleEl.textContent = title;
+                const body = document.getElementById('points-history-clean-list');
+                if (!body) return;
+                body.innerHTML = `<table>
+                    <thead><tr><th>التاريخ</th><th>المستخدم</th><th>العملية</th><th>النقاط</th><th>السبب</th><th>بواسطة</th><th>المصدر</th></tr></thead>
+                    <tbody>${CLEAN_POINTS_ROWS.map(r => {
+                        const delta = Number(r.delta ?? ((r.mode === 'deduct' ? -1 : 1) * Number(r.amount || 0)));
+                        return `<tr>
+                            <td style="font-size:12px;direction:ltr;text-align:right;white-space:nowrap;">${ptsCleanEsc(ptsCleanDate(r.createdAt))}</td>
+                            <td><div style="font-weight:800;">${ptsCleanEsc(ptsCleanUserName(r.userEmail || r.email))}</div><div style="font-size:11px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${ptsCleanEsc(r.userEmail || r.email || '')}</div></td>
+                            <td>${delta < 0 ? 'خصم' : 'منح'}</td>
+                            <td>${ptsCleanBadge(delta)}</td>
+                            <td>${ptsCleanEsc(r.reason || r.action || 'بدون سبب')}</td>
+                            <td>${ptsCleanEsc(ptsCleanActorName(r.by || r.createdBy || r.actorEmail || 'system'))}</td>
+                            <td>${ptsCleanEsc(ptsCleanSourceLabel(r.source, r.by))}</td>
+                        </tr>`;
+                    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--color-text-secondary);">لا يوجد History نقاط حتى الآن</td></tr>'}</tbody>
+                </table>`;
+            }
+
+            async function openPointsHistoryClean(email = '') {
+                try {
+                    const rows = await ptsCleanFetchRows(email);
+                    const title = email ? `تفاصيل نقاط: ${ptsCleanUserName(email)}` : 'History النقاط';
+                    ptsCleanRenderRows(rows, title);
+                    openModal(CLEAN_POINTS_MODAL_ID);
+                } catch(e) {
+                    console.error(e);
+                    toast('تعذر تحميل History النقاط', 'error');
+                }
+            }
+            function exportCurrentPointsHistoryClean() {
+                if (!window.XLSX) return toast('مكتبة Excel لسه محملتش، جرّب بعد ثواني', 'warning');
+                const rows = (CLEAN_POINTS_ROWS || []).map(r => {
+                    const delta = Number(r.delta ?? ((r.mode === 'deduct' ? -1 : 1) * Number(r.amount || 0)));
+                    return {
+                        'التاريخ': ptsCleanDate(r.createdAt),
+                        'المستخدم': ptsCleanUserName(r.userEmail || r.email),
+                        'الإيميل': r.userEmail || r.email || '',
+                        'العملية': delta < 0 ? 'خصم' : 'منح',
+                        'النقاط': delta,
+                        'السبب': r.reason || r.action || 'بدون سبب',
+                        'بواسطة': ptsCleanActorName(r.by || r.createdBy || r.actorEmail || 'system'),
+                        'المصدر': ptsCleanSourceLabel(r.source, r.by)
+                    };
+                });
+                if (!rows.length) return toast('لا يوجد بيانات للتصدير', 'warning');
+                const ws = window.XLSX.utils.json_to_sheet(rows);
+                const wb = window.XLSX.utils.book_new();
+                window.XLSX.utils.book_append_sheet(wb, ws, 'Points History');
+                const fileName = (CLEAN_POINTS_CURRENT_TITLE || 'points_history').includes('تفاصيل') ? 'user_points_details.xlsx' : 'points_history.xlsx';
+                window.XLSX.writeFile(wb, fileName);
+            }
+            async function exportPointsHistoryAllClean() {
+                await openPointsHistoryClean('');
+                setTimeout(exportCurrentPointsHistoryClean, 100);
+            }
+
+            function pointsCleanPatchHomeCard() {
+                const grid = document.querySelector('#tab-points .adv-folder-grid');
+                if (!grid) return;
+                [...grid.querySelectorAll('.adv-folder-card')].filter(card => (card.textContent || '').includes('History النقاط')).forEach((card, idx) => { if (idx > 0) card.remove(); });
+                if (![...grid.querySelectorAll('.adv-folder-card')].some(card => (card.textContent || '').includes('History النقاط'))) {
+                    grid.insertAdjacentHTML('beforeend', `<div class="adv-folder-card" onclick="openPointsHistory()"><i class="ti ti-history"></i><div><strong>History النقاط</strong><div class="adv-sub">مين منح/خصم، السبب، وتصدير Excel.</div></div></div>`);
+                }
+            }
+            function pointsCleanPatchGrantToolbar() {
+                const body = document.getElementById('adv-points-body');
+                if (!body) return;
+                // امسح أي Toolbars قديمة اتكررت من النسخ السابقة
+                [...body.querySelectorAll('#points-grant-history-toolbar-clean, #points-grant-history-toolbar-v5, #points-grant-history-toolbar-v6, [id^="points-grant-history-toolbar"], .adv2-toolbar')].forEach(el => { const tx = el.textContent || ''; if (el.id?.startsWith('points-grant-history-toolbar') || tx.includes('History النقاط') || tx.includes('History Excel')) el.remove(); });
+                const card = body.querySelector('.card') || body;
+                const toolbar = document.createElement('div');
+                toolbar.id = 'points-grant-history-toolbar-clean';
+                toolbar.className = 'adv2-toolbar';
+                toolbar.style.cssText = 'margin:0 0 12px;gap:8px;flex-wrap:wrap;align-items:center;';
+                toolbar.innerHTML = `<button class="primary" onclick="openPointsHistory()"><i class="ti ti-history"></i> History النقاط</button><button onclick="exportPointsHistoryAll()"><i class="ti ti-file-spreadsheet"></i> تصدير كل History Excel</button><span class="adv-sub">يعرض مين منح/خصم، لمين، كام نقطة، والسبب.</span>`;
+                const title = [...card.querySelectorAll('div,strong')].find(x => (x.textContent || '').trim().includes('منح / خصم'));
+                if (title) title.insertAdjacentElement('afterend', toolbar);
+                else card.insertAdjacentElement('afterbegin', toolbar);
+            }
+            async function renderPointsLeaderboardClean() {
+                await ptsCleanEnsureUsers();
+                const body = document.getElementById('points-leaderboard');
+                if (!body) return;
+                const picked = typeof finalSelectedPointRoles === 'function' ? finalSelectedPointRoles() : [];
+                const roleKey = u => typeof finalRoleKey === 'function' ? finalRoleKey(u) : String(u.role || 'trainee');
+                const rows = (UCACHE || [])
+                    .filter(u => (u.status || 'active') !== 'deleted')
+                    .filter(u => !picked.length || picked.includes(roleKey(u)))
+                    .sort((a,b) => (Number(b.points || 0) - Number(a.points || 0)) || String(a.full_name || a.email || '').localeCompare(String(b.full_name || b.email || ''), 'ar'));
+                body.innerHTML = rows.map((u, i) => {
+                    const email = ptsCleanEmail(u.email);
+                    return `<tr onclick="openPointUserDetails('${ptsCleanEsc(email)}')" style="cursor:pointer;" title="اضغط لعرض تفاصيل النقاط">
+                        <td style="font-weight:700;">${i + 1}</td>
+                        <td style="display:flex;align-items:center;gap:6px;color:var(--color-text-info);font-weight:800;">
+                            ${u.avatar_url ? `<img src="${ptsCleanEsc(u.avatar_url)}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">` : ''}
+                            ${ptsCleanEsc(u.full_name || u.email || '-')}
+                        </td>
+                        <td>${typeof advBadge === 'function' ? advBadge(typeof roleName === 'function' ? roleName(roleKey(u)) : roleKey(u)) : ptsCleanEsc(roleKey(u))}</td>
+                        <td style="direction:ltr;text-align:right;font-size:12px;color:var(--color-text-secondary);">${ptsCleanEsc(u.email || '')}</td>
+                        <td><span class="badge badge-points"><i class="ti ti-star"></i> ${Number(u.points || 0)}</span></td>
+                        <td><button type="button" class="sm" onclick="event.stopPropagation();openPointUserDetails('${ptsCleanEsc(email)}')"><i class="ti ti-list-details"></i> تفاصيل</button></td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--color-text-secondary);">لا توجد بيانات مطابقة للفلتر</td></tr>';
+            }
+            async function finalRenderAdvancedPointsLeaderboardClean() {
+                await ptsCleanEnsureUsers();
+                advHtml('adv-points-body', `
+                    <div class="adv2-toolbar" style="align-items:flex-start;gap:10px;flex-wrap:wrap;">
+                        <button class="primary" onclick="exportPointsLeaderboard()"><i class="ti ti-file-spreadsheet"></i> تصدير ترتيب النقاط</button>
+                        <button onclick="openPointsHistory()"><i class="ti ti-history"></i> History النقاط</button>
+                        <span class="adv-sub">اضغط على أي مستخدم أو زر تفاصيل عشان تشوف كل نقطة خدها أو اتخصمت منه.</span>
+                    </div>
+                    <div id="points-leaderboard-role-filters" class="card" style="padding:12px;margin:0 0 12px;"></div>
+                    <div class="adv-table-wrap">
+                        <table>
+                            <thead><tr><th>#</th><th>الاسم</th><th>الفئة</th><th>الإيميل</th><th>النقاط</th><th>تفاصيل</th></tr></thead>
+                            <tbody id="points-leaderboard"></tbody>
+                        </table>
+                    </div>`);
+                if (typeof finalRenderPointsRoleFilters === 'function') await finalRenderPointsRoleFilters();
+                await renderPointsLeaderboardClean();
+            }
+
+            const previousAdvRenderPointsHome = typeof advRenderPointsHome === 'function' ? advRenderPointsHome : null;
+            advRenderPointsHome = async function(mode = 'home') {
+                if (mode === 'history') return openPointsHistoryClean('');
+                if (mode === 'leaderboard') {
+                    if (previousAdvRenderPointsHome) await previousAdvRenderPointsHome('home');
+                    pointsCleanPatchHomeCard();
+                    await finalRenderAdvancedPointsLeaderboardClean();
+                    return;
+                }
+                if (previousAdvRenderPointsHome) await previousAdvRenderPointsHome(mode);
+                if (mode === 'home' || !mode) pointsCleanPatchHomeCard();
+                if (mode === 'grant') pointsCleanPatchGrantToolbar();
+            };
+            loadPointsTab = async function(){ await advRenderPointsHome('home'); };
+            renderPointsLeaderboard = renderPointsLeaderboardClean;
+            finalRenderAdvancedPointsLeaderboard = finalRenderAdvancedPointsLeaderboardClean;
+            openPointsHistory = openPointsHistoryClean;
+            window.openPointsHistory = openPointsHistoryClean;
+            window.openPointUserDetails = openPointsHistoryClean;
+            window.exportCurrentPointsHistory = exportCurrentPointsHistoryClean;
+            window.exportPointsHistoryAll = exportPointsHistoryAllClean;
+            window.advRenderPointsHome = advRenderPointsHome;
+            window.loadPointsTab = loadPointsTab;
+            window.renderPointsLeaderboard = renderPointsLeaderboardClean;
+            window.finalRenderAdvancedPointsLeaderboard = finalRenderAdvancedPointsLeaderboardClean;
+            setTimeout(() => {
+                try {
+                    if (!document.getElementById('tab-points')?.classList.contains('hidden')) {
+                        pointsCleanPatchHomeCard();
+                        if ((document.getElementById('adv-points-body')?.textContent || '').includes('منح / خصم')) pointsCleanPatchGrantToolbar();
+                    }
+                } catch(e) {}
+            }, 900);
+        })();
+        // ═════════ END CLEAN FIX ═════════
 
         console.log('✅ أكاديمية التدريب - النظام جاهز بالكامل');
     </script>
