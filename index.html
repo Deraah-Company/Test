@@ -21635,6 +21635,2330 @@
         })();
         // ═════════ END CLEAN FIX ═════════
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ═════════ LAUNCH POLISH HOTFIX: professional release permissions and approvals ═════════
+        (function(){
+            const LP = window.__launchPolish || (window.__launchPolish = {});
+            const COURSE_REQUESTS_COLLECTION = 'course_enrollment_requests';
+
+            function lpEsc(v) {
+                if (typeof advEsc === 'function') return advEsc(v ?? '');
+                if (typeof esc === 'function') return esc(v ?? '');
+                return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+            }
+            function lpEmail(v) {
+                try { return typeof normalizeEmail === 'function' ? normalizeEmail(v || '') : String(v || '').trim().toLowerCase(); }
+                catch(e) { return String(v || '').trim().toLowerCase(); }
+            }
+            function lpVal(id) { return document.getElementById(id)?.value || ''; }
+            function lpSet(id, value) { const el = document.getElementById(id); if (el) el.value = value ?? ''; }
+            function lpHtml(id, value) {
+                if (typeof advHtml === 'function') return advHtml(id, value);
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = value ?? '';
+            }
+            function lpToast(msg, type) {
+                if (typeof toast === 'function') toast(msg, type);
+            }
+            function lpDate(v) {
+                if (typeof advDate === 'function') return advDate(v);
+                if (!v) return '';
+                const d = typeof v === 'number' ? new Date(v) : new Date(v);
+                return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleString('ar-EG', { timeZone:'Asia/Riyadh' });
+            }
+            function lpBadge(label, kind = '') {
+                if (typeof advBadge === 'function') return advBadge(label, kind);
+                return `<span class="badge ${kind ? `badge-${kind}` : ''}">${lpEsc(label)}</span>`;
+            }
+            function lpSafeId(v) {
+                return String(v || '').trim().toLowerCase().replace(/[^a-z0-9_-]+/gi, '_');
+            }
+            function lpMoney(price, currency) {
+                if (typeof advMoney === 'function') return advMoney(price, currency);
+                return `${Number(price || 0).toLocaleString('ar-SA')} ${currency || 'SAR'}`;
+            }
+            function lpAddStyle() {
+                if (document.getElementById('launch-polish-style')) return;
+                const style = document.createElement('style');
+                style.id = 'launch-polish-style';
+                style.textContent = `
+                    .final-course-card .course-thumb,.launch-course-card .course-thumb{position:relative}
+                    .launch-course-approve{position:absolute;right:12px;bottom:12px;z-index:5;display:inline-flex;align-items:center;gap:6px;border:0;background:#15803d;color:#fff;box-shadow:0 10px 20px rgba(21,128,61,.28);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:900;min-height:36px}
+                    .launch-course-approve:hover{background:#166534;transform:translateY(-1px)}
+                    .launch-creator-badge{background:#eef2ff!important;color:#3730a3!important}
+                    .launch-muted-card{grid-column:1/-1;text-align:center;padding:3rem;color:var(--color-text-secondary)}
+                    .launch-perm-shell{display:flex;flex-direction:column;gap:10px}
+                    .launch-perm-cat{border:1px solid var(--color-border-tertiary);border-radius:12px;background:var(--color-background-primary);overflow:hidden}
+                    .launch-perm-cat summary{list-style:none;cursor:pointer;padding:14px 16px;background:var(--color-background-secondary);font-weight:900;display:flex;justify-content:space-between;align-items:center;gap:12px}
+                    .launch-perm-cat summary::-webkit-details-marker{display:none}
+                    .launch-perm-body{padding:12px;display:grid;gap:8px}
+                    .launch-perm-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--color-border-tertiary);border-radius:10px;padding:11px 12px;background:var(--color-background-primary)}
+                    .launch-request-note{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin-top:8px}
+                    .launch-comm-fab{position:fixed;right:24px;bottom:24px;width:64px;height:64px;z-index:220;direction:ltr}
+                    .launch-comm-main,.launch-comm-action{position:absolute;width:58px;height:58px;border-radius:50%;border:0;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 14px 30px rgba(0,0,0,.24);transition:transform .22s ease,opacity .18s ease,background .18s ease}
+                    .launch-comm-main{right:0;bottom:0;background:#d94f4f;font-size:28px;z-index:3}
+                    .launch-comm-main i{transition:transform .22s ease}
+                    .launch-comm-action{right:3px;bottom:3px;opacity:0;pointer-events:none;transform:translate(0,0) scale(.72);font-size:24px}
+                    .launch-comm-fab.open .launch-comm-action{opacity:1;pointer-events:auto}
+                    .launch-comm-fab.open .launch-comm-main i{transform:rotate(45deg)}
+                    .launch-comm-ask{background:#f6bf26}
+                    .launch-comm-chat{background:#49b84f}
+                    .launch-comm-fab.open .launch-comm-ask{transform:translate(-74px,-58px) scale(1)}
+                    .launch-comm-fab.open .launch-comm-chat{transform:translate(0,-94px) scale(1)}
+                    .launch-comm-badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:999px;background:#e53935;color:#fff;font-size:10px;line-height:18px;font-weight:900}
+                    .launch-chat-tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+                    .launch-chat-tabs button.active{background:var(--accent-color);color:#fff;border-color:var(--accent-color)}
+                    .launch-chat-empty{padding:2rem;text-align:center;color:var(--color-text-secondary)}
+                    .launch-tech-ticket{border:1px solid var(--color-border-tertiary);border-radius:10px;padding:12px;background:var(--color-background-secondary);display:grid;gap:8px}
+                    .launch-tech-answer{border-radius:8px;background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);padding:10px;line-height:1.7}
+                    .launch-tech-page{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:18px;align-items:start}
+                    .launch-tech-form{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;padding:16px;display:grid;gap:14px}
+                    .launch-tech-form .field{margin:0}
+                    .launch-tech-form input,.launch-tech-form select,.launch-tech-form textarea{width:100%;min-height:44px}
+                    .launch-tech-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+                    .launch-tech-stat{border:1px solid var(--color-border-tertiary);border-radius:8px;background:var(--color-background-primary);padding:14px;text-align:center;cursor:pointer;font-weight:900}
+                    .launch-tech-stat small{display:block;margin-top:8px;font-size:24px}
+                    .launch-tech-stat.open{border-color:#dc2626;color:#dc2626}
+                    .launch-tech-stat.in_progress{border-color:#0ea5e9;color:#0284c7}
+                    .launch-tech-stat.pending{border-color:#f59e0b;color:#d97706}
+                    .launch-tech-stat.closed{border-color:#16a34a;color:#16a34a}
+                    .launch-tech-stat.active{box-shadow:0 0 0 2px currentColor inset}
+                    .launch-tech-table{width:100%;border-collapse:collapse;background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;overflow:hidden}
+                    .launch-tech-table th,.launch-tech-table td{border-bottom:1px solid var(--color-border-tertiary);padding:10px;text-align:right;vertical-align:top;font-size:13px}
+                    .launch-ticket-status{display:inline-flex;align-items:center;border-radius:6px;padding:5px 8px;font-size:12px;font-weight:900;color:#fff}
+                    .launch-ticket-status.open{background:#dc2626}.launch-ticket-status.in_progress{background:#0ea5e9}.launch-ticket-status.pending{background:#f59e0b}.launch-ticket-status.closed{background:#16a34a}
+                    .launch-ticket-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--color-text-secondary);font-size:12px}
+                    .launch-ticket-detail{display:grid;grid-template-columns:1fr minmax(260px,360px);gap:24px;align-items:start}
+                    .launch-ticket-main{display:grid;gap:18px}
+                    .launch-ticket-main-title{font-size:26px;font-weight:900;margin:0;border-bottom:1px solid #cc2c7a;padding-bottom:8px;display:inline-block}
+                    .launch-ticket-desc{line-height:1.9;color:var(--color-text-secondary);white-space:pre-wrap}
+                    .launch-ticket-side{border:1px solid var(--color-border-tertiary);border-radius:8px;background:var(--color-background-primary);padding:16px;display:grid;gap:10px}
+                    .launch-ticket-side-row{border-bottom:1px solid var(--color-border-tertiary);padding:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+                    .launch-ticket-side-row:last-child{border-bottom:0}
+                    .launch-ticket-attachments{display:grid;gap:8px}
+                    .launch-ticket-attach{border:1px solid var(--color-border-tertiary);border-radius:4px;background:var(--color-background-primary);padding:8px;min-height:72px;display:flex;align-items:center;gap:10px}
+                    .launch-ticket-attach img{max-width:120px;max-height:86px;object-fit:contain;border:1px solid var(--color-border-tertiary);border-radius:4px;background:#fff}
+                    .launch-ticket-comments{display:grid;gap:16px}
+                    .launch-ticket-comment{border:1px solid var(--color-border-tertiary);background:var(--color-background-primary);border-radius:4px;padding:18px;display:grid;grid-template-columns:74px 1fr;gap:14px;align-items:start}
+                    .launch-ticket-avatar{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e8eef7;color:#123b63;font-weight:900;font-size:20px;overflow:hidden}
+                    .launch-ticket-avatar.support{background:#e7f7ef;color:#0b6b3a}
+                    .launch-ticket-comment-body{line-height:1.9;white-space:pre-wrap;color:var(--color-text-secondary)}
+                    .launch-ticket-comment-head{font-weight:900;font-size:17px}
+                    .launch-ticket-comment-time{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+                    .launch-ticket-comment-form{border:1px solid var(--color-border-tertiary);border-radius:8px;padding:14px;background:var(--color-background-secondary);display:grid;gap:10px}
+                    .launch-tech-file{border:1px dashed var(--color-border-tertiary);border-radius:8px;padding:10px;background:var(--color-background-secondary)}
+                    .launch-tech-file input{min-height:auto!important}
+                    @media(max-width:980px){.launch-ticket-detail{grid-template-columns:1fr}.launch-tech-page{grid-template-columns:1fr}.launch-tech-stats{grid-template-columns:repeat(2,minmax(120px,1fr))}}
+                    @media(max-width:640px){.launch-comm-fab{right:16px;bottom:16px}.launch-comm-fab.open .launch-comm-ask{transform:translate(-66px,-54px) scale(1)}.launch-comm-fab.open .launch-comm-chat{transform:translate(0,-86px) scale(1)}}
+                `;
+                document.head.appendChild(style);
+            }
+
+            function lpAddPermission(key, label) {
+                if (!Array.isArray(window.ADV_PERMISSION_MODULES || ADV_PERMISSION_MODULES)) return;
+                const mods = window.ADV_PERMISSION_MODULES || ADV_PERMISSION_MODULES;
+                if (!mods.some(([k]) => k === key)) mods.push([key, label]);
+            }
+            [
+                ['dashboard.view', 'عرض لوحة التحكم'],
+                ['users.view', 'عرض المستخدمين'],
+                ['users.trainees.view', 'عرض بيانات المتدربين'],
+                ['users.trainers.view', 'عرض بيانات المدربين'],
+                ['users.admins.view', 'عرض بيانات الأدمن'],
+                ['users.manage', 'إضافة وتعديل المستخدمين'],
+                ['users.registration.approve', 'موافقات إنشاء الحسابات'],
+                ['content.enrollment.approve', 'موافقات الالتحاق بالدورات'],
+                ['permissions.manage', 'إدارة الصلاحيات']
+            ].forEach(([key, label]) => lpAddPermission(key, label));
+            [
+                ['communication.chat.private', 'تفعيل الشات الخاص'],
+                ['communication.chat.trainees.all', 'إظهار كل المتدربين في الشات'],
+                ['communication.chat.trainees.region', 'إظهار متدربي نفس الإقليم في الشات'],
+                ['communication.chat.trainees.group', 'إظهار متدربي نفس الجروب في الشات']
+            ].forEach(([key, label]) => lpAddPermission(key, label));
+            [
+                ['communication.chat.group', 'تفعيل شات الجروبات'],
+                ['communication.chat.region', 'تفعيل شات الأقاليم']
+            ].forEach(([key, label]) => lpAddPermission(key, label));
+
+            const lpPrevRolePresetPermissions = typeof rolePresetPermissions === 'function' ? rolePresetPermissions : null;
+            rolePresetPermissions = function(role) {
+                const out = Object.fromEntries((ADV_PERMISSION_MODULES || []).map(([key]) => [key, false]));
+                if (lpPrevRolePresetPermissions) Object.assign(out, lpPrevRolePresetPermissions(role) || {});
+                (ADV_PERMISSION_MODULES || []).forEach(([key]) => { if (!(key in out)) out[key] = false; });
+                if (role === 'admin') (ADV_PERMISSION_MODULES || []).forEach(([key]) => out[key] = true);
+                if (role === 'trainer') {
+                    ['dashboard.view','content.courses.view','content.courses.create','content.surveys.manage','content.surveys.export','question_bank.manage','tech_support.answer'].forEach(k => out[k] = true);
+                }
+                if (role === 'manager') {
+                    ['dashboard.view','users.view','users.trainees.view','users.trainers.view','content.courses.view','progress.view','points.leaderboard','activity.view','reports.rating','groups.manage','tech_support.answer'].forEach(k => out[k] = true);
+                }
+                if (role === 'region_manager') {
+                    ['dashboard.view','users.view','users.trainees.view','users.trainers.view','content.courses.view','progress.view','points.leaderboard','activity.view','reports.rating','reports.financial','groups.manage','groups.managers','tech_support.answer'].forEach(k => out[k] = true);
+                }
+                if (role === 'trainee') out['tech_support.visible'] = true;
+                return out;
+            };
+
+            const LP_ALIASES = {
+                'users.view': ['users.manage','users.trainees.view','users.trainers.view','users.admins.view'],
+                'users.trainees.view': ['users.view','users.manage'],
+                'users.trainers.view': ['users.view','users.manage'],
+                'users.admins.view': ['users.view','users.manage'],
+                'users.registration.approve': ['users.manage'],
+                'content.enrollment.approve': ['content.courses.approve'],
+                'permissions.manage': [],
+                'dashboard.view': ['content.courses.view','progress.view','activity.view','reports.rating']
+            };
+            function lpIsAdminUser() {
+                try { if (typeof isAdmin === 'function' && isAdmin()) return true; } catch(e) {}
+                const role = String(CU?.role || '').trim().toLowerCase();
+                return role === 'admin' || role === 'administrator' || CU?.is_admin === true || CU?.isAdmin === true;
+            }
+            function lpCurrentPerms() {
+                return ADV_CURRENT_PERMS || rolePresetPermissions(CU?.role || 'trainee') || {};
+            }
+            function lpCan(key) {
+                if (lpIsAdminUser()) return true;
+                if (key === '__admin_only__') return false;
+                const perms = lpCurrentPerms();
+                if (Object.prototype.hasOwnProperty.call(perms || {}, key)) return perms?.[key] === true;
+                return (LP_ALIASES[key] || []).some(k => perms?.[k] === true);
+            }
+            function lpCanAny(keys = []) {
+                if (!keys.length) return true;
+                if (keys.includes('__admin_only__')) return lpIsAdminUser();
+                return keys.some(lpCan);
+            }
+            advCan = lpCan;
+            window.advCan = lpCan;
+
+            const LP_TAB_PERMS = {
+                dash: ['dashboard.view'],
+                users: ['users.view','users.manage','users.trainees.view','users.trainers.view','users.admins.view'],
+                courses: ['content.courses.view'],
+                paths: ['content.courses.view'],
+                progress: ['progress.view'],
+                groups: ['groups.manage','groups.managers'],
+                certs: ['utility.certificates'],
+                qa: ['tech_support.answer','content.courses.view'],
+                chat: ['tech_support.answer','groups.manage'],
+                'question-bank': ['question_bank.manage'],
+                points: ['points.weights','points.grant','points.leaderboard','points.history'],
+                settings: ['style.manage','partners.manage'],
+                activity: ['activity.view'],
+                announcements: ['announcements.manage'],
+                packages: ['content.packages.manage'],
+                sessions: ['content.sessions.manage'],
+                rooms: ['content.rooms.manage'],
+                'survey-library': ['content.surveys.manage','content.surveys.export'],
+                coupons: ['utility.coupons'],
+                faq: ['utility.faq'],
+                financial: ['reports.financial'],
+                'rating-report': ['reports.rating'],
+                'tech-support': ['tech_support.answer'],
+                'registration-requests': ['users.registration.approve'],
+                'enrollment-requests': ['content.enrollment.approve'],
+                'login-settings': ['style.manage'],
+                permissions: ['permissions.manage']
+            };
+            adv5TabPerms = function(tab) { return LP_TAB_PERMS[tab] || []; };
+            adv5CanSeeTab = function(tab) { return lpCanAny(adv5TabPerms(tab)); };
+            adv5FirstAllowedTab = function() {
+                return ['dash','users','courses','progress','groups','packages','sessions','rooms','question-bank','survey-library','certs','points','registration-requests','enrollment-requests','settings','announcements','financial','rating-report','activity','chat','qa','faq','tech-support'].find(adv5CanSeeTab) || '';
+            };
+
+            const lpPrevLoadPerms = typeof advLoadCurrentPermissions === 'function' ? advLoadCurrentPermissions : null;
+            advLoadCurrentPermissions = async function() {
+                if (!CU?.email) return;
+                if (lpIsAdminUser()) {
+                    ADV_CURRENT_PERMS = Object.fromEntries((ADV_PERMISSION_MODULES || []).map(([key]) => [key, true]));
+                    advApplyPermissions?.();
+                    return;
+                }
+                const role = CU?.role || 'trainee';
+                const base = rolePresetPermissions(role);
+                let rolePerms = {};
+                let userPerms = {};
+                let roleChatScope = {};
+                let userChatScope = {};
+                try {
+                    const roleSnap = await getDoc(doc(db, 'role_permissions', role));
+                    if (roleSnap.exists()) {
+                        const data = roleSnap.data() || {};
+                        rolePerms = data.permissions || {};
+                        roleChatScope = data.chatScope || {};
+                    }
+                } catch(e) {}
+                try {
+                    const userSnap = await getDoc(doc(db, 'user_permissions', lpEmail(CU.email)));
+                    if (userSnap.exists()) {
+                        const data = userSnap.data() || {};
+                        userPerms = { ...(data.permissions || {}), ...(data.overrides || {}) };
+                        userChatScope = data.chatScope || {};
+                    }
+                } catch(e) {}
+                LP.currentChatScope = { ...lpDefaultChatScope(), ...roleChatScope, ...userChatScope };
+                ADV_CURRENT_PERMS = { ...base, ...rolePerms, ...userPerms };
+                try { await lpPrevLoadPerms?.(); } catch(e) {}
+                ADV_CURRENT_PERMS = { ...base, ...(ADV_CURRENT_PERMS || {}), ...rolePerms, ...userPerms };
+                advApplyPermissions?.();
+            };
+            window.advLoadCurrentPermissions = advLoadCurrentPermissions;
+
+            function lpEnsureShell() {
+                lpAddStyle();
+                if (Array.isArray(ADV_TABS) && !ADV_TABS.includes('enrollment-requests')) ADV_TABS.push('enrollment-requests');
+                if (Array.isArray(ADV_TABS) && !ADV_TABS.includes('registration-requests')) ADV_TABS.push('registration-requests');
+                const host = document.getElementById('tab-dash')?.parentElement;
+                if (host && !document.getElementById('tab-enrollment-requests')) host.insertAdjacentHTML('beforeend', '<div id="tab-enrollment-requests" class="hidden"></div>');
+                if (host && !document.getElementById('tab-registration-requests')) host.insertAdjacentHTML('beforeend', '<div id="tab-registration-requests" class="hidden"></div>');
+                const usersMenu = document.getElementById('users-submenu');
+                document.getElementById('lp-enrollment-requests-link')?.remove();
+                if (usersMenu && !document.getElementById('lp-registration-requests-link')) {
+                    usersMenu.insertAdjacentHTML('beforeend', `<button id="lp-registration-requests-link" onclick="showTab('registration-requests')"><i class="ti ti-user-plus"></i>طلبات إنشاء الحساب</button>`);
+                }
+                const userTabs = document.querySelector('#tab-users .seg-tabs');
+                document.getElementById('user-tab-enrollment-requests')?.remove();
+                if (userTabs && !document.getElementById('user-tab-registration-requests-final')) {
+                    userTabs.insertAdjacentHTML('beforeend', `<button id="user-tab-registration-requests-final" onclick="showTab('registration-requests')">طلبات إنشاء الحساب</button>`);
+                }
+            }
+
+            function lpSelectorForTab(tab) {
+                return [
+                    `#nav-${tab}`,
+                    `#nav-adv-${tab}`,
+                    `.adv-ref-nav[data-ref-tab="${tab}"]`,
+                    tab === 'settings' ? '#top-settings-btn' : '',
+                    tab === 'enrollment-requests' ? '' : '',
+                    tab === 'registration-requests' ? '#lp-registration-requests-link,#user-tab-registration-requests-final,#user-tab-register-requests-link,#user-tab-register-requests' : ''
+                ].filter(Boolean).join(',');
+            }
+            function lpSetVisible(selector, visible) {
+                if (!selector) return;
+                document.querySelectorAll(selector).forEach(el => {
+                    el.style.display = visible ? '' : 'none';
+                    el.classList.toggle('hidden', !visible && el.classList.contains('nav-item'));
+                });
+            }
+            const LP_LEGACY_ADV_NAV = ['nav-users','users-submenu','nav-courses','nav-paths','nav-progress','nav-groups','nav-certs','nav-qa','nav-chat','nav-question-bank','nav-points','nav-activity','nav-announcements','nav-settings'];
+            function lpHideLegacyAdvancedNav() {
+                if (!document.querySelector('.adv-ref-folder')) return;
+                document.querySelectorAll('#adv-ref-users').forEach((el, index) => { if (index > 0) el.remove(); });
+                LP_LEGACY_ADV_NAV.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.style.display = 'none';
+                        el.classList.add('hidden');
+                    }
+                });
+            }
+            function lpCanRoleView(role) {
+                if (lpIsAdminUser()) return true;
+                if (lpCan('users.manage')) return true;
+                const roleKeys = {
+                    trainee: 'users.trainees.view',
+                    trainer: 'users.trainers.view',
+                    admin: 'users.admins.view'
+                };
+                const specificKeys = Object.values(roleKeys);
+                const perms = lpCurrentPerms();
+                const hasSpecificGrant = specificKeys.some(key => perms?.[key] === true);
+                if (roleKeys[role]) return lpCan(roleKeys[role]) || (!hasSpecificGrant && lpCan('users.view'));
+                return !hasSpecificGrant && lpCan('users.view');
+            }
+            function lpFirstRoleView() {
+                return ['trainee','trainer','admin','manager','region_manager'].find(lpCanRoleView) || 'trainee';
+            }
+            function lpApplyUserRoleVisibility() {
+                const map = {
+                    trainee: ['#user-tab-trainee', "openUsersRole('trainee')"],
+                    trainer: ['#user-tab-trainer', "openUsersRole('trainer')"],
+                    admin: ['#user-tab-admin', "openUsersRole('admin')"],
+                    manager: ['#user-tab-manager', "openUsersRole('manager')"],
+                    region_manager: ['#user-tab-region_manager,#user-tab-region-manager', "openUsersRole('region_manager')"]
+                };
+                function targetsRole(btn, role) {
+                    const dataRole = btn.dataset?.roleView || '';
+                    if (dataRole) return dataRole === role;
+                    const action = btn.getAttribute('onclick') || '';
+                    return action.includes(`openUsersRole('${role}')`) ||
+                        action.includes(`openUsersRole("${role}")`) ||
+                        action.includes(`setUserRoleView('${role}')`) ||
+                        action.includes(`setUserRoleView("${role}")`);
+                }
+                Object.entries(map).forEach(([role, [ids, onclickNeedle]]) => {
+                    const can = lpCanRoleView(role);
+                    lpSetVisible(ids, can);
+                    document.querySelectorAll('#users-submenu button,.adv-ref-nav[data-ref-tab="users"],#tab-users .seg-tabs button,[data-role-view]').forEach(btn => {
+                        if (targetsRole(btn, role)) btn.style.display = can ? '' : 'none';
+                    });
+                });
+            }
+            function lpApplyUserManagementChrome(root = document) {
+                const canManage = lpCan('users.manage');
+                const canPerms = lpCan('permissions.manage');
+                const canRegistration = lpCan('users.registration.approve');
+                const roleTextRules = [
+                    { role:'trainee', words:['المتدربين','المتدربون'] },
+                    { role:'trainer', words:['المدربين','المدربون'] },
+                    { role:'admin', words:['الأدمن','الادمن'] },
+                    { role:'manager', words:['المديرين'] },
+                    { role:'region_manager', words:['مديرين الإقليم','مديري الإقليم'] }
+                ];
+                const current = USER_ROLE_VIEW || '';
+                let switchedRoleView = false;
+                if (document.getElementById('tab-users') && (!current || !lpCanRoleView(current))) {
+                    const first = lpFirstRoleView();
+                    if (first && first !== current) {
+                        USER_ROLE_VIEW = first;
+                        switchedRoleView = true;
+                        ['trainee','trainer','admin','manager','region_manager'].forEach(x => {
+                            document.getElementById(`user-tab-${x}`)?.classList.toggle('active', USER_ROLE_VIEW === x);
+                            document.querySelectorAll(`[data-role-view="${x}"]`).forEach(btn => btn.classList.toggle('active', USER_ROLE_VIEW === x));
+                        });
+                    }
+                }
+                if (switchedRoleView && typeof renderUsers === 'function') renderUsers(getFilteredUsers());
+                root.querySelectorAll('button,.adv-ref-nav').forEach(btn => {
+                    const action = btn.getAttribute('onclick') || '';
+                    const tab = btn.dataset?.refTab || '';
+                    const text = (btn.textContent || '').trim();
+                    roleTextRules.forEach(rule => {
+                        if (rule.words.some(word => text === word || text.includes(word))) {
+                            btn.style.display = lpCanRoleView(rule.role) ? '' : 'none';
+                        }
+                    });
+                    if (tab === 'permissions' || action.includes("showTab('permissions')") || action.includes('showTab("permissions")') || action.includes('openRoleHierarchyManager')) btn.style.display = canPerms ? '' : 'none';
+                    if (tab === 'registration-requests' || action.includes("showTab('registration-requests')") || action.includes('showTab("registration-requests")')) btn.style.display = canRegistration ? '' : 'none';
+                    if (tab === 'login-settings' || action.includes("showTab('login-settings')") || action.includes('showTab("login-settings")')) btn.style.display = lpCan('style.manage') ? '' : 'none';
+                    if (text.includes('إضافة تدرج') || text.includes('الصلاحيات')) btn.style.display = canPerms ? '' : 'none';
+                    if (text.includes('طلبات تحت الموافقة') || text.includes('طلبات إنشاء الحساب')) btn.style.display = canRegistration ? '' : 'none';
+                });
+                const usersTab = document.getElementById('tab-users');
+                if (usersTab) {
+                    usersTab.querySelectorAll('button').forEach(btn => {
+                        const action = btn.getAttribute('onclick') || '';
+                        if (action.includes("openModal('m-add-user')") || action.includes('openModal("m-add-user")') ||
+                            action.includes("openModal('m-bulk')") || action.includes('openModal("m-bulk")') ||
+                            action.includes('exportVisibleUsers') || action.includes('exportSelectedUsers') ||
+                            action.includes('bulkEnroll') || action.includes('bulkAdd') || action.includes('bulkSetStatus') ||
+                            action.includes('bulkIssueCertificate')) {
+                            btn.style.display = canManage ? '' : 'none';
+                        }
+                    });
+                    if (!canManage) {
+                        document.getElementById('users-bulk-toolbar')?.classList.toggle('show', false);
+                        document.getElementById('u-select-all')?.style.setProperty('display', 'none');
+                        usersTab.querySelectorAll('.u-check,#users-tb button').forEach(el => el.style.display = 'none');
+                    } else {
+                        document.getElementById('u-select-all')?.style.removeProperty('display');
+                        usersTab.querySelectorAll('.u-check,#users-tb button').forEach(el => el.style.display = '');
+                    }
+                }
+                lpApplyUserRoleVisibility();
+            }
+            function lpApplyPermissions() {
+                lpEnsureShell();
+                Object.keys(LP_TAB_PERMS).forEach(tab => lpSetVisible(lpSelectorForTab(tab), adv5CanSeeTab(tab)));
+                lpApplyUserRoleVisibility();
+                lpHideLegacyAdvancedNav();
+                lpApplyCoursePermissionChrome();
+                lpRefreshAllowedCourseGrid();
+                lpApplyTraineeCommChrome();
+                lpApplyUserManagementChrome();
+                document.querySelectorAll('.adv-ref-folder,.adv-nav-panel').forEach(folder => {
+                    const visible = [...folder.querySelectorAll('button,.adv-ref-nav')].some(btn => btn.style.display !== 'none');
+                    folder.style.display = visible ? '' : 'none';
+                });
+            }
+            const lpPrevApplyPerms = typeof advApplyPermissions === 'function' ? advApplyPermissions : null;
+            let lpApplyingPerms = false;
+            advApplyPermissions = function() {
+                if (lpApplyingPerms) return;
+                lpApplyingPerms = true;
+                try { lpPrevApplyPerms?.(); } catch(e) {}
+                try { lpApplyPermissions(); } finally { lpApplyingPerms = false; }
+                setTimeout(lpPolishText, 0);
+            };
+            window.advApplyPermissions = advApplyPermissions;
+
+            function lpRoleOptions() {
+                if (typeof adv8AllRoles === 'function') return adv8AllRoles();
+                return [{ key:'trainee', label:'متدرب' }, { key:'trainer', label:'مدرب' }, { key:'admin', label:'أدمن' }];
+            }
+            function lpPermissionGroups() {
+                return [
+                    { id:'users', icon:'ti-users', title:'المستخدمون والموافقات', desc:'عرض المستخدمين، بيانات المدربين، وموافقات الحسابات والالتحاق' },
+                    { id:'content', icon:'ti-layout-grid', title:'الدورات والمحتوى', desc:'إدارة الدورات، الاعتماد، الباقات، الجلسات، والتقييمات' },
+                    { id:'progress', icon:'ti-chart-bar', title:'التقدم والتقارير', desc:'التقدم، النقاط، التقارير، وسجل النشاط' },
+                    { id:'communication', icon:'ti-messages', title:'التواصل والدعم', desc:'الشات، الأسئلة، الإعلانات، والدعم الفني' },
+                    { id:'tools', icon:'ti-tool', title:'الأدوات والهوية', desc:'ستايل الأكاديمية، الشهادات، الكوبونات، والأسئلة الشائعة' }
+                ];
+            }
+            function lpPermissionBucket(key) {
+                if (key.startsWith('users.') || key === 'groups.manage' || key === 'groups.managers' || key === 'permissions.manage') return 'users';
+                if (key.startsWith('content.') || key === 'question_bank.manage') return 'content';
+                if (key.startsWith('progress.') || key.startsWith('points.') || key.startsWith('reports.') || key === 'activity.view' || key === 'dashboard.view') return 'progress';
+                if (key.startsWith('communication.') || key.startsWith('tech_support.') || key === 'announcements.manage' || key === 'utility.faq') return 'communication';
+                return 'tools';
+            }
+            function lpDefaultChatScope() {
+                return { regionsAll:false, regions:[], groupsAll:false, groups:[] };
+            }
+            async function lpEnsureChatScopeCaches() {
+                await ensureUsersCache?.();
+                if (!(GCACHE || []).length) {
+                    const gr = await call({ action:'getGroups' }).catch(() => null);
+                    if (gr?.success) GCACHE = gr.groups || [];
+                }
+            }
+            function lpRegionOptions() {
+                return [...new Set((UCACHE || []).map(u => String(u.region || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'ar'));
+            }
+            function lpGroupOptions() {
+                const rows = (GCACHE || []).map(g => ({ id:String(g.group_id || g.id || g.group_name || '').trim(), name:String(g.group_name || g.name || g.group_id || g.id || '').trim() })).filter(g => g.id);
+                return rows.sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+            }
+            function lpChatScopeHtml(prefix, chatScope = lpDefaultChatScope(), kind = 'region', enabled = true) {
+                const isRegion = kind === 'region';
+                const allKey = isRegion ? 'regionsAll' : 'groupsAll';
+                const listKey = isRegion ? 'regions' : 'groups';
+                const wrapId = `${prefix}-chat-${kind}-scope-wrap`;
+                const allId = `${prefix}-chat-${kind}-all`;
+                const selId = `${prefix}-chat-${kind}-list`;
+                const rows = isRegion ? lpRegionOptions().map(v => ({ id:v, name:v })) : lpGroupOptions();
+                const selected = new Set((chatScope[listKey] || []).map(String));
+                return `<div id="${wrapId}" class="launch-request-note" style="${enabled ? '' : 'display:none;'}border:1px solid var(--color-border-tertiary);border-radius:10px;padding:10px;background:var(--color-background-secondary);margin-top:8px;">
+                    <label style="display:flex;gap:8px;align-items:center;font-weight:800;margin-bottom:8px;"><input id="${allId}" type="checkbox" ${chatScope[allKey] ? 'checked' : ''} onchange="lpToggleChatScopeAll('${prefix}','${kind}')"> ${isRegion ? 'كل الأقاليم' : 'كل الجروبات'}</label>
+                    <label style="font-weight:800;display:block;margin-bottom:6px;">${isRegion ? 'اختار أقاليم محددة' : 'اختار جروبات محددة'}</label>
+                    <select id="${selId}" multiple size="${Math.min(Math.max(rows.length || 1, 3), 7)}" style="width:100%;" ${chatScope[allKey] ? 'disabled' : ''}>${rows.map(row => `<option value="${lpEsc(row.id)}" ${selected.has(String(row.id)) ? 'selected' : ''}>${lpEsc(row.name)}</option>`).join('')}</select>
+                    <div class="adv-sub" style="margin-top:6px;">لو ما اخترتش حاجة، هيتحسب نطاق المستخدم نفسه فقط.</div>
+                </div>`;
+            }
+            function lpToggleChatScopeAll(prefix, kind) {
+                const all = document.getElementById(`${prefix}-chat-${kind}-all`)?.checked === true;
+                const sel = document.getElementById(`${prefix}-chat-${kind}-list`);
+                if (sel) sel.disabled = all;
+            }
+            function lpCollectChatScope(prefix) {
+                const collect = (id) => [...(document.getElementById(id)?.selectedOptions || [])].map(o => o.value).filter(Boolean);
+                return {
+                    regionsAll: document.getElementById(`${prefix}-chat-region-all`)?.checked === true,
+                    regions: collect(`${prefix}-chat-region-list`),
+                    groupsAll: document.getElementById(`${prefix}-chat-group-all`)?.checked === true,
+                    groups: collect(`${prefix}-chat-group-list`)
+                };
+            }
+            function lpPermissionToggleChanged(ch, prefix) {
+                if (ch.dataset.key === 'progress.view') {
+                    const box = document.getElementById(`${prefix}-progress-scope-wrap`);
+                    if (box) box.style.display = ch.checked ? '' : 'none';
+                }
+                if (ch.dataset.key === 'communication.chat.region') {
+                    const box = document.getElementById(`${prefix}-chat-region-scope-wrap`);
+                    if (box) box.style.display = ch.checked ? '' : 'none';
+                }
+                if (ch.dataset.key === 'communication.chat.group') {
+                    const box = document.getElementById(`${prefix}-chat-group-scope-wrap`);
+                    if (box) box.style.display = ch.checked ? '' : 'none';
+                }
+            }
+            function lpPermissionAccordions(perms = {}, base = {}, prefix = '', scope = null, chatScope = null) {
+                const groups = lpPermissionGroups();
+                const byGroup = Object.fromEntries(groups.map(g => [g.id, []]));
+                (ADV_PERMISSION_MODULES || []).forEach(([key, label]) => (byGroup[lpPermissionBucket(key)] || byGroup.tools).push([key, label]));
+                return `<div class="launch-perm-shell">${groups.map((group, index) => {
+                    const items = byGroup[group.id] || [];
+                    const count = items.filter(([key]) => (perms[key] ?? base[key]) === true).length;
+                    return `<details class="launch-perm-cat" ${index === 0 ? 'open' : ''}>
+                        <summary><span><i class="ti ${lpEsc(group.icon)}"></i> ${lpEsc(group.title)}<div class="adv-sub">${lpEsc(group.desc)}</div></span><span class="badge">${count}/${items.length}</span></summary>
+                        <div class="launch-perm-body">${items.map(([key,label]) => {
+                            const checked = (perms[key] ?? base[key]) === true;
+                            const inherited = base[key] === true;
+                            const progressScope = key === 'progress.view' && prefix && typeof adv12ProgressScopeHtml === 'function' ? `<div style="${checked ? '' : 'display:none;'}" id="${prefix}-progress-scope-wrap">${adv12ProgressScopeHtml(prefix, scope || (typeof adv12DefaultScope === 'function' ? adv12DefaultScope() : null))}</div>` : '';
+                            const chatScopeBox = key === 'communication.chat.region' && prefix ? lpChatScopeHtml(prefix, chatScope || lpDefaultChatScope(), 'region', checked) : key === 'communication.chat.group' && prefix ? lpChatScopeHtml(prefix, chatScope || lpDefaultChatScope(), 'group', checked) : '';
+                            return `<div><div class="launch-perm-row"><div><strong>${lpEsc(label)}</strong><div class="adv-sub" dir="ltr">${lpEsc(key)}${inherited ? ' • مفعلة في صلاحيات الدور' : ''}</div></div><label class="adv-switch"><input class="role-perm-check" data-key="${lpEsc(key)}" data-base="${inherited ? '1' : '0'}" type="checkbox" ${checked ? 'checked' : ''} onchange="lpPermissionToggleChanged(this,'${prefix}')"><span></span></label></div>${progressScope}${chatScopeBox}</div>`;
+                        }).join('')}</div>
+                    </details>`;
+                }).join('')}</div>`;
+            }
+            adv15PermissionBucket = lpPermissionBucket;
+            adv15PermissionAccordions = lpPermissionAccordions;
+
+            loadPermissionsPage = async function(selectedEmail = '') {
+                lpEnsureShell();
+                if (!lpCan('permissions.manage')) {
+                    lpHtml('tab-permissions', '<div class="card launch-muted-card"><i class="ti ti-lock" style="font-size:44px;display:block;margin-bottom:10px;"></i>ليست لديك صلاحية إدارة الصلاحيات.</div>');
+                    return;
+                }
+                await ensureUsersCache?.();
+                await adv8LoadCustomRoles?.();
+                const rowsSnap = await getDocs(collection(db, 'user_permissions')).catch(() => ({ docs:[] }));
+                const rows = rowsSnap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => String(a.userEmail || a.id).localeCompare(String(b.userEmail || b.id), 'ar'));
+                const roles = lpRoleOptions();
+                const userOptions = (UCACHE || []).filter(u => u.status !== 'deleted').map(u => `<option value="${lpEsc(lpEmail(u.email))}" ${lpEmail(selectedEmail) === lpEmail(u.email) ? 'selected' : ''}>${lpEsc(u.full_name || u.email)} - ${lpEsc(typeof roleName === 'function' ? roleName(u.role) : u.role || 'متدرب')}</option>`).join('');
+                lpHtml('tab-permissions', `<div class="adv-title"><i class="ti ti-lock-access"></i> صلاحيات المستخدمين</div>
+                    <div class="adv-seg" id="adv15-perm-mode"><button class="active" onclick="adv15ShowPermMode('role',this)">صلاحيات حسب الدور</button><button onclick="adv15ShowPermMode('user',this)">تخصيص مستخدم</button><button onclick="adv15ShowPermMode('roles',this)"><i class="ti ti-user-cog"></i> إدارة الفئات الوظيفية</button></div>
+                    <div id="adv15-perm-role" class="card"><div class="field-row"><div class="field"><label>اختر الدور</label><select id="perm-role-kind" onchange="adv2RenderRoleWidePermissions(this.value)">${roles.map(r => `<option value="${lpEsc(r.key)}">${lpEsc(r.label)}</option>`).join('')}</select></div><div style="align-self:end"><button class="primary" onclick="saveRoleWidePermissions()"><i class="ti ti-device-floppy"></i> حفظ صلاحيات الدور</button></div></div><div class="launch-request-note">الصلاحيات هنا تتحكم في ظهور الصفحة وفي فتحها فعلياً، وليست مجرد شكل في القائمة.</div><div id="role-wide-perms" style="margin-top:12px;"></div></div>
+                    <div id="adv15-perm-user" class="hidden"><div class="card" style="margin-bottom:14px;"><div class="field-row"><div class="field"><label>اختر مستخدم للتخصيص</label><select id="perm-user">${userOptions}</select></div><div style="align-self:end;display:flex;gap:8px;flex-wrap:wrap;"><button class="primary" onclick="openUserRoleModal(document.getElementById('perm-user').value)"><i class="ti ti-adjustments"></i> فتح الصلاحيات</button><button onclick="loadPermissionsPage()"><i class="ti ti-refresh"></i> تحديث</button></div></div></div><div class="adv-table-wrap"><table><thead><tr><th>المستخدم</th><th>الدور الأساسي</th><th>تخصيصات</th><th>آخر تحديث</th><th>إجراءات</th></tr></thead><tbody>${rows.map(r => { const email = lpEmail(r.userEmail || r.id); const u = (UCACHE || []).find(x => lpEmail(x.email) === email) || {}; const count = Object.keys(r.overrides || {}).length || Object.values(r.permissions || {}).filter(Boolean).length || (r.progressScope && !r.progressScope.all ? 1 : 0); return `<tr><td><strong>${lpEsc(u.full_name || email)}</strong><div class="adv-sub" dir="ltr">${lpEsc(email)}</div></td><td>${lpBadge(typeof roleName === 'function' ? roleName(u.role || r.baseRole || 'custom') : (u.role || r.baseRole || 'custom'))}</td><td>${count}</td><td>${lpDate(r.updatedAt || r.createdAt)}</td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button class="sm" onclick="openUserRoleModal('${lpEsc(email)}')"><i class="ti ti-edit"></i> مراجعة</button><button class="sm danger" onclick="deleteUserPermissionOverride('${lpEsc(email)}')"><i class="ti ti-trash"></i> رجوع لصلاحيات الدور</button></td></tr>`; }).join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;">لا توجد تخصيصات محفوظة.</td></tr>'}</tbody></table></div></div>
+                    <div id="adv15-perm-roles" class="hidden"></div>`);
+                await adv2RenderRoleWidePermissions(lpVal('perm-role-kind') || roles[0]?.key || 'trainee');
+                await adv15RenderRoleHierarchyPanel?.();
+            };
+            adv15ShowPermMode = function(mode, btn) {
+                document.querySelectorAll('#adv15-perm-mode button').forEach(b => b.classList.remove('active'));
+                btn?.classList.add('active');
+                document.getElementById('adv15-perm-role')?.classList.toggle('hidden', mode !== 'role');
+                document.getElementById('adv15-perm-user')?.classList.toggle('hidden', mode !== 'user');
+                document.getElementById('adv15-perm-roles')?.classList.toggle('hidden', mode !== 'roles');
+                if (mode === 'roles') adv15RenderRoleHierarchyPanel?.();
+            };
+            adv2RenderRoleWidePermissions = async function(role) {
+                await adv12EnsureScopeCaches?.();
+                await lpEnsureChatScopeCaches();
+                const base = rolePresetPermissions(role);
+                const snap = await getDoc(doc(db, 'role_permissions', role)).catch(() => null);
+                const saved = snap?.exists?.() ? (snap.data().permissions || {}) : {};
+                const scope = snap?.exists?.() ? (snap.data().progressScope || (typeof adv12DefaultScope === 'function' ? adv12DefaultScope() : null)) : (typeof adv12DefaultScope === 'function' ? adv12DefaultScope() : null);
+                const chatScope = snap?.exists?.() ? (snap.data().chatScope || lpDefaultChatScope()) : lpDefaultChatScope();
+                lpHtml('role-wide-perms', lpPermissionAccordions(saved, base, 'role', scope, chatScope));
+            };
+            saveRoleWidePermissions = async function() {
+                const role = lpVal('perm-role-kind') || 'trainer';
+                const permissions = {};
+                document.querySelectorAll('#role-wide-perms .role-perm-check').forEach(ch => permissions[ch.dataset.key] = ch.checked === true);
+                const progressScope = typeof adv12CollectProgressScope === 'function' ? adv12CollectProgressScope('role') : null;
+                const chatScope = lpCollectChatScope('role');
+                await setDoc(doc(db, 'role_permissions', role), { role, permissions, progressScope, chatScope, updatedAt: Date.now(), updatedBy: CU?.email || '' }, { merge: true });
+                lpToast('تم حفظ صلاحيات الدور');
+                await advLoadCurrentPermissions?.();
+                advApplyPermissions?.();
+            };
+            openUserRoleModal = async function(email) {
+                email = lpEmail(email);
+                if (!email) return lpToast('اختر مستخدم أولاً', 'warning');
+                await ensureUsersCache?.();
+                await adv12EnsureScopeCaches?.();
+                await lpEnsureChatScopeCaches();
+                const user = (UCACHE || []).find(u => lpEmail(u.email) === email) || { email, role:'trainee' };
+                const role = user.role || 'trainee';
+                const basePreset = rolePresetPermissions(role);
+                const [roleSnap, userSnap] = await Promise.all([
+                    getDoc(doc(db, 'role_permissions', role)).catch(() => null),
+                    getDoc(doc(db, 'user_permissions', email)).catch(() => null)
+                ]);
+                const rolePerms = roleSnap?.exists?.() ? (roleSnap.data().permissions || {}) : {};
+                const userData = userSnap?.exists?.() ? (userSnap.data() || {}) : {};
+                const saved = { ...(userData.permissions || {}), ...(userData.overrides || {}) };
+                const scope = userSnap?.exists?.() && userSnap.data().progressScope ? userSnap.data().progressScope : (roleSnap?.exists?.() ? roleSnap.data().progressScope : (typeof adv12DefaultScope === 'function' ? adv12DefaultScope() : null));
+                const chatScope = userSnap?.exists?.() && userSnap.data().chatScope ? userSnap.data().chatScope : (roleSnap?.exists?.() ? (roleSnap.data().chatScope || lpDefaultChatScope()) : lpDefaultChatScope());
+                const body = `<input type="hidden" id="role-user-email" value="${lpEsc(email)}"><div class="adv-sub" style="margin-bottom:12px;">الدور الأساسي: ${lpBadge(typeof roleName === 'function' ? roleName(role) : role)} • أي تغيير هنا استثناء لهذا المستخدم فقط.</div><div id="user-role-body">${lpPermissionAccordions(saved, { ...basePreset, ...rolePerms }, 'user', scope, chatScope)}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;"><button onclick="closeModal('m-adv2');closeModal('m-user-role')">إلغاء</button>${userSnap?.exists?.() ? `<button class="danger" onclick="deleteUserPermissionOverride('${lpEsc(email)}')"><i class="ti ti-trash"></i> مسح التخصيص والرجوع للدور</button>` : ''}<button class="primary" onclick="saveUserRoleOverrides()"><i class="ti ti-device-floppy"></i> حفظ التخصيص</button></div>`;
+                if (typeof adv2OpenModal === 'function') adv2OpenModal(`صلاحيات: ${lpEsc(user.full_name || email)}`, body, '980px');
+                else {
+                    if (!document.getElementById('m-user-role')) document.body.insertAdjacentHTML('beforeend', '<div id="m-user-role" class="modal-wrap hidden"><div class="modal" style="max-width:980px;"><div id="user-role-body-shell"></div></div></div>');
+                    lpHtml('user-role-body-shell', `<div style="font-size:18px;font-weight:900;margin-bottom:12px;">صلاحيات: ${lpEsc(user.full_name || email)}</div>${body}`);
+                    openModal('m-user-role');
+                }
+            };
+            saveUserRoleOverrides = async function() {
+                const email = lpEmail(lpVal('role-user-email'));
+                if (!email) return lpToast('المستخدم غير محدد', 'warning');
+                const user = (UCACHE || []).find(u => lpEmail(u.email) === email) || {};
+                const permissions = {};
+                const overrides = {};
+                document.querySelectorAll('#user-role-body .role-perm-check').forEach(ch => {
+                    const key = ch.dataset.key;
+                    const base = ch.dataset.base === '1';
+                    const val = ch.checked === true;
+                    permissions[key] = val;
+                    if (val !== base) overrides[key] = val;
+                });
+                const progressScope = typeof adv12CollectProgressScope === 'function' ? adv12CollectProgressScope('user') : null;
+                const chatScope = lpCollectChatScope('user');
+                await setDoc(doc(db, 'user_permissions', email), { userEmail: email, baseRole: user.role || '', permissions, overrides, progressScope, chatScope, updatedAt: Date.now(), updatedBy: CU?.email || '' }, { merge: true });
+                closeModal('m-adv2'); closeModal('m-user-role');
+                lpToast('تم حفظ تخصيص الصلاحيات');
+                if (lpEmail(CU?.email) === email) await advLoadCurrentPermissions?.();
+                loadPermissionsPage(email);
+            };
+
+            setUserRoleView = function(view) {
+                view = view || 'trainee';
+                if (!lpCanRoleView(view)) {
+                    view = lpFirstRoleView();
+                    lpToast('تم توجيهك لأول فئة مسموح لك بعرضها', 'warning');
+                }
+                USER_ROLE_VIEW = view;
+                SELECTED_USERS?.clear?.();
+                ['trainee','trainer','admin','manager','region_manager'].forEach(x => {
+                    document.getElementById(`user-tab-${x}`)?.classList.toggle('active', USER_ROLE_VIEW === x);
+                    document.querySelectorAll(`[data-role-view="${x}"]`).forEach(btn => btn.classList.toggle('active', USER_ROLE_VIEW === x));
+                });
+                filterUsers?.();
+            };
+            openUsersRole = function(view) {
+                document.getElementById('users-submenu')?.classList.add('hidden');
+                const menu = document.getElementById('users-submenu');
+                if (menu) menu.style.display = 'none';
+                USER_ROLE_VIEW = view || 'trainee';
+                showTab('users');
+                setUserRoleView(USER_ROLE_VIEW);
+            };
+            getFilteredUsers = function() {
+                const roleView = USER_ROLE_VIEW || lpFirstRoleView();
+                if (!lpCanRoleView(roleView)) return [];
+                const q = (lpVal('u-search') || '').toLowerCase();
+                const region = lpVal('u-filter-region');
+                const supervisor = lpVal('u-filter-supervisor');
+                const group = lpVal('u-filter-group');
+                const status = lpVal('u-filter-status');
+                return (UCACHE || []).filter(u => {
+                    const role = u.role || 'trainee';
+                    const hay = `${u.full_name || ''} ${u.email || ''} ${u.employee_id || ''} ${u.region_manager || ''}`.toLowerCase();
+                    return role === roleView &&
+                        (!q || hay.includes(q)) &&
+                        (!region || u.region === region) &&
+                        (!supervisor || u.supervisor === supervisor) &&
+                        (!group || u.group === group) &&
+                        (!status || u.status === status);
+                });
+            };
+            filterUsers = function() {
+                if (typeof renderUsers === 'function') renderUsers(getFilteredUsers());
+                lpApplyUserManagementChrome(document.getElementById('tab-users') || document);
+            };
+
+            function lpCanViewCourses() { return lpCan('content.courses.view'); }
+            function lpCanCreateCourses() { return lpCan('content.courses.create'); }
+            function lpCanApproveCourses() { return lpCan('content.courses.approve'); }
+            function lpCourseById(courseId) { return (CCACHE || []).find(c => lpCourseId(c) === String(courseId || CCI || COURSE_ACTION_ID || '')) || null; }
+            function lpCanEditCourse(course = null) {
+                if (lpIsAdminUser()) return true;
+                if (!lpCanCreateCourses()) return false;
+                if (typeof isTrainer === 'function' && isTrainer()) return !course || trainerOwnsCourse(course);
+                return true;
+            }
+            function lpDenyCourseWrite() {
+                lpToast('ليست لديك صلاحية تعديل الدورات', 'warning');
+                return false;
+            }
+            function lpSetButtonsVisible(root, selector, visible) {
+                (root || document).querySelectorAll(selector).forEach(el => el.style.display = visible ? '' : 'none');
+            }
+            function lpApplyCoursePermissionChrome(root = document) {
+                const canView = lpCanViewCourses();
+                const canCreate = lpCanCreateCourses();
+                const canApprove = lpCanApproveCourses();
+                lpSetButtonsVisible(root, '[onclick*="openAddCourseModal"]', canCreate);
+                lpSetButtonsVisible(root, '[onclick*="openEditCourse"],[onclick*="openCourseEditFromActions"],[onclick*="saveCourseInfoSettings"],[onclick*="openCourseItemModal"],[onclick*="saveCourseItem"]', canCreate);
+                lpSetButtonsVisible(root, '[onclick*="deleteCourse"],[onclick*="deleteCourseFromActions"]', canCreate);
+                lpSetButtonsVisible(root, '[onclick*="approveCourseFromActions"],[onclick*="finalApproveCourse"],[onclick*="approveCourseQuick"]', canApprove);
+            }
+            function lpRefreshAllowedCourseGrid() {
+                if (!lpCanViewCourses()) return;
+                const grid = document.getElementById('courses-grid');
+                if (!grid) return;
+                const text = (grid.textContent || '').trim();
+                const needsRefresh = !grid.children.length || text.includes('ليست لديك صلاحية عرض الدورات');
+                if (!needsRefresh || LP.courseGridRefreshQueued) return;
+                LP.courseGridRefreshQueued = true;
+                setTimeout(async () => {
+                    try {
+                        if (!lpCanViewCourses()) return;
+                        if (typeof loadCourses === 'function') await loadCourses();
+                        else if (typeof renderCoursesGrid === 'function') renderCoursesGrid();
+                    } finally {
+                        LP.courseGridRefreshQueued = false;
+                    }
+                }, 0);
+            }
+            const lpPrevOpenAddCourseModal = typeof openAddCourseModal === 'function' ? openAddCourseModal : null;
+            openAddCourseModal = async function(...args) {
+                if (!lpCanCreateCourses()) return lpDenyCourseWrite();
+                return lpPrevOpenAddCourseModal?.(...args);
+            };
+            const lpPrevOpenCourseActions = typeof openCourseActions === 'function' ? openCourseActions : null;
+            openCourseActions = function(courseId) {
+                if (!lpCanViewCourses()) return lpToast('ليست لديك صلاحية عرض الدورات', 'warning');
+                const out = lpPrevOpenCourseActions?.(courseId);
+                setTimeout(() => lpApplyCoursePermissionChrome(document.getElementById('m-course-actions') || document), 0);
+                return out;
+            };
+            const lpPrevOpenCourseDetail = typeof openCourseDetail === 'function' ? openCourseDetail : null;
+            openCourseDetail = async function(courseId) {
+                if (!lpCanViewCourses()) return lpToast('ليست لديك صلاحية عرض الدورات', 'warning');
+                const out = await lpPrevOpenCourseDetail?.(courseId);
+                setTimeout(() => lpApplyCoursePermissionChrome(document.getElementById('tab-course-detail') || document), 0);
+                return out;
+            };
+            const lpPrevOpenCourseEditFromActions = typeof openCourseEditFromActions === 'function' ? openCourseEditFromActions : null;
+            openCourseEditFromActions = function(...args) {
+                if (!lpCanEditCourse(lpCourseById(COURSE_ACTION_ID || CCI))) return lpDenyCourseWrite();
+                return lpPrevOpenCourseEditFromActions?.(...args);
+            };
+            const lpPrevOpenEditCourse = typeof openEditCourse === 'function' ? openEditCourse : null;
+            openEditCourse = async function(...args) {
+                if (!lpCanEditCourse(lpCourseById(CCI))) return lpDenyCourseWrite();
+                return lpPrevOpenEditCourse?.(...args);
+            };
+            const lpPrevDeleteCourse = typeof deleteCourse === 'function' ? deleteCourse : null;
+            deleteCourse = async function(...args) {
+                if (!lpCanEditCourse(lpCourseById(CCI))) return lpDenyCourseWrite();
+                return lpPrevDeleteCourse?.(...args);
+            };
+            const lpPrevDeleteCourseFromActions = typeof deleteCourseFromActions === 'function' ? deleteCourseFromActions : null;
+            deleteCourseFromActions = async function(...args) {
+                if (!lpCanEditCourse(lpCourseById(COURSE_ACTION_ID || CCI))) return lpDenyCourseWrite();
+                return lpPrevDeleteCourseFromActions?.(...args);
+            };
+            const lpPrevSaveCourseInfoSettings = typeof saveCourseInfoSettings === 'function' ? saveCourseInfoSettings : null;
+            saveCourseInfoSettings = async function(...args) {
+                if (!lpCanEditCourse(lpCourseById(CCI))) return lpDenyCourseWrite();
+                return lpPrevSaveCourseInfoSettings?.(...args);
+            };
+            const lpPrevOpenCourseItemModal = typeof openCourseItemModal === 'function' ? openCourseItemModal : null;
+            openCourseItemModal = function(...args) {
+                if (!lpCanEditCourse(lpCourseById(CCI))) return lpDenyCourseWrite();
+                return lpPrevOpenCourseItemModal?.(...args);
+            };
+            const lpPrevSaveCourseItem = typeof saveCourseItem === 'function' ? saveCourseItem : null;
+            saveCourseItem = async function(...args) {
+                if (!lpCanEditCourse(lpCourseById(CCI))) return lpDenyCourseWrite();
+                return lpPrevSaveCourseItem?.(...args);
+            };
+
+            function lpCourseId(c = {}) { return String(c.course_id || c.courseId || c.id || '').trim(); }
+            function lpCourseTitle(c = {}) { return (typeof courseName === 'function' ? courseName(c) : (c.course_name || c.title || lpCourseId(c))) || lpCourseId(c); }
+            function lpCourseDesc(c = {}) { return (typeof courseDesc === 'function' ? courseDesc(c) : (c.description || c.desc || '')) || ''; }
+            function lpCourseStatus(c = {}) { return typeof effectiveCourseStatus === 'function' ? effectiveCourseStatus(c) : (c.status || 'active'); }
+            function lpApprovalStatus(c = {}) {
+                return String(c.approval_status || c.approvalStatus || c.review_status || '').toLowerCase() || (lpCourseStatus(c) === 'active' ? 'approved' : 'draft');
+            }
+            function lpCoursePricing(c = {}) {
+                if (typeof finalDirectCoursePricing === 'function') return finalDirectCoursePricing(c);
+                if (typeof adv16CoursePricing === 'function') return adv16CoursePricing(c);
+                const p = c.pricing || {};
+                const price = Number(p.price ?? c.price ?? c.course_price ?? 0);
+                const isPaid = p.isPaid === true || c.is_paid === true || String(p.type || c.pricing_type || '').toLowerCase() === 'paid' || price > 0;
+                return { isPaid, price: isPaid ? price : 0, currency: p.currency || c.currency || 'SAR' };
+            }
+            function lpPricingBadge(c = {}) {
+                const p = lpCoursePricing(c);
+                return p.isPaid ? `<span class="badge" style="background:#fff2cc;color:#7a4b00;"><i class="ti ti-credit-card"></i> مدفوعة - ${lpMoney(p.price, p.currency)}</span>` : `<span class="badge badge-active"><i class="ti ti-gift"></i> مجانية</span>`;
+            }
+            function lpPackageCacheReady() {
+                try { return typeof FINAL_PAID_PACKAGE_CACHE_READY === 'undefined' ? true : !!FINAL_PAID_PACKAGE_CACHE_READY; }
+                catch(e) { return true; }
+            }
+            function lpPackageCacheLoading() {
+                try { return typeof FINAL_PAID_PACKAGE_CACHE_LOADING === 'undefined' ? false : !!FINAL_PAID_PACKAGE_CACHE_LOADING; }
+                catch(e) { return false; }
+            }
+            function lpCourseCreatorLabel(c = {}) {
+                const email = lpEmail(c.created_by || c.createdBy || c.trainer_email || c.trainerEmail || c.instructor_email || c.instructorEmail || c.reviewed_by || c.updated_by || '');
+                const byEmail = (UCACHE || []).find(u => lpEmail(u.email) === email);
+                return String(c.created_by_name || c.creator_name || c.trainer_name || c.trainerName || c.instructor || byEmail?.full_name || byEmail?.email || email || '').trim();
+            }
+            finalDirectTrainerLabel = lpCourseCreatorLabel;
+            finalDirectApprovalStatus = lpApprovalStatus;
+            finalDirectTrainerSearchText = function(c = {}) {
+                const email = lpEmail(c.created_by || c.createdBy || c.trainer_email || c.trainerEmail || c.instructor_email || c.instructorEmail || c.reviewed_by || '');
+                const byEmail = (UCACHE || []).find(u => lpEmail(u.email) === email);
+                return [email, byEmail?.email, byEmail?.full_name, c.created_by_name, c.creator_name, c.trainer_name, c.trainerName, c.instructor, c.created_by, c.createdBy, c.reviewed_by].filter(Boolean).join(' ').toLowerCase();
+            };
+
+            const lpPrevSubmitAddCourse = typeof submitAddCourse === 'function' ? submitAddCourse : null;
+            submitAddCourse = async function() {
+                if (!lpCanCreateCourses()) return lpDenyCourseWrite();
+                const nameAr = (lpVal('nc-name') || '').trim();
+                const nameEnEl = document.getElementById('nc-name-en');
+                const nameEn = nameEnEl ? (lpVal('nc-name-en') || '').trim() : '';
+                if (!nameAr) return lpToast('اسم الدورة مطلوب', 'warning');
+                if (nameEnEl && !nameEn) return lpToast('اكتب اسم الدورة باللغة الإنجليزية', 'warning');
+                const certTemplateId = lpVal('nc-cert-template');
+                const certTemplate = (CERT_TEMPLATE_CACHE || []).find(t => t.id === certTemplateId);
+                const existingCourse = EDITING_COURSE_ID ? (CCACHE || []).find(c => lpCourseId(c) === EDITING_COURSE_ID) : null;
+                const creatorEmail = lpEmail(existingCourse?.created_by || existingCourse?.createdBy || existingCourse?.trainer_email || existingCourse?.trainerEmail || CU?.email || '');
+                const creatorName = existingCourse?.created_by_name || existingCourse?.creator_name || CU?.full_name || CU?.email || creatorEmail;
+                const course = {
+                    course_name: nameAr,
+                    course_name_ar: nameAr,
+                    course_name_en: nameEn || existingCourse?.course_name_en || '',
+                    description: lpVal('nc-desc'),
+                    description_ar: lpVal('nc-desc'),
+                    description_en: lpVal('nc-desc-en'),
+                    thumbnail_url: lpVal('nc-thumb'),
+                    start_date: lpVal('nc-start'),
+                    end_date: lpVal('nc-end'),
+                    release_date: lpVal('nc-release'),
+                    certificate_enabled: lpVal('nc-cert'),
+                    certificate_template_id: certTemplateId || '',
+                    certificate_image_url: certTemplate ? (certTemplate.imageUrl || '') : lpVal('nc-certimg'),
+                    certificate_builder: certTemplate ? (certTemplate.builder || null) : null,
+                    certificate_body: certTemplate ? (certTemplate.body || '') : '',
+                    status: lpVal('nc-status') || 'active',
+                    visibility: lpVal('nc-visibility') || 'public',
+                    prerequisite: lpVal('nc-prereq') || '',
+                    created_by: creatorEmail,
+                    created_by_name: creatorName,
+                    created_by_role: existingCourse?.created_by_role || CU?.role || '',
+                    created_at: existingCourse?.created_at || existingCourse?.createdAt || Date.now(),
+                    updated_by: lpEmail(CU?.email || ''),
+                    updated_at: Date.now()
+                };
+                if (typeof isTrainer === 'function' && isTrainer()) {
+                    course.status = 'draft';
+                    course.approval_status = 'pending_review';
+                    course.submitted_for_review_at = Date.now();
+                } else {
+                    course.approval_status = course.status === 'active' ? 'approved' : (existingCourse?.approval_status || 'draft');
+                    course.reviewed_by = lpEmail(CU?.email || '');
+                    course.reviewed_at = Date.now();
+                }
+                const r = EDITING_COURSE_ID ? await call({ action:'updateCourse', courseId: EDITING_COURSE_ID, updates: course }) : await call({ action:'addCourse', course });
+                if (r.success) {
+                    closeModal('m-add-course');
+                    if (typeof isTrainer === 'function' && isTrainer()) await notifyAdminsCourseReview?.(course, !!EDITING_COURSE_ID);
+                    lpToast((typeof isTrainer === 'function' && isTrainer()) ? 'تم إرسال الدورة إلى المراجعة' : (EDITING_COURSE_ID ? 'تم حفظ تعديلات الدورة' : 'تم إنشاء الدورة'));
+                    const edited = EDITING_COURSE_ID;
+                    EDITING_COURSE_ID = null;
+                    await loadCourses?.();
+                    if (edited) openCourseDetail?.(edited);
+                } else if (lpPrevSubmitAddCourse) {
+                    return lpPrevSubmitAddCourse();
+                } else lpToast(r.error || 'تعذر حفظ الدورة', 'error');
+            };
+
+            async function lpApproveCourse(courseId, clickedBtn = null) {
+                LP.approvingCourses = LP.approvingCourses || new Set();
+                if (LP.approvingCourses.has(courseId)) return lpToast('جاري اعتماد الدورة بالفعل...', 'warning');
+                LP.approvingCourses.add(courseId);
+                const oldHtml = clickedBtn?.innerHTML;
+                if (clickedBtn) {
+                    clickedBtn.disabled = true;
+                    clickedBtn.innerHTML = '<i class="ti ti-loader-2"></i><span>جاري الاعتماد</span>';
+                }
+                try {
+                    if (!lpIsAdminUser() && !lpCan('content.courses.approve')) return lpToast('ليست لديك صلاحية اعتماد الدورات', 'warning');
+                    const c = (CCACHE || []).find(x => lpCourseId(x) === String(courseId)) || {};
+                    const r = await call({ action:'updateCourse', courseId, updates:{
+                        approval_status: 'approved',
+                        status: 'active',
+                        reviewed_by: lpEmail(CU?.email || ''),
+                        reviewed_at: Date.now(),
+                        updated_by: lpEmail(CU?.email || ''),
+                        updated_at: Date.now()
+                    }});
+                    if (!r.success) return lpToast(r.error || 'تعذر اعتماد الدورة', 'error');
+                    const owner = lpEmail(c.created_by || c.createdBy || c.trainer_email || c.trainerEmail || '');
+                    if (owner) await call({ action:'addNotification', userEmail: owner, message:`تم اعتماد ونشر دورتك: ${lpCourseTitle(c) || 'دورة'}`, type:'course_review', link:'courses' }).catch(() => {});
+                    lpToast('تم اعتماد الدورة ونشرها');
+                    await loadCourses?.();
+                } finally {
+                    LP.approvingCourses.delete(courseId);
+                    if (clickedBtn) {
+                        clickedBtn.disabled = false;
+                        if (oldHtml) clickedBtn.innerHTML = oldHtml;
+                    }
+                }
+            }
+            approveCourseQuick = lpApproveCourse;
+            window.approveCourseQuick = lpApproveCourse;
+            window.finalApproveCourse = lpApproveCourse;
+
+            function lpRenderCourseCard(c) {
+                const id = lpCourseId(c);
+                const title = lpCourseTitle(c);
+                const desc = lpCourseDesc(c);
+                const status = lpCourseStatus(c);
+                const pending = lpApprovalStatus(c) === 'pending_review';
+                const creator = lpCourseCreatorLabel(c);
+                const approveBtn = (lpIsAdminUser() || lpCan('content.courses.approve')) && pending ? `<button class="launch-course-approve" title="اعتماد الدورة" onclick="event.stopPropagation();finalApproveCourse('${lpEsc(id)}', this)"><i class="ti ti-check"></i><span>اعتماد</span></button>` : '';
+                const pkgMarker = typeof finalPaidPackageMarker === 'function' ? finalPaidPackageMarker(c) : '';
+                const pkgTop = pkgMarker && pkgMarker.startsWith('<span title=') ? pkgMarker.split('</span>')[0] + '</span>' : '';
+                return `<div class="course-card final-course-card launch-course-card" style="position:relative;" onclick="openCourseActions('${lpEsc(id)}')">${pkgTop}<div class="course-thumb">${c.thumbnail_url ? `<img src="${lpEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i>${approveBtn}</div><div class="course-body"><div class="course-name">${lpEsc(title)}</div><div class="course-desc">${lpEsc(desc || 'لا يوجد وصف')}</div>${typeof courseCountPills === 'function' ? courseCountPills(c) : ''}<div class="course-meta-row"><span><i class="ti ti-calendar-play"></i> ${lpEsc(c.start_date || 'بدون بداية')}</span><span><i class="ti ti-calendar-off"></i> ${lpEsc(c.end_date || 'بدون نهاية')}</span><span><i class="ti ti-users"></i> ${Number(c._enrolled_count || 0)} مسجل</span></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">${lpPricingBadge(c)}<span class="badge badge-${status === 'active' ? 'active' : 'suspended'}">${status === 'active' ? 'مفتوحة' : 'مسودة'}</span><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>${pending ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد المراجعة</span>' : (typeof approvalBadge === 'function' ? approvalBadge(c) : '')}${creator ? `<span class="badge launch-creator-badge"><i class="ti ti-user-edit"></i> منشئ الدورة: ${lpEsc(creator)}</span>` : ''}${typeof finalPackagesForCourse === 'function' && finalPackagesForCourse(id, { paidOnly:true }).length ? `<span class="badge" style="background:#fce8e6;color:#b3261e;"><i class="ti ti-package"></i> داخل باقة مدفوعة</span>` : ''}${typeof hasCourseCertificate === 'function' && hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}</div></div></div>`;
+            }
+            renderCoursesGrid = function() {
+                if (LP.renderingCoursesGrid) return;
+                LP.renderingCoursesGrid = true;
+                try {
+                    if (typeof finalDirectEnsureCourseFilters === 'function') finalDirectEnsureCourseFilters();
+                    const grid = document.getElementById('courses-grid');
+                    if (!grid) return;
+                    if (!lpCanViewCourses()) {
+                        grid.innerHTML = '<div class="launch-muted-card">ليست لديك صلاحية عرض الدورات.</div>';
+                        lpApplyCoursePermissionChrome();
+                        return;
+                    }
+                    lpApplyCoursePermissionChrome();
+                    if (typeof finalEnsurePackageCache === 'function' && !lpPackageCacheReady() && !lpPackageCacheLoading() && !LP.packageCacheRefreshQueued) {
+                        LP.packageCacheRefreshQueued = true;
+                        try {
+                            Promise.resolve(finalEnsurePackageCache()).finally(() => {
+                                LP.packageCacheRefreshQueued = false;
+                                if (document.getElementById('courses-grid')) renderCoursesGrid();
+                            });
+                        } catch(e) {
+                            LP.packageCacheRefreshQueued = false;
+                        }
+                    }
+                    let courses = [...(CCACHE || [])];
+                    if (typeof isTrainer === 'function' && isTrainer()) courses = courses.filter(trainerOwnsCourse);
+                    const q = (document.getElementById('course-search')?.value || '').toLowerCase().trim();
+                    const priceFilter = document.getElementById('course-price-filter')?.value || '';
+                    const trainerFilter = (document.getElementById('course-trainer-filter')?.value || '').toLowerCase().trim();
+                    const filter = CURRENT_COURSE_FILTER || 'all';
+                    if (filter === 'public') courses = courses.filter(c => c.visibility === 'public');
+                    if (filter === 'private') courses = courses.filter(c => c.visibility !== 'public');
+                    if (filter === 'active') courses = courses.filter(c => lpCourseStatus(c) === 'active');
+                    if (filter === 'draft') courses = courses.filter(c => lpCourseStatus(c) !== 'active');
+                    if (filter === 'paid') courses = courses.filter(c => lpCoursePricing(c).isPaid);
+                    if (filter === 'free') courses = courses.filter(c => !lpCoursePricing(c).isPaid);
+                    if (filter === 'review') courses = courses.filter(c => lpApprovalStatus(c) === 'pending_review');
+                    if (priceFilter === 'paid') courses = courses.filter(c => lpCoursePricing(c).isPaid);
+                    if (priceFilter === 'free') courses = courses.filter(c => !lpCoursePricing(c).isPaid);
+                    if (trainerFilter) courses = courses.filter(c => finalDirectTrainerSearchText(c).includes(trainerFilter));
+                    if (q) courses = courses.filter(c => `${lpCourseTitle(c)} ${c.course_name || ''} ${c.course_name_en || ''} ${lpCourseDesc(c)} ${lpCourseCreatorLabel(c)}`.toLowerCase().includes(q));
+                    grid.innerHTML = courses.length ? courses.map(lpRenderCourseCard).join('') : '<div class="launch-muted-card"><i class="ti ti-books" style="font-size:48px;display:block;margin-bottom:12px;opacity:.5"></i>لا توجد دورات مطابقة</div>';
+                    lpPolishText();
+                } finally {
+                    LP.renderingCoursesGrid = false;
+                }
+            };
+
+            function lpRules(c = {}) { return c.rules || c.course_rules || {}; }
+            function lpApprovalRequired(c = {}) { const r = lpRules(c); return r.approvalRequired === true || r.requiresApproval === true || r.enrollmentApproval === true; }
+            function lpEnrollmentDisabled(c = {}) { const r = lpRules(c); return r.disableEnrollment === true || r.enrollmentDisabled === true; }
+            function lpRequestId(courseId, email) { return `${lpSafeId(courseId)}_${lpSafeId(email)}`; }
+            function lpNormalizeEnrollmentRequest(row = {}) {
+                return { ...row, id: row.id || lpRequestId(row.courseId, row.userEmail), status: lpRequestStatus(row) };
+            }
+            function lpLocalRequestKey(email) { return `${COURSE_REQUESTS_COLLECTION}:${lpEmail(email)}`; }
+            function lpReadLocalEnrollmentRequests(email) {
+                try { return JSON.parse(localStorage.getItem(lpLocalRequestKey(email)) || '[]').map(lpNormalizeEnrollmentRequest); }
+                catch(e) { return []; }
+            }
+            function lpSaveLocalEnrollmentRequest(row) {
+                try {
+                    const email = lpEmail(row.userEmail);
+                    const rows = lpReadLocalEnrollmentRequests(email).filter(r => String(r.courseId) !== String(row.courseId));
+                    rows.push(lpNormalizeEnrollmentRequest(row));
+                    localStorage.setItem(lpLocalRequestKey(email), JSON.stringify(rows.slice(-80)));
+                } catch(e) {}
+            }
+            function lpUniqueRequests(rows) {
+                const map = new Map();
+                (rows || []).filter(Boolean).forEach(row => {
+                    const r = lpNormalizeEnrollmentRequest(row);
+                    map.set(r.id || `${r.courseId}:${r.userEmail}`, r);
+                });
+                return [...map.values()];
+            }
+            async function lpFetchEnrollmentRequests({ email = '', courseId = '', courseIds = [] } = {}) {
+                const rows = [];
+                const normalizedEmail = lpEmail(email);
+                const ids = [...new Set([courseId, ...courseIds].filter(Boolean).map(String))];
+                if (normalizedEmail) rows.push(...lpReadLocalEnrollmentRequests(normalizedEmail));
+                if (normalizedEmail) {
+                    try {
+                        const snaps = await getDocs(query(collection(db, COURSE_REQUESTS_COLLECTION), where('userEmail', '==', normalizedEmail)));
+                        rows.push(...snaps.docs.map(d => ({ ...d.data(), id: d.id })));
+                    } catch(e) {}
+                    await Promise.all(ids.map(async id => {
+                        try {
+                            const snap = await getDoc(doc(db, COURSE_REQUESTS_COLLECTION, lpRequestId(id, normalizedEmail)));
+                            if (snap.exists()) rows.push({ ...snap.data(), id: snap.id });
+                        } catch(e) {}
+                    }));
+                } else if (courseId) {
+                    try {
+                        const snaps = await getDocs(query(collection(db, COURSE_REQUESTS_COLLECTION), where('courseId', '==', String(courseId))));
+                        rows.push(...snaps.docs.map(d => ({ ...d.data(), id: d.id })));
+                    } catch(e) {
+                        try { rows.push(...(await advDocs(COURSE_REQUESTS_COLLECTION)).filter(r => String(r.courseId) === String(courseId))); } catch(e2) {}
+                    }
+                } else {
+                    try { rows.push(...await advDocs(COURSE_REQUESTS_COLLECTION)); } catch(e) {}
+                }
+                return lpUniqueRequests(rows).filter(r =>
+                    (!normalizedEmail || lpEmail(r.userEmail) === normalizedEmail) &&
+                    (!courseId || String(r.courseId) === String(courseId)) &&
+                    (!ids.length || ids.includes(String(r.courseId)))
+                );
+            }
+            async function lpLoadCourse(courseId) {
+                let c = (CCACHE || []).find(x => lpCourseId(x) === String(courseId));
+                if (c) return c;
+                const r = await call({ action:'getCourse', courseId }).catch(() => null);
+                return r?.success ? r.course : null;
+            }
+            async function lpAwardEnrollPoints(email) {
+                try {
+                    const config = await call({ action:'getPointsConfig' });
+                    const points = config?.success ? (config.config.enroll || config.config.enroll_points || 5) : 5;
+                    const uRef = doc(db, 'users', email);
+                    const uSnap = await getDoc(uRef);
+                    const current = uSnap.exists() ? Number(uSnap.data().points || 0) : 0;
+                    await setDoc(uRef, { points: current + Number(points || 0) }, { merge:true });
+                    if (Number(points || 0)) await logPoints?.(email, Number(points || 0), 'الالتحاق بدورة', 'system', 'enroll');
+                } catch(e) {}
+            }
+            async function lpCompleteEnrollment(courseId, email, notify = true) {
+                email = lpEmail(email);
+                const before = await getDoc(doc(db, 'enrollments', `${email}_${courseId}`)).catch(() => null);
+                const r = await call({ action:'enrollUser', userEmail: email, courseId });
+                if (!r.success) return { success:false, error:r.error || 'تعذر إتمام الالتحاق' };
+                if (!before?.exists?.()) await lpAwardEnrollPoints(email);
+                if (notify) {
+                    lpToast('تم تسجيلك في الدورة بنجاح');
+                    updateTraineePoints?.();
+                    showTraineeTab?.('home');
+                }
+                return { success:true };
+            }
+            async function requestCourseEnrollment(courseId) {
+                const email = lpEmail(CU?.email || '');
+                if (!email) return lpToast('سجل الدخول أولاً', 'warning');
+                const c = await lpLoadCourse(courseId);
+                if (!c) return lpToast('الدورة غير موجودة', 'error');
+                const id = lpRequestId(courseId, email);
+                const existing = (await lpFetchEnrollmentRequests({ email, courseIds:[courseId] })).find(r => String(r.courseId) === String(courseId));
+                if (existing?.status === 'pending') {
+                    lpSaveLocalEnrollmentRequest(existing);
+                    return lpToast('طلبك قيد الموافقة بالفعل', 'warning');
+                }
+                if (existing?.status === 'approved') return lpToast('تمت الموافقة على طلبك بالفعل', 'success');
+                const row = {
+                    id,
+                    courseId,
+                    courseName: lpCourseTitle(c),
+                    userEmail: email,
+                    userName: CU?.full_name || CU?.email || email,
+                    status: 'pending',
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+                await setDoc(doc(db, COURSE_REQUESTS_COLLECTION, id), row, { merge:true });
+                lpSaveLocalEnrollmentRequest(row);
+                const users = await call({ action:'getUsers' }).catch(() => ({ success:false, users:[] }));
+                await Promise.all((users.users || []).filter(u => u.role === 'admin').map(u => call({ action:'addNotification', userEmail:u.email, message:`طلب التحاق جديد: ${CU?.full_name || email} يريد الالتحاق بدورة ${lpCourseTitle(c)}`, type:'enrollment_request', link:'courses' }).catch(() => {})));
+                lpToast('تم إرسال طلب الالتحاق للموافقة');
+                await loadAvailableCourses?.();
+            }
+            window.requestCourseEnrollment = requestCourseEnrollment;
+            async function lpEnrollmentRequestsFor(email, courseIds = []) {
+                return lpFetchEnrollmentRequests({ email, courseIds });
+            }
+            function lpCourseVisibleToTrainee(c, enrolled = []) {
+                const rules = lpRules(c);
+                if (rules.hideWhenRequirementsFail && c.prerequisite && !enrolled.includes(c.prerequisite)) return false;
+                if (c.release_date) {
+                    const release = Date.parse(c.release_date);
+                    const hours = Number(rules.showBeforeHours || 0);
+                    if (release && Date.now() < release - hours * 3600000) return false;
+                }
+                return true;
+            }
+            function lpEnrollActionHtml(c, enrolled, requests) {
+                const id = lpCourseId(c);
+                const hasPrereq = c.prerequisite && c.prerequisite !== '';
+                const prereqDone = hasPrereq ? enrolled.includes(c.prerequisite) : true;
+                const request = (requests || []).find(r => String(r.courseId) === String(id));
+                if (enrolled.includes(id)) return '<span class="badge badge-active"><i class="ti ti-circle-check"></i> مسجل</span>';
+                if (request?.status === 'pending') return '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> طلبك قيد الموافقة</span>';
+                if (request?.status === 'rejected') return '<span class="badge" style="background:#fde8e8;color:#b42318;"><i class="ti ti-circle-x"></i> تم رفض الطلب</span>';
+                if (!prereqDone) return '<span class="badge" style="background:#fce8e6;color:#d93025;">المتطلب غير مكتمل</span>';
+                if (lpEnrollmentDisabled(c)) return '<span class="badge" style="background:#f1f3f4;color:#5f6368;">الالتحاق مغلق حالياً</span>';
+                if (lpApprovalRequired(c)) return `<button class="primary sm" onclick="requestCourseEnrollment('${lpEsc(id)}')"><i class="ti ti-user-check"></i>طلب الالتحاق</button>`;
+                return `<button class="primary sm" onclick="enrollInCourse('${lpEsc(id)}')"><i class="ti ti-user-plus"></i>التحاق</button>`;
+            }
+            loadAvailableCourses = async function() {
+                const email = lpEmail(CU?.email || '');
+                const [cr, enrSnaps] = await Promise.all([
+                    call({ action:'getCourses', userEmail: email, userRole:'trainee' }),
+                    getDocs(query(collection(db, 'enrollments'), where('userEmail', '==', email))).catch(() => ({ docs:[] }))
+                ]);
+                const grid = document.getElementById('tr-available-grid');
+                if (!grid) return;
+                if (!cr.success) {
+                    grid.innerHTML = '<div class="launch-muted-card"><i class="ti ti-books" style="font-size:56px;display:block;margin-bottom:14px;opacity:.35;"></i>تعذر تحميل الدورات المتاحة حالياً</div>';
+                    return;
+                }
+                CCACHE = cr.courses || CCACHE || [];
+                const enrolled = enrSnaps.docs.map(d => d.data().courseId);
+                const reqRows = await lpEnrollmentRequestsFor(email, (cr.courses || []).map(lpCourseId));
+                const available = (cr.courses || []).filter(c => lpCourseStatus(c) === 'active' && c.visibility === 'public' && !enrolled.includes(lpCourseId(c)) && lpCourseVisibleToTrainee(c, enrolled));
+                grid.innerHTML = available.length ? available.map(c => {
+                    const id = lpCourseId(c);
+                    const hasPrereq = c.prerequisite && c.prerequisite !== '';
+                    return `<div class="course-card" style="display:flex;flex-direction:column;"><div class="course-thumb">${c.thumbnail_url ? `<img src="${lpEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i></div><div class="course-body" style="flex:1;display:flex;flex-direction:column;"><div class="course-name">${lpEsc(lpCourseTitle(c))}</div><div class="course-desc" style="flex:1;">${lpEsc(lpCourseDesc(c) || 'لا يوجد وصف')}</div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span class="badge badge-active">متاحة</span>${lpApprovalRequired(c) ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-user-check"></i> تحتاج موافقة</span>' : ''}${hasPrereq ? `<span class="badge" style="background:#fef7e0;color:#9a5b00;">متطلب: ${lpEsc((CCACHE || []).find(cc => lpCourseId(cc) === c.prerequisite)?.course_name || c.prerequisite)}</span>` : ''}${lpEnrollActionHtml(c, enrolled, reqRows)}</div></div></div>`;
+                }).join('') : '<div class="launch-muted-card"><i class="ti ti-check" style="font-size:48px;display:block;margin-bottom:12px;color:var(--color-text-success);"></i>لا توجد دورات متاحة للالتحاق حالياً</div>';
+                lpPolishText();
+            };
+            renderTraineeCourseCard = function(c, enrolled, state = {}) {
+                const id = lpCourseId(c);
+                const hasPrereq = c.prerequisite && c.prerequisite !== '';
+                const prereqDone = hasPrereq ? enrolled.includes(c.prerequisite) : true;
+                const isEnrolled = enrolled.includes(id);
+                const canOpen = isEnrolled && !state.locked;
+                const canEnroll = prereqDone && !isEnrolled && !state.locked && !lpEnrollmentDisabled(c);
+                const action = canOpen ? `<button class="primary sm" onclick="openPlayer('${lpEsc(id)}')"><i class="ti ti-player-play"></i>فتح</button>` : canEnroll ? (lpApprovalRequired(c) ? `<button class="primary sm" onclick="requestCourseEnrollment('${lpEsc(id)}')"><i class="ti ti-user-check"></i>طلب الالتحاق</button>` : `<button class="primary sm" onclick="enrollInCourse('${lpEsc(id)}')"><i class="ti ti-user-plus"></i>التحاق</button>`) : isEnrolled ? '<span class="badge badge-active">مسجل</span>' : `<span class="badge" style="background:#fce8e6;color:#d93025;">${lpEsc(state.reason || 'غير متاح الآن')}</span>`;
+                return `<div class="course-card" style="display:flex;flex-direction:column;${state.locked ? 'filter:grayscale(1);opacity:.55;' : state.active ? 'box-shadow:0 0 0 3px rgba(26,115,232,.18),0 12px 28px rgba(26,115,232,.14);' : ''}"><div class="course-thumb">${c.thumbnail_url ? `<img src="${lpEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i></div><div class="course-body" style="flex:1;display:flex;flex-direction:column;"><div class="course-name">${lpEsc(lpCourseTitle(c))}</div><div class="course-desc" style="flex:1;">${lpEsc(lpCourseDesc(c) || 'لا يوجد وصف')}</div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><span class="badge badge-${lpCourseStatus(c) === 'active' ? 'active' : 'suspended'}">${lpCourseStatus(c) === 'active' ? 'نشطة' : 'مسودة'}</span>${lpApprovalRequired(c) ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;">تحتاج موافقة</span>' : ''}${state.completed ? '<span class="badge badge-active"><i class="ti ti-circle-check"></i>مكتملة</span>' : ''}${state.active && !state.completed ? '<span class="badge" style="background:var(--color-background-info);color:var(--color-text-info);">الدورة الحالية</span>' : ''}${hasPrereq ? `<span class="badge" style="background:#fef7e0;color:#9a5b00;">متطلب: ${lpEsc((CCACHE || []).find(cc => lpCourseId(cc) === c.prerequisite)?.course_name || c.prerequisite)}</span>` : ''}${action}</div></div></div>`;
+            };
+            enrollInCourse = async function(courseId) {
+                const email = lpEmail(CU?.email || '');
+                if (!email) return lpToast('سجل الدخول أولاً', 'warning');
+                if (!lpIsAdminUser() && typeof finalEnsurePackageCache === 'function' && typeof finalPackagesForCourse === 'function') {
+                    await finalEnsurePackageCache();
+                    const locked = finalPackagesForCourse(courseId, { publishedOnly:true, paidOnly:true }).length > 0;
+                    if (locked && typeof finalHasPaidPackageAccess === 'function' && !(await finalHasPaidPackageAccess(courseId, email))) return finalOpenCoursePackageGate?.(courseId);
+                }
+                const c = await lpLoadCourse(courseId);
+                if (c && lpEnrollmentDisabled(c)) return lpToast('الالتحاق بهذه الدورة مغلق حالياً', 'warning');
+                if (c && lpApprovalRequired(c) && !lpIsAdminUser()) return requestCourseEnrollment(courseId);
+                const r = await lpCompleteEnrollment(courseId, email, true);
+                if (!r.success) lpToast(r.error, 'error');
+            };
+            window.enrollInCourse = enrollInCourse;
+
+            function lpRequestStatus(r = {}) { return String(r.status || 'pending').toLowerCase(); }
+            function lpEnrollmentRowsHtml(rows) {
+                return rows.map(r => `<tr><td>${lpDate(r.createdAt || r.updatedAt)}</td><td><strong>${lpEsc(r.userName || r.userEmail || '-')}</strong><div class="adv-sub" dir="ltr">${lpEsc(r.userEmail || '')}</div></td><td>${lpEsc(r.courseName || r.courseId || '-')}</td><td>${lpBadge(lpRequestStatus(r) === 'approved' ? 'تمت الموافقة' : lpRequestStatus(r) === 'rejected' ? 'مرفوض' : 'قيد الموافقة', lpRequestStatus(r) === 'approved' ? 'active' : lpRequestStatus(r) === 'rejected' ? 'suspended' : '')}</td><td style="display:flex;gap:6px;flex-wrap:wrap;">${lpRequestStatus(r) !== 'approved' ? `<button class="sm success" onclick="approveCourseEnrollmentRequest('${lpEsc(r.id)}')"><i class="ti ti-check"></i> موافقة</button>` : ''}${lpRequestStatus(r) !== 'rejected' ? `<button class="sm danger" onclick="rejectCourseEnrollmentRequest('${lpEsc(r.id)}')"><i class="ti ti-x"></i> رفض</button>` : ''}</td></tr>`).join('');
+            }
+            async function lpCourseEnrollmentRequests(courseId) {
+                const rows = await lpFetchEnrollmentRequests({ courseId });
+                return rows.sort((a,b) => Number(b.createdAt || b.updatedAt || 0) - Number(a.createdAt || a.updatedAt || 0));
+            }
+            function lpCourseEnrollmentRequestsHtml(rows, courseId) {
+                const pending = rows.filter(r => lpRequestStatus(r) === 'pending');
+                const reviewed = rows.filter(r => lpRequestStatus(r) !== 'pending').slice(0, 8);
+                return `<div id="lp-course-enrollment-requests" class="card" style="margin-bottom:14px;">
+                    <div class="adv-title" style="font-size:18px;"><i class="ti ti-user-check"></i> طلبات الالتحاق المعلقة</div>
+                    <div class="adv-sub" style="margin-bottom:12px;">هذه الطلبات تخص الدورة الحالية فقط، والموافقة هنا تسجل المتدرب مباشرة في الدورة.</div>
+                    <div class="adv-table-wrap"><table><thead><tr><th>التاريخ</th><th>المتدرب</th><th>الإيميل</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${pending.length ? pending.map(r => `<tr><td>${lpDate(r.createdAt || r.updatedAt)}</td><td><strong>${lpEsc(r.userName || r.userEmail || '-')}</strong></td><td dir="ltr">${lpEsc(r.userEmail || '')}</td><td>${lpBadge('قيد الموافقة')}</td><td style="display:flex;gap:6px;flex-wrap:wrap;"><button class="sm success" onclick="approveCourseEnrollmentRequest('${lpEsc(r.id)}','${lpEsc(courseId)}')"><i class="ti ti-check"></i> موافقة</button><button class="sm danger" onclick="rejectCourseEnrollmentRequest('${lpEsc(r.id)}','${lpEsc(courseId)}')"><i class="ti ti-x"></i> رفض</button></td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:1.5rem;">لا توجد طلبات التحاق معلقة لهذه الدورة.</td></tr>'}</tbody></table></div>
+                    ${reviewed.length ? `<div class="adv-sub" style="margin-top:10px;">آخر الطلبات التي تمت مراجعتها: ${reviewed.map(r => `${lpEsc(r.userName || r.userEmail || '-')} (${lpRequestStatus(r) === 'approved' ? 'مقبول' : 'مرفوض'})`).join('، ')}</div>` : ''}
+                </div>`;
+            }
+            async function lpInjectCourseEnrollmentRequests(courseId) {
+                if (!courseId || !lpCan('content.enrollment.approve')) return;
+                const extra = document.getElementById('course-detail-extra');
+                if (!extra) return;
+                document.getElementById('lp-course-enrollment-requests')?.remove();
+                const rows = await lpCourseEnrollmentRequests(courseId);
+                extra.insertAdjacentHTML('afterbegin', lpCourseEnrollmentRequestsHtml(rows, courseId));
+            }
+            async function lpLoadCourseEnrollmentRequestsPage(mode = 'pending') {
+                lpEnsureShell();
+                if (!lpCan('content.enrollment.approve')) {
+                    lpHtml('tab-enrollment-requests', '<div class="card launch-muted-card">ليست لديك صلاحية مراجعة طلبات الالتحاق.</div>');
+                    return;
+                }
+                const rows = (await advDocs(COURSE_REQUESTS_COLLECTION).catch(() => []))
+                    .map(r => ({ ...r, status: lpRequestStatus(r) }))
+                    .filter(r => r.status === mode)
+                    .sort((a,b) => Number(b.createdAt || b.updatedAt || 0) - Number(a.createdAt || a.updatedAt || 0));
+                const htmlBlock = `<div class="adv-title"><i class="ti ti-user-check"></i> طلبات الالتحاق بالدورات</div><div class="adv-seg" style="margin-bottom:14px;"><button class="${mode === 'pending' ? 'active' : ''}" onclick="loadCourseEnrollmentRequestsPage('pending')">طلبات جديدة</button><button class="${mode === 'approved' ? 'active' : ''}" onclick="loadCourseEnrollmentRequestsPage('approved')">تمت الموافقة</button><button class="${mode === 'rejected' ? 'active' : ''}" onclick="loadCourseEnrollmentRequestsPage('rejected')">مرفوضة</button></div><div class="adv-table-wrap"><table><thead><tr><th>التاريخ</th><th>المتدرب</th><th>الدورة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${rows.length ? lpEnrollmentRowsHtml(rows) : '<tr><td colspan="5" style="text-align:center;padding:2rem;">لا توجد طلبات في هذه الصفحة.</td></tr>'}</tbody></table></div>`;
+                lpHtml('tab-enrollment-requests', htmlBlock);
+            }
+            async function lpApproveCourseEnrollmentRequest(id, courseId = '') {
+                const snap = await getDoc(doc(db, COURSE_REQUESTS_COLLECTION, id));
+                if (!snap.exists()) return lpToast('الطلب غير موجود', 'error');
+                const r = { id, ...snap.data() };
+                const done = await lpCompleteEnrollment(r.courseId, r.userEmail, false);
+                if (!done.success) return lpToast(done.error, 'error');
+                await setDoc(doc(db, COURSE_REQUESTS_COLLECTION, id), { status:'approved', approvedAt:Date.now(), approvedBy:CU?.email || '', updatedAt:Date.now() }, { merge:true });
+                await call({ action:'addNotification', userEmail:r.userEmail, message:`تمت الموافقة على التحاقك بدورة ${r.courseName || r.courseId}`, type:'enrollment_request', link:'courses' }).catch(() => {});
+                lpToast('تمت الموافقة وتسجيل المتدرب في الدورة');
+                if (courseId || String(CCI || '') === String(r.courseId || '')) await courseDetailSub?.('enrolled', document.querySelectorAll('#course-detail-subtabs button')[1]);
+                else await lpLoadCourseEnrollmentRequestsPage('approved');
+            }
+            async function lpRejectCourseEnrollmentRequest(id, courseId = '') {
+                const snap = await getDoc(doc(db, COURSE_REQUESTS_COLLECTION, id));
+                if (!snap.exists()) return lpToast('الطلب غير موجود', 'error');
+                const r = { id, ...snap.data() };
+                await setDoc(doc(db, COURSE_REQUESTS_COLLECTION, id), { status:'rejected', rejectedAt:Date.now(), rejectedBy:CU?.email || '', updatedAt:Date.now() }, { merge:true });
+                await call({ action:'addNotification', userEmail:r.userEmail, message:`تم رفض طلب الالتحاق بدورة ${r.courseName || r.courseId}`, type:'enrollment_request', link:'courses' }).catch(() => {});
+                lpToast('تم رفض طلب الالتحاق');
+                if (courseId || String(CCI || '') === String(r.courseId || '')) await courseDetailSub?.('enrolled', document.querySelectorAll('#course-detail-subtabs button')[1]);
+                else await lpLoadCourseEnrollmentRequestsPage('rejected');
+            }
+            window.loadCourseEnrollmentRequestsPage = lpLoadCourseEnrollmentRequestsPage;
+            window.approveCourseEnrollmentRequest = lpApproveCourseEnrollmentRequest;
+            window.rejectCourseEnrollmentRequest = lpRejectCourseEnrollmentRequest;
+
+            const lpPrevCourseDetailSub = typeof courseDetailSub === 'function' ? courseDetailSub : null;
+            courseDetailSub = async function(kind, btn) {
+                const normalized = (kind === 'progress' || kind === 'users') ? 'enrolled' : kind;
+                if (normalized === 'settings' && !lpCanEditCourse(lpCourseById(CCI))) {
+                    lpDenyCourseWrite();
+                    return;
+                }
+                const out = lpPrevCourseDetailSub ? await lpPrevCourseDetailSub(kind, btn) : undefined;
+                if (normalized === 'enrolled') await lpInjectCourseEnrollmentRequests(CCI);
+                lpApplyCoursePermissionChrome(document.getElementById('tab-course-detail') || document);
+                return out;
+            };
+            window.courseDetailSub = courseDetailSub;
+
+            function lpActivateAdminTab(tab) {
+                lpEnsureShell();
+                [...(ADV_BASE_TABS || []), ...(ADV_TABS || []), 'registration-requests','enrollment-requests','login-settings'].forEach(id => {
+                    document.getElementById(`tab-${id}`)?.classList.add('hidden');
+                });
+                document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+                document.querySelectorAll('.sidebar .active,.adv-nav-panel .active,.adv-ref-nav.active').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll(`#nav-${tab},#nav-adv-${tab},.adv-ref-nav[data-ref-tab="${tab}"],#lp-${tab}-link`).forEach(el => el.classList.add('active'));
+            }
+            const lpPrevShowTab = typeof showTab === 'function' ? showTab : null;
+            showTab = function(tab) {
+                lpEnsureShell();
+                if (tab === 'chat' && !lpCanAny(['tech_support.answer','groups.manage']) && lpCanPrivateChat()) {
+                    openSupportChat?.();
+                    return;
+                }
+                if (!adv5CanSeeTab(tab)) {
+                    const dest = adv5FirstAllowedTab();
+                    lpToast('ليست لديك صلاحية فتح هذه الصفحة', 'warning');
+                    if (dest && dest !== tab) return showTab(dest);
+                    return;
+                }
+                if (tab === 'enrollment-requests') {
+                    lpActivateAdminTab('enrollment-requests');
+                    lpLoadCourseEnrollmentRequestsPage('pending');
+                    advApplyPermissions?.();
+                    return;
+                }
+                if (tab === 'registration-requests') {
+                    lpActivateAdminTab('registration-requests');
+                    loadRegistrationRequestsPage?.('pending');
+                    advApplyPermissions?.();
+                    return;
+                }
+                const out = lpPrevShowTab ? lpPrevShowTab(tab) : undefined;
+                setTimeout(() => { advApplyPermissions?.(); lpPolishText(); }, 0);
+                return out;
+            };
+            window.showTab = showTab;
+
+            function lpChatDisabledByStyle() {
+                return ADV_STYLE_EXTRA?.general?.disableChat === true;
+            }
+            function lpCanPrivateChat() {
+                return lpCan('communication.chat.private');
+            }
+            function lpCanGroupChat() { return lpCan('communication.chat.group'); }
+            function lpCanRegionChat() { return lpCan('communication.chat.region'); }
+            function lpCanAnyChatMode() { return lpCanPrivateChat() || lpCanGroupChat() || lpCanRegionChat(); }
+            function lpDefaultTraineeChatMode(wanted = '') {
+                if (wanted === 'private' && lpCanPrivateChat()) return 'private';
+                if (wanted === 'group' && lpCanGroupChat()) return 'group';
+                if (wanted === 'region' && lpCanRegionChat()) return 'region';
+                if (lpCanPrivateChat()) return 'private';
+                if (lpCanGroupChat()) return 'group';
+                if (lpCanRegionChat()) return 'region';
+                return '';
+            }
+            function lpCanChatAllTrainees() { return lpCan('communication.chat.trainees.all'); }
+            function lpCanChatRegionTrainees() { return lpCan('communication.chat.trainees.region'); }
+            function lpCanChatGroupTrainees() { return lpCan('communication.chat.trainees.group'); }
+            const LP_TRAINEE_PANEL_IGNORED_PERMS = new Set([
+                'tech_support.visible',
+                'communication.chat.private',
+                'communication.chat.group',
+                'communication.chat.region',
+                'communication.chat.trainees.all',
+                'communication.chat.trainees.region',
+                'communication.chat.trainees.group'
+            ]);
+            function lpHasTraineeAdminPanelPermission() {
+                const perms = lpCurrentPerms() || {};
+                return Object.entries(perms).some(([key, val]) => val === true && !LP_TRAINEE_PANEL_IGNORED_PERMS.has(key));
+            }
+            const lpPrevAdv5HasPanelPermission = typeof adv5HasPanelPermission === 'function' ? adv5HasPanelPermission : null;
+            adv5HasPanelPermission = function() {
+                if (String(CU?.role || '').toLowerCase() === 'trainee') return lpHasTraineeAdminPanelPermission();
+                return lpPrevAdv5HasPanelPermission ? lpPrevAdv5HasPanelPermission() : false;
+            };
+            window.adv5HasPanelPermission = adv5HasPanelPermission;
+            function lpUserRecord(email) {
+                const clean = lpEmail(email || CU?.email || '');
+                return (UCACHE || []).find(u => lpEmail(u.email) === clean) || (clean === lpEmail(CU?.email) ? (CU || {}) : { email: clean });
+            }
+            function lpSameText(a, b) {
+                return String(a || '').trim().toLowerCase() && String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+            }
+            function lpUserGroupKeys(u = {}) {
+                const out = new Set();
+                ['group','group_id','groupId','group_name','groupName'].forEach(k => { if (u[k]) out.add(String(u[k]).trim().toLowerCase()); });
+                ['groups','group_ids','groupIds'].forEach(k => {
+                    const v = u[k];
+                    if (Array.isArray(v)) v.forEach(x => { if (x) out.add(String(x).trim().toLowerCase()); });
+                    else if (v) out.add(String(v).trim().toLowerCase());
+                });
+                return [...out].filter(Boolean);
+            }
+            function lpSameChatGroup(a = {}, b = {}) {
+                const aKeys = lpUserGroupKeys(a);
+                const bKeys = lpUserGroupKeys(b);
+                if (aKeys.some(k => bKeys.includes(k))) return true;
+                const aEmail = lpEmail(a.email || CU?.email || '');
+                const bEmail = lpEmail(b.email || '');
+                return (GCACHE || []).some(g => {
+                    const members = (g.members || []).map(lpEmail);
+                    return members.includes(aEmail) && members.includes(bEmail);
+                });
+            }
+            function lpCanChatWithUser(user = {}) {
+                const email = lpEmail(user.email || '');
+                if (!email || email === lpEmail(CU?.email || '')) return false;
+                if ((user.status || 'active') === 'deleted') return false;
+                if (lpIsAdminUser()) return true;
+                if (!lpCanPrivateChat()) return false;
+                const role = String(user.role || '').toLowerCase();
+                if (role !== 'trainee') return true;
+                if (lpCanChatAllTrainees()) return true;
+                const me = lpUserRecord(CU?.email);
+                if (lpCanChatRegionTrainees() && lpSameText(me.region, user.region)) return true;
+                if (lpCanChatGroupTrainees() && lpSameChatGroup(me, user)) return true;
+                return false;
+            }
+            async function lpEnsureChatGroups() {
+                if (!lpCanChatGroupTrainees() || (GCACHE || []).length) return;
+                const gr = await call({ action: 'getGroups' }).catch(() => null);
+                if (gr?.success) GCACHE = gr.groups || [];
+            }
+            function lpTraineeScreenVisible() {
+                const screen = document.getElementById('trainee-screen');
+                return !!screen && !screen.classList.contains('hidden') && getComputedStyle(screen).display !== 'none';
+            }
+            function lpRestoreTraineeShellIfChatOnly() {
+                if (String(CU?.role || '').toLowerCase() !== 'trainee' || lpHasTraineeAdminPanelPermission()) return;
+                const adminScreen = document.getElementById('admin-screen');
+                const traineeScreen = document.getElementById('trainee-screen');
+                if (!adminScreen || !traineeScreen || adminScreen.classList.contains('hidden')) return;
+                hide?.('admin-screen');
+                traineeScreen.classList.remove('hidden');
+                traineeScreen.style.display = 'flex';
+                try { showTraineeTab?.('home'); } catch(e) {}
+            }
+            function lpEnsureCommFab() {
+                let fab = document.getElementById('launch-comm-fab');
+                if (!fab && document.body) {
+                    document.body.insertAdjacentHTML('beforeend', `<div id="launch-comm-fab" class="launch-comm-fab">
+                        <button type="button" class="launch-comm-action launch-comm-ask" data-launch-action="ask" onclick="lpOpenFloatingQuestion()" title="اسأل المدرب" aria-label="اسأل المدرب"><i class="ti ti-message-question"></i></button>
+                        <button type="button" class="launch-comm-action launch-comm-chat" data-launch-action="chat" onclick="lpOpenFloatingChat()" title="الشات" aria-label="الشات"><i class="ti ti-message-circle"></i><span id="launch-chat-count" class="launch-comm-badge hidden">0</span></button>
+                        <button type="button" class="launch-comm-main" onclick="toggleLaunchCommFab(event)" title="التواصل" aria-label="التواصل"><i class="ti ti-plus"></i></button>
+                    </div>`);
+                    fab = document.getElementById('launch-comm-fab');
+                }
+                if (fab && !document.getElementById('launch-comm-main-count')) {
+                    fab.querySelector('.launch-comm-main')?.insertAdjacentHTML('beforeend', '<span id="launch-comm-main-count" class="launch-comm-badge hidden">0</span>');
+                }
+                if (fab && !document.getElementById('launch-qa-count')) {
+                    fab.querySelector('[data-launch-action="ask"]')?.insertAdjacentHTML('beforeend', '<span id="launch-qa-count" class="launch-comm-badge hidden">0</span>');
+                }
+                fab?.querySelectorAll('[data-launch-action="group"],[data-launch-action="region"]').forEach(btn => btn.remove());
+                return fab;
+            }
+            function lpVisibleBadgeNumber(id) {
+                const el = document.getElementById(id);
+                if (!el || el.classList.contains('hidden')) return 0;
+                const raw = (el.textContent || '').trim();
+                return raw.includes('9+') ? 10 : (Number(raw.replace(/[^\d]/g, '')) || 0);
+            }
+            function lpQuestionUnreadCount() {
+                try { return (NOTIFS || []).filter(n => (n.type || '') === 'qa' && n.read !== true).length; }
+                catch(e) { return 0; }
+            }
+            function lpSyncFloatingChatBadge() {
+                const dest = document.getElementById('launch-chat-count');
+                const total = Object.values(CHAT_UNREAD_BY || {}).reduce((a, b) => a + Number(b || 0), 0);
+                if (dest) {
+                    dest.textContent = total > 9 ? '9+' : String(total || 0);
+                    dest.classList.toggle('hidden', total === 0);
+                }
+                const qaTotal = lpQuestionUnreadCount();
+                const qaBadge = document.getElementById('launch-qa-count');
+                if (qaBadge) {
+                    qaBadge.textContent = qaTotal > 9 ? '9+' : String(qaTotal || 0);
+                    qaBadge.classList.toggle('hidden', qaTotal === 0);
+                }
+                const mainTotal = total + qaTotal;
+                const main = document.getElementById('launch-comm-main-count');
+                if (main) {
+                    main.textContent = mainTotal > 9 ? '9+' : String(mainTotal || 0);
+                    main.classList.toggle('hidden', mainTotal === 0);
+                }
+            }
+            function lpApplyUnreadTotals() {
+                const total = Object.values(CHAT_UNREAD_BY || {}).reduce((a, b) => a + Number(b || 0), 0);
+                ['adm-chat-count','tr-chat-count'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.textContent = total > 9 ? '9+' : String(total || 0);
+                    el.classList.toggle('hidden', total === 0);
+                });
+                lpSyncFloatingChatBadge();
+            }
+            function lpFilterUnreadByChatScope() {
+                if (lpIsAdminUser()) return;
+                Object.keys(CHAT_UNREAD_BY || {}).forEach(email => {
+                    if (!lpCanChatWithUser(lpUserRecord(email))) delete CHAT_UNREAD_BY[email];
+                });
+            }
+            function lpApplyTraineeCommChrome() {
+                lpAddStyle();
+                lpRestoreTraineeShellIfChatOnly();
+                const canAsk = typeof openAskQuestion === 'function';
+                const canChat = lpCanAnyChatMode();
+                const canGroup = lpCanGroupChat();
+                const canRegion = lpCanRegionChat();
+                document.querySelectorAll('.floating-question-btn').forEach(btn => btn.style.display = 'none');
+                document.querySelectorAll('#tr-support-button,#trainee-topbar button[onclick*="openSupportChat"]').forEach(btn => btn.style.display = 'none');
+                const fab = lpEnsureCommFab();
+                if (!fab) return;
+                const askBtn = fab.querySelector('[data-launch-action="ask"]');
+                const chatBtn = fab.querySelector('[data-launch-action="chat"]');
+                if (askBtn) askBtn.style.display = canAsk ? '' : 'none';
+                if (chatBtn) chatBtn.style.display = canChat ? '' : 'none';
+                const visible = lpTraineeScreenVisible() && (canAsk || canChat || canGroup || canRegion);
+                fab.style.display = visible ? '' : 'none';
+                if (!visible) fab.classList.remove('open');
+                lpSyncFloatingChatBadge();
+            }
+            function toggleLaunchCommFab(event) {
+                event?.stopPropagation?.();
+                const fab = lpEnsureCommFab();
+                if (fab) fab.classList.toggle('open');
+            }
+            function lpCloseLaunchCommFab() {
+                document.getElementById('launch-comm-fab')?.classList.remove('open');
+            }
+            async function lpOpenFloatingQuestion() {
+                lpCloseLaunchCommFab();
+                await lpMarkQuestionNotificationsRead();
+                return openAskQuestion?.();
+            }
+            async function lpMarkQuestionNotificationsRead() {
+                if (!CU?.email) return;
+                try {
+                    const snap = await getDocs(query(collection(db, 'notifications'), where('userEmail', '==', lpEmail(CU.email))));
+                    const batch = writeBatch(db);
+                    let changed = false;
+                    snap.docs.forEach(d => {
+                        const n = d.data() || {};
+                        if (!n.read && n.type === 'qa') {
+                            batch.update(doc(db, 'notifications', d.id), { read: true, read_at: Date.now() });
+                            changed = true;
+                        }
+                    });
+                    if (changed) await batch.commit();
+                    if (Array.isArray(NOTIFS)) NOTIFS = NOTIFS.filter(n => n.type !== 'qa');
+                    lpSyncFloatingChatBadge();
+                    if (typeof updateNotificationCount === 'function') updateNotificationCount();
+                } catch(e) {}
+            }
+            async function lpMarkChatNotificationsRead() {
+                if (!CU?.email) return;
+                try {
+                    const snap = await getDocs(query(collection(db, 'notifications'), where('userEmail', '==', lpEmail(CU.email))));
+                    const batch = writeBatch(db);
+                    let changed = false;
+                    snap.docs.forEach(d => {
+                        const n = d.data() || {};
+                        if (!n.read && n.type === 'chat') {
+                            batch.update(doc(db, 'notifications', d.id), { read: true, read_at: Date.now() });
+                            changed = true;
+                        }
+                    });
+                    if (changed) await batch.commit();
+                    if (Array.isArray(NOTIFS)) NOTIFS = NOTIFS.filter(n => n.type !== 'chat');
+                    if (typeof updateNotificationCount === 'function') updateNotificationCount();
+                } catch(e) {}
+            }
+            async function lpOpenFloatingChat() {
+                lpCloseLaunchCommFab();
+                if (!lpCanAnyChatMode()) return lpToast('ليست لديك صلاحية فتح الشات', 'warning');
+                return openSupportChat?.();
+            }
+            async function lpOpenFloatingGroupChat() {
+                lpCloseLaunchCommFab();
+                if (!lpCanGroupChat()) return lpToast('ليست لديك صلاحية شات الجروبات', 'warning');
+                return lpOpenTraineeChatDirectory('group');
+            }
+            async function lpOpenFloatingRegionChat() {
+                lpCloseLaunchCommFab();
+                if (!lpCanRegionChat()) return lpToast('ليست لديك صلاحية شات الأقاليم', 'warning');
+                return lpOpenTraineeChatDirectory('region');
+            }
+            function lpCurrentChatScope() {
+                return { ...lpDefaultChatScope(), ...(LP.currentChatScope || {}) };
+            }
+            function lpAllowedChatRegions() {
+                if (!lpCanRegionChat()) return [];
+                const scope = lpCurrentChatScope();
+                const all = lpRegionOptions();
+                if (scope.regionsAll) return all;
+                if ((scope.regions || []).length) return all.filter(r => scope.regions.includes(r));
+                const me = lpUserRecord(CU?.email);
+                return me.region ? [me.region] : [];
+            }
+            function lpAllowedChatGroups() {
+                if (!lpCanGroupChat()) return [];
+                const scope = lpCurrentChatScope();
+                const all = lpGroupOptions();
+                if (scope.groupsAll) return all;
+                if ((scope.groups || []).length) return all.filter(g => scope.groups.includes(g.id));
+                const me = lpUserRecord(CU?.email);
+                const myKeys = lpUserGroupKeys(me);
+                const email = lpEmail(CU?.email || '');
+                return all.filter(g => myKeys.includes(String(g.id).toLowerCase()) || (GCACHE || []).some(row => String(row.group_id || row.id || row.group_name || '').trim() === g.id && (row.members || []).map(lpEmail).includes(email)));
+            }
+            async function lpOpenTraineeChatDirectory(mode = 'private') {
+                await ensureUsersCache?.();
+                await lpEnsureChatScopeCaches();
+                mode = lpDefaultTraineeChatMode(mode);
+                if (!mode) return lpToast('ليست لديك صلاحية فتح الشات', 'warning');
+                LP.traineeChatMode = mode;
+                const modal = document.querySelector('#m-chat-directory .modal');
+                if (!modal) return;
+                modal.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div style="font-size:18px;font-weight:800"><i class="ti ti-message-circle"></i> الشات</div>
+                    <button class="icon-btn" onclick="closeModal('m-chat-directory')"><i class="ti ti-x"></i></button>
+                </div>
+                <div class="launch-chat-tabs">
+                    ${lpCanPrivateChat() ? `<button class="${mode === 'private' ? 'active' : ''}" onclick="lpSwitchTraineeChatMode('private')"><i class="ti ti-user"></i> خاص</button>` : ''}
+                    ${lpCanGroupChat() ? `<button class="${mode === 'group' ? 'active' : ''}" onclick="lpSwitchTraineeChatMode('group')"><i class="ti ti-users-group"></i> الجروبات</button>` : ''}
+                    ${lpCanRegionChat() ? `<button class="${mode === 'region' ? 'active' : ''}" onclick="lpSwitchTraineeChatMode('region')"><i class="ti ti-map-pin"></i> الأقاليم</button>` : ''}
+                </div>
+                <div style="position:relative;margin-bottom:12px;">
+                    <i class="ti ti-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--color-text-secondary);"></i>
+                    <input id="trainee-chat-search" placeholder="بحث..." style="padding-right:36px;" oninput="lpRenderTraineeChatDirectory()">
+                </div>
+                <div id="trainee-chat-users-list" class="card" style="padding:0;max-height:620px;overflow:auto;"></div>`;
+                lpRenderTraineeChatDirectory();
+                openModal('m-chat-directory');
+            }
+            function lpSwitchTraineeChatMode(mode) {
+                lpOpenTraineeChatDirectory(mode);
+            }
+            function lpRenderTraineeChatDirectory() {
+                const box = document.getElementById('trainee-chat-users-list');
+                if (!box) return;
+                const mode = LP.traineeChatMode || 'private';
+                const q = (document.getElementById('trainee-chat-search')?.value || '').toLowerCase().trim();
+                if (mode === 'private') {
+                    renderChatUsersInto?.('trainee-chat-users-list', 'trainee-chat-search');
+                    return;
+                }
+                if (mode === 'group') {
+                    const rows = lpAllowedChatGroups().filter(g => !q || `${g.name} ${g.id}`.toLowerCase().includes(q));
+                    box.innerHTML = rows.map(g => `<div class="chat-user-row" onclick="lpOpenAudienceChatFromTrainee('group','${lpEsc(g.id)}','${lpEsc(g.name)}')"><i class="ti ti-users-group" style="font-size:24px;color:var(--accent-color);"></i><div style="flex:1;min-width:0;"><div style="font-weight:800;">${lpEsc(g.name)}</div><div class="adv-sub">شات جروب</div></div></div>`).join('') || '<div class="launch-chat-empty">لا توجد جروبات متاحة.</div>';
+                    return;
+                }
+                const rows = lpAllowedChatRegions().filter(r => !q || r.toLowerCase().includes(q));
+                box.innerHTML = rows.map(r => `<div class="chat-user-row" onclick="lpOpenAudienceChatFromTrainee('region','${lpEsc(r)}','${lpEsc(r)}')"><i class="ti ti-map-pin" style="font-size:24px;color:var(--accent-color);"></i><div style="flex:1;min-width:0;"><div style="font-weight:800;">${lpEsc(r)}</div><div class="adv-sub">شات إقليم</div></div></div>`).join('') || '<div class="launch-chat-empty">لا توجد أقاليم متاحة.</div>';
+            }
+            function lpAudienceChatId(mode, id) {
+                return `${mode}:${id}`;
+            }
+            function lpOpenAudienceChatFromTrainee(mode, id, label) {
+                closeModal('m-chat-directory');
+                LP.activeAudienceChat = { mode, id, label: label || id };
+                ACTIVE_CHAT_EMAIL = '';
+                ACTIVE_CHAT_ROWS = [];
+                lpMarkChatNotificationsRead();
+                openModal('m-chat');
+                const title = document.getElementById('chat-modal-title');
+                const status = document.getElementById('chat-modal-status');
+                if (title) title.innerHTML = `<i class="ti ${mode === 'group' ? 'ti-users-group' : 'ti-map-pin'}"></i> ${lpEsc(label || id)}`;
+                if (status) status.textContent = mode === 'group' ? 'شات جروب' : 'شات إقليم';
+                lpSubscribeAudienceChat();
+                setTimeout(() => document.getElementById('chat-input')?.focus(), 80);
+            }
+            function lpSubscribeAudienceChat() {
+                if (!LP.activeAudienceChat) return;
+                if (CHAT_UNSUB) CHAT_UNSUB();
+                const chatId = lpAudienceChatId(LP.activeAudienceChat.mode, LP.activeAudienceChat.id);
+                const qRef = query(collection(db, 'chat_messages'), where('chatId', '==', chatId));
+                CHAT_UNSUB = onSnapshot(qRef, snap => {
+                    ACTIVE_CHAT_ROWS = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+                    renderChatMessages?.();
+                }, err => console.warn('audience chat snapshot failed', err));
+            }
+            async function lpSendAudienceChatMessage() {
+                const active = LP.activeAudienceChat;
+                const input = document.getElementById('chat-input');
+                const body = (input?.value || '').trim();
+                if (!active || !body || !CU?.email) return;
+                input.value = '';
+                await addDoc(collection(db, 'chat_messages'), {
+                    chatId: lpAudienceChatId(active.mode, active.id),
+                    audienceType: active.mode,
+                    audienceId: active.id,
+                    fromEmail: lpEmail(CU.email),
+                    fromName: CU.full_name || CU.email,
+                    toEmail: '',
+                    body,
+                    read: false,
+                    createdAt: Date.now()
+                });
+            }
+            const lpPrevChatVisibleUsers = typeof chatVisibleUsers === 'function' ? chatVisibleUsers : null;
+            chatVisibleUsers = function(searchValue = '') {
+                const rows = lpPrevChatVisibleUsers ? lpPrevChatVisibleUsers(searchValue) : [];
+                return rows.filter(lpCanChatWithUser);
+            };
+            const lpPrevOpenSupportChat = typeof openSupportChat === 'function' ? openSupportChat : null;
+            openSupportChat = async function(...args) {
+                if (!lpCanAnyChatMode()) return lpToast('ليست لديك صلاحية فتح الشات', 'warning');
+                await ensureUsersCache?.();
+                await lpEnsureChatGroups();
+                if (String(CU?.role || '').toLowerCase() === 'trainee') return lpOpenTraineeChatDirectory(lpDefaultTraineeChatMode('private'));
+                return lpPrevOpenSupportChat?.(...args);
+            };
+            const lpPrevOpenChatWith = typeof openChatWith === 'function' ? openChatWith : null;
+            openChatWith = async function(email, ...args) {
+                await ensureUsersCache?.();
+                const user = lpUserRecord(email);
+                if (!lpCanChatWithUser(user)) return lpToast('ليست لديك صلاحية فتح محادثة مع هذا المستخدم', 'warning');
+                LP.activeAudienceChat = null;
+                const normalizedEmail = lpEmail(email);
+                const out = await lpPrevOpenChatWith?.(email, ...args);
+                if (normalizedEmail && CHAT_UNREAD_BY?.[normalizedEmail]) {
+                    delete CHAT_UNREAD_BY[normalizedEmail];
+                    lpApplyUnreadTotals();
+                    if (typeof renderChatUsers === 'function') renderChatUsers();
+                }
+                await lpMarkChatNotificationsRead();
+                return out;
+            };
+            const lpPrevCloseChatModal = typeof closeChatModal === 'function' ? closeChatModal : null;
+            closeChatModal = function(...args) {
+                LP.activeAudienceChat = null;
+                return lpPrevCloseChatModal?.(...args);
+            };
+            const lpPrevSendChatMessage = typeof sendChatMessage === 'function' ? sendChatMessage : null;
+            sendChatMessage = async function(...args) {
+                if (LP.activeAudienceChat) return lpSendAudienceChatMessage();
+                if (ACTIVE_CHAT_EMAIL && !lpCanChatWithUser(lpUserRecord(ACTIVE_CHAT_EMAIL))) return lpToast('ليست لديك صلاحية إرسال رسالة لهذا المستخدم', 'warning');
+                return lpPrevSendChatMessage?.(...args);
+            };
+
+            const LP_TECH_STATUSES = [
+                ['open', 'Open'],
+                ['in_progress', 'In-Progress'],
+                ['pending', 'Pending'],
+                ['closed', 'Closed']
+            ];
+            const LP_TECH_TYPES = [
+                ['system_bug', 'System Bug'],
+                ['new_feature', 'New Feature Request'],
+                ['data_issue', 'Data Issue'],
+                ['inquiry', 'Inquiry']
+            ];
+            const LP_TECH_PRIORITIES = [
+                ['low', 'Low'],
+                ['medium', 'Medium'],
+                ['high', 'High'],
+                ['severe', 'Severe']
+            ];
+            function lpTechSupportAgent() {
+                return lpIsAdminUser() || lpCan('tech_support.answer');
+            }
+            function lpTechStatusKey(status) {
+                const s = String(status || 'open').toLowerCase().replace('-', '_');
+                if (s === 'answered') return 'pending';
+                if (s === 'inprogress') return 'in_progress';
+                return ['open','in_progress','pending','closed'].includes(s) ? s : 'open';
+            }
+            function lpTechLabel(list, key) {
+                return (list.find(([id]) => id === key) || [key, key])[1];
+            }
+            function lpTechTicketNo(tk = {}) {
+                return String(tk.ticketNo || tk.ticket_no || tk.serialNo || tk.serial || (tk.id ? tk.id.slice(0, 6).toUpperCase() : ''));
+            }
+            function lpTechStatusBadge(status) {
+                const key = lpTechStatusKey(status);
+                return `<span class="launch-ticket-status ${key}">${lpEsc(lpTechLabel(LP_TECH_STATUSES, key))}</span>`;
+            }
+            function lpTechDate(ts) {
+                return ts ? new Date(Number(ts)).toLocaleString('ar-EG') : '';
+            }
+            function lpTechInitials(name = '') {
+                const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+                return (parts.length ? parts.slice(0, 2).map(x => x[0]).join('') : '?').toUpperCase();
+            }
+            function lpTechAttachmentHtml(items = []) {
+                const rows = (Array.isArray(items) ? items : []).filter(x => x && (x.dataUrl || x.url));
+                if (!rows.length) return '';
+                return `<div class="launch-ticket-attachments">${rows.map(att => {
+                    const href = lpEsc(att.dataUrl || att.url || '#');
+                    const name = lpEsc(att.name || 'attachment');
+                    return `<a class="launch-ticket-attach" href="${href}" target="_blank" rel="noopener"><img src="${href}" alt="${name}"><span>${name}</span></a>`;
+                }).join('')}</div>`;
+            }
+            function lpReadFileAsDataURL(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+            function lpLoadImage(src) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = src;
+                });
+            }
+            async function lpReadTechImage(inputId) {
+                const input = document.getElementById(inputId);
+                const file = input?.files?.[0];
+                if (!file) return [];
+                if (!String(file.type || '').startsWith('image/')) {
+                    toast('ارفق صورة فقط', 'warning');
+                    return [];
+                }
+                const raw = await lpReadFileAsDataURL(file);
+                try {
+                    const img = await lpLoadImage(raw);
+                    const maxSide = 1100;
+                    const scale = Math.min(1, maxSide / Math.max(img.width || maxSide, img.height || maxSide));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round((img.width || maxSide) * scale));
+                    canvas.height = Math.max(1, Math.round((img.height || maxSide) * scale));
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+                    return [{ type:'image', name:file.name || 'screenshot.jpg', dataUrl, size:dataUrl.length, createdAt:Date.now() }];
+                } catch(e) {
+                    return [{ type:'image', name:file.name || 'screenshot', dataUrl:raw, size:raw.length, createdAt:Date.now() }];
+                }
+            }
+            function lpTechInitialMessage(tk = {}) {
+                const subject = tk.subject || tk.question || '';
+                const body = tk.description || tk.question || subject;
+                return {
+                    id: `${tk.id || 'ticket'}-initial`,
+                    body,
+                    attachments: Array.isArray(tk.attachments) ? tk.attachments : [],
+                    authorEmail: lpEmail(tk.requesterEmail || tk.trainerEmail || ''),
+                    authorName: tk.requesterName || tk.trainerName || tk.trainerEmail || 'صاحب التذكرة',
+                    authorRole: tk.requesterRole || 'requester',
+                    createdAt: tk.createdAt || Date.now()
+                };
+            }
+            function lpTechMessages(tk = {}) {
+                const rows = Array.isArray(tk.messages) && tk.messages.length ? tk.messages.slice() : [lpTechInitialMessage(tk)];
+                if ((!tk.messages || !tk.messages.length) && tk.answer) {
+                    rows.push({
+                        id: `${tk.id || 'ticket'}-answer`,
+                        body: tk.answer,
+                        authorEmail: lpEmail(tk.answeredBy || ''),
+                        authorName: tk.answeredBy || 'الدعم الفني',
+                        authorRole: 'support',
+                        createdAt: tk.answeredAt || tk.updatedAt || Date.now()
+                    });
+                }
+                return rows.filter(m => (m.body || '').trim()).sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+            }
+            async function lpNextTechTicketNo() {
+                const ref = doc(db, 'settings', 'tech_support_counter');
+                const snap = await getDoc(ref).catch(() => null);
+                const current = snap?.exists?.() ? Number(snap.data().lastNo || 292000) : 292000;
+                const next = Math.max(292000, current) + 1;
+                await setDoc(ref, { lastNo: next, updatedAt: Date.now() }, { merge:true });
+                return next;
+            }
+            async function lpTechTicketsAll() {
+                const rows = await advDocs('tech_support_tickets');
+                return rows.map(tk => ({ ...tk, status: lpTechStatusKey(tk.status) })).sort((a,b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+            }
+            async function lpTrainerTechTickets() {
+                if (!CU?.email) return [];
+                const email = lpEmail(CU.email);
+                const snap = await getDocs(query(collection(db, 'tech_support_tickets'), where('trainerEmail', '==', email)));
+                return snap.docs.map(d => ({ id:d.id, ...d.data(), status: lpTechStatusKey(d.data().status) })).sort((a,b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+            }
+            function lpTechTicketForm(prefix = 'trainer') {
+                return `<div class="launch-tech-form">
+                    <div class="adv-title" style="font-size:20px;margin:0;">Create Ticket</div>
+                    <div class="field"><label>Ticket Type *</label><select id="${prefix}-tech-type">${LP_TECH_TYPES.map(([id,label]) => `<option value="${id}">${lpEsc(label)}</option>`).join('')}</select></div>
+                    <div class="field"><label>Priority *</label><select id="${prefix}-tech-priority">${LP_TECH_PRIORITIES.map(([id,label]) => `<option value="${id}">${lpEsc(label)}</option>`).join('')}</select></div>
+                    <div class="field"><label>Subject *</label><input id="${prefix}-tech-subject" placeholder="Subject"></div>
+                    <div class="field"><label>Description *</label><textarea id="${prefix}-tech-description" rows="6" placeholder="Description"></textarea></div>
+                    <div class="field"><label>إرفاق صورة</label><div class="launch-tech-file"><input id="${prefix}-tech-image" type="file" accept="image/*"></div></div>
+                    <button class="primary" onclick="lpCreateTechTicket('${prefix}')"><i class="ti ti-send"></i> Create</button>
+                </div>`;
+            }
+            async function lpNotifyTechAdmins(ticket) {
+                if (typeof call !== 'function') return;
+                await ensureUsersCache?.();
+                const admins = (UCACHE || []).filter(u => ['admin','administrator'].includes(String(u.role || '').toLowerCase()) || u.is_admin === true || u.isAdmin === true);
+                await Promise.all(admins.filter(u => lpEmail(u.email) !== lpEmail(CU?.email)).map(u => call({
+                    action:'addNotification',
+                    userEmail:u.email,
+                    message:`تذكرة دعم فني جديدة #${lpTechTicketNo(ticket)}: ${ticket.subject || ticket.question || ''}`,
+                    type:'tech_support',
+                    link:'tech-support'
+                }).catch(() => {})));
+            }
+            async function lpNotifyTechRequester(ticket, message) {
+                if (typeof call !== 'function') return;
+                const email = ticket.requesterEmail || ticket.trainerEmail;
+                if (!email || lpEmail(email) === lpEmail(CU?.email)) return;
+                try {
+                    await call({ action:'addNotification', userEmail:email, message, type:'tech_support', link:'tech-support' });
+                } catch(e) {}
+            }
+            async function lpCreateTechTicket(prefix = 'trainer') {
+                const type = advVal(`${prefix}-tech-type`) || 'inquiry';
+                const priority = advVal(`${prefix}-tech-priority`) || 'medium';
+                const subject = (advVal(`${prefix}-tech-subject`) || '').trim();
+                const description = (advVal(`${prefix}-tech-description`) || '').trim();
+                if (!subject || !description) return toast('اكتب العنوان والوصف أولاً', 'warning');
+                const attachments = await lpReadTechImage(`${prefix}-tech-image`);
+                const ref = doc(collection(db, 'tech_support_tickets'));
+                const ticketNo = await lpNextTechTicketNo();
+                const now = Date.now();
+                const ticket = {
+                    id: ref.id,
+                    ticketNo,
+                    type,
+                    priority,
+                    subject,
+                    description,
+                    question: subject,
+                    attachments,
+                    requesterEmail: lpEmail(CU.email),
+                    requesterName: CU.full_name || CU.email,
+                    requesterRole: CU.role || '',
+                    trainerEmail: lpEmail(CU.email),
+                    trainerName: CU.full_name || CU.email,
+                    status: 'open',
+                    createdAt: now,
+                    updatedAt: now,
+                    messages: [{
+                        id: `${ref.id}-${now}`,
+                        body: description,
+                        attachments,
+                        authorEmail: lpEmail(CU.email),
+                        authorName: CU.full_name || CU.email,
+                        authorRole: CU.role || 'requester',
+                        createdAt: now
+                    }]
+                };
+                await setDoc(ref, ticket, { merge:true });
+                await lpNotifyTechAdmins(ticket);
+                ['type','priority','subject','description','image'].forEach(id => {
+                    const el = document.getElementById(`${prefix}-tech-${id}`);
+                    if (el && !['type','priority'].includes(id)) el.value = '';
+                });
+                toast(`تم إنشاء تذكرة رقم ${ticketNo}`);
+                if (prefix === 'admin') loadTechSupportPage?.();
+                else await lpRenderTrainerTechTicketList();
+            }
+            function lpTechTicketRow(tk) {
+                const no = lpTechTicketNo(tk);
+                const status = lpTechStatusKey(tk.status);
+                return `<tr onclick="lpOpenTechTicket('${lpEsc(tk.id)}')" style="cursor:pointer;">
+                    <td dir="ltr"><strong>#${lpEsc(no)}</strong></td>
+                    <td>${lpEsc(lpTechLabel(LP_TECH_TYPES, tk.type || 'inquiry'))}</td>
+                    <td>${lpEsc(lpTechLabel(LP_TECH_PRIORITIES, tk.priority || 'medium'))}</td>
+                    <td><strong>${lpEsc(tk.subject || tk.question || '')}</strong></td>
+                    <td>${lpEsc(tk.requesterName || tk.trainerName || tk.requesterEmail || tk.trainerEmail || '')}</td>
+                    <td>${lpTechStatusBadge(status)}</td>
+                    <td dir="ltr">${lpTechDate(tk.updatedAt || tk.createdAt)}</td>
+                    <td><button class="sm" onclick="event.stopPropagation();lpOpenTechTicket('${lpEsc(tk.id)}')"><i class="ti ti-eye"></i> فتح</button></td>
+                </tr>`;
+            }
+            function lpRenderTechTicketsTable(rows = null) {
+                rows = rows || LP.techTicketsRows || [];
+                const status = LP.techStatusFilter || 'all';
+                const q = (advVal('tech-ticket-search') || '').toLowerCase().trim();
+                let filtered = rows.filter(tk => status === 'all' || lpTechStatusKey(tk.status) === status);
+                if (q) filtered = filtered.filter(tk => `${lpTechTicketNo(tk)} ${tk.subject || ''} ${tk.question || ''} ${tk.requesterName || ''} ${tk.trainerName || ''} ${tk.requesterEmail || ''} ${tk.trainerEmail || ''}`.toLowerCase().includes(q));
+                advHtml('tech-ticket-table-body', filtered.map(lpTechTicketRow).join('') || '<tr><td colspan="8" style="text-align:center;padding:2rem;">لا توجد تذاكر مطابقة.</td></tr>');
+            }
+            function lpTechStatsHtml(rows) {
+                const counts = Object.fromEntries(LP_TECH_STATUSES.map(([k]) => [k, rows.filter(tk => lpTechStatusKey(tk.status) === k).length]));
+                const current = LP.techStatusFilter || 'all';
+                return `<div class="launch-tech-stats">${LP_TECH_STATUSES.map(([key,label]) => `<button class="launch-tech-stat ${key} ${current === key ? 'active' : ''}" onclick="lpSetTechStatusFilter('${key}')">${lpEsc(label)}<small>${counts[key] || 0}</small></button>`).join('')}</div>`;
+            }
+            loadTechSupportPage = async function() {
+                lpAddStyle();
+                const rows = await lpTechTicketsAll();
+                const current = LP.techStatusFilter || 'all';
+                advHtml('tab-tech-support', `<div class="adv-title"><i class="ti ti-headset"></i> Technical Support</div>
+                    <div class="launch-tech-page">
+                        ${lpTechTicketForm('admin')}
+                        <div>
+                            ${lpTechStatsHtml(rows)}
+                            <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px;">
+                                <button class="${current === 'all' ? 'primary' : ''}" onclick="lpSetTechStatusFilter('all')"><i class="ti ti-list"></i> كل التذاكر</button>
+                                <input id="tech-ticket-search" placeholder="بحث بالرقم أو العنوان أو الاسم..." oninput="lpRenderTechTicketsTable()" style="max-width:320px;">
+                            </div>
+                            <div class="adv-table-wrap"><table class="launch-tech-table">
+                                <thead><tr><th>ID</th><th>Type</th><th>Priority</th><th>Subject</th><th>Opened By</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+                                <tbody id="tech-ticket-table-body"></tbody>
+                            </table></div>
+                        </div>
+                    </div>`);
+                LP.techTicketsRows = rows;
+                lpRenderTechTicketsTable(rows);
+            };
+            function lpSetTechStatusFilter(status) {
+                LP.techStatusFilter = status || 'all';
+                loadTechSupportPage?.();
+            }
+            function lpTrainerTechTicketHtml(rows) {
+                if (!rows.length) return '<div class="adv-sub" style="padding:18px;text-align:center;">لا توجد تذاكر دعم فني حتى الآن.</div>';
+                return rows.map(tk => {
+                    const closed = lpTechStatusKey(tk.status) === 'closed';
+                    const messages = lpTechMessages(tk);
+                    const last = messages[messages.length - 1] || {};
+                    return `<div class="launch-tech-ticket">
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
+                            <strong>#${lpEsc(lpTechTicketNo(tk))} - ${lpEsc(tk.subject || tk.question || '')}</strong>
+                            ${lpTechStatusBadge(tk.status)}
+                        </div>
+                        <div class="launch-ticket-meta"><span>${lpEsc(lpTechLabel(LP_TECH_TYPES, tk.type || 'inquiry'))}</span><span>${lpEsc(lpTechLabel(LP_TECH_PRIORITIES, tk.priority || 'medium'))}</span><span dir="ltr">${lpTechDate(tk.updatedAt || tk.createdAt)}</span></div>
+                        <div class="launch-tech-answer">${last.body ? `<strong>آخر رسالة:</strong><br>${lpEsc(last.body)}` : '<span class="adv-sub">لا توجد رسائل.</span>'}</div>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="primary sm" onclick="lpOpenTechTicket('${lpEsc(tk.id)}')"><i class="ti ti-message"></i> ${closed ? 'عرض التذكرة' : 'فتح والرد'}</button></div>
+                    </div>`;
+                }).join('');
+            }
+            async function lpRenderTrainerTechTicketList() {
+                const host = document.getElementById('trainer-tech-ticket-list');
+                if (!host) return;
+                host.innerHTML = '<div class="adv-sub" style="padding:16px;text-align:center;">جاري تحميل التذاكر...</div>';
+                try {
+                    host.innerHTML = lpTrainerTechTicketHtml(await lpTrainerTechTickets());
+                } catch(e) {
+                    host.innerHTML = '<div class="adv-sub" style="padding:16px;text-align:center;color:var(--color-text-danger);">تعذر تحميل تذاكر الدعم الفني.</div>';
+                }
+            }
+            openTrainerTechTicket = async function() {
+                lpAddStyle();
+                adv2OpenModal('الدعم الفني', `<div class="launch-tech-page" style="grid-template-columns:minmax(300px,360px) 1fr;">
+                    ${lpTechTicketForm('trainer')}
+                    <div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                            <div class="adv-title" style="font-size:18px;margin:0;">تذاكري وردود الدعم</div>
+                            <button onclick="lpRenderTrainerTechTicketList()"><i class="ti ti-refresh"></i> تحديث</button>
+                        </div>
+                        <div id="trainer-tech-ticket-list" style="display:grid;gap:10px;"></div>
+                    </div>
+                </div>`, '1100px');
+                await lpRenderTrainerTechTicketList();
+            };
+            submitTrainerTechTicket = async function() {
+                return lpCreateTechTicket('trainer');
+            };
+            function lpTechTicketModalHtml(tk) {
+                const status = lpTechStatusKey(tk.status);
+                const closed = status === 'closed';
+                const messages = lpTechMessages(tk);
+                const first = messages[0] || lpTechInitialMessage(tk);
+                const comments = messages.slice(1);
+                const canManage = lpTechSupportAgent();
+                const description = tk.description || first.body || tk.question || tk.subject || '';
+                const mainAttachments = Array.isArray(tk.attachments) && tk.attachments.length ? tk.attachments : (first.attachments || []);
+                const commentHtml = comments.map(m => {
+                    const role = String(m.authorRole || '').toLowerCase();
+                    const support = role.includes('support') || role === 'admin' || role === 'administrator';
+                    const name = support ? 'Support Team' : (m.authorName || m.authorEmail || 'Deraah Academy');
+                    return `<div class="launch-ticket-comment">
+                        <div class="launch-ticket-avatar ${support ? 'support' : ''}">${support ? '<i class="ti ti-headset"></i>' : lpEsc(lpTechInitials(name))}</div>
+                        <div>
+                            <div class="launch-ticket-comment-head">${lpEsc(name)}</div>
+                            <div class="launch-ticket-comment-time" dir="ltr">${lpTechDate(m.createdAt)}</div>
+                            <div class="launch-ticket-comment-body">${lpEsc(m.body || '')}</div>
+                            ${lpTechAttachmentHtml(m.attachments)}
+                        </div>
+                    </div>`;
+                }).join('');
+                return `<div class="launch-ticket-detail">
+                    <div class="launch-ticket-main">
+                        <div>
+                            <h2 class="launch-ticket-main-title">${lpEsc(tk.subject || tk.question || 'Ticket')}</h2>
+                            <div class="launch-ticket-desc">${lpEsc(description)}</div>
+                            <div class="launch-ticket-meta" style="margin-top:12px;"><i class="ti ti-clock"></i><span dir="ltr">${lpTechDate(tk.createdAt)}</span></div>
+                        </div>
+                        ${lpTechAttachmentHtml(mainAttachments)}
+                        <div>
+                            <div class="adv-title" style="font-size:20px;margin:0 0 12px;">${comments.length} Comments</div>
+                            <div class="launch-ticket-comments">${commentHtml || '<div class="adv-sub">لا توجد تعليقات حتى الآن.</div>'}</div>
+                        </div>
+                        ${closed ? '<div class="launch-tech-answer"><strong>تم إغلاق التذكرة.</strong><br>لا يمكن إضافة تعليقات جديدة بعد الإغلاق.</div>' : `<div class="launch-ticket-comment-form">
+                            <div class="field"><label>إضافة تعليق</label><textarea id="tech-ticket-reply" rows="5" placeholder="اكتب تعليقك هنا..."></textarea></div>
+                            <div class="field"><label>إرفاق صورة</label><div class="launch-tech-file"><input id="tech-ticket-reply-image" type="file" accept="image/*"></div></div>
+                            <div style="text-align:left;"><button class="primary" onclick="lpSaveTechTicketReply('${lpEsc(tk.id)}')"><i class="ti ti-send"></i> إضافة تعليق</button></div>
+                        </div>`}
+                    </div>
+                    <aside class="launch-ticket-side">
+                        <div class="adv-title" style="font-size:20px;margin:0;">Ticket Details</div>
+                        <div class="launch-ticket-side-row"><span>Ticket ID</span><strong dir="ltr">#${lpEsc(lpTechTicketNo(tk))}</strong></div>
+                        ${closed ? '<div style="color:#dc2626;line-height:1.7;">لن يتم فتح التذكرة مرة أخرى لأن حالتها مغلقة.</div>' : ''}
+                        <div class="launch-ticket-side-row"><span>Status</span>${lpTechStatusBadge(status)}</div>
+                        <div class="launch-ticket-side-row"><span>Priority</span><strong>${lpEsc(lpTechLabel(LP_TECH_PRIORITIES, tk.priority || 'medium'))}</strong></div>
+                        <div class="launch-ticket-side-row"><span>Type</span><strong>${lpEsc(lpTechLabel(LP_TECH_TYPES, tk.type || 'inquiry'))}</strong></div>
+                        <div class="launch-ticket-side-row"><span>Opened By</span><strong>${lpEsc(tk.requesterName || tk.trainerName || tk.requesterEmail || tk.trainerEmail || '')}</strong></div>
+                        ${canManage ? `<div class="field" style="margin:0;"><label>تغيير الحالة</label><select id="tech-ticket-status">${LP_TECH_STATUSES.map(([id,label]) => `<option value="${id}" ${status === id ? 'selected' : ''}>${lpEsc(label)}</option>`).join('')}</select></div><button class="primary" onclick="lpUpdateTechTicketStatus('${lpEsc(tk.id)}')"><i class="ti ti-refresh"></i> تحديث الحالة</button>` : ''}
+                    </aside>
+                </div>`;
+            }
+            async function lpOpenTechTicket(id) {
+                const snap = await getDoc(doc(db, 'tech_support_tickets', id));
+                if (!snap.exists()) return toast('التذكرة غير موجودة', 'warning');
+                const tk = { id, ...snap.data() };
+                adv2OpenModal(`${tk.subject || tk.question || 'Ticket'} #${lpTechTicketNo(tk)}`, lpTechTicketModalHtml(tk), '1180px');
+            }
+            async function lpSaveTechTicketReply(id) {
+                const body = (advVal('tech-ticket-reply') || '').trim();
+                const attachments = await lpReadTechImage('tech-ticket-reply-image');
+                if (!body && !attachments.length) return toast('اكتب تعليقاً أو ارفق صورة أولاً', 'warning');
+                const ref = doc(db, 'tech_support_tickets', id);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return toast('التذكرة غير موجودة', 'warning');
+                const tk = { id, ...snap.data() };
+                if (lpTechStatusKey(tk.status) === 'closed') return toast('التذكرة مغلقة ولا تقبل ردود جديدة', 'warning');
+                const now = Date.now();
+                const isSupport = lpTechSupportAgent();
+                const msg = {
+                    id: `${id}-${now}`,
+                    body,
+                    attachments,
+                    authorEmail: lpEmail(CU.email),
+                    authorName: CU.full_name || CU.email,
+                    authorRole: isSupport ? 'support' : (CU.role || 'requester'),
+                    createdAt: now
+                };
+                const messages = [...lpTechMessages(tk), msg];
+                const nextStatus = isSupport ? 'pending' : 'open';
+                const update = { messages, status: nextStatus, updatedAt: now, lastMessageAt: now };
+                if (isSupport && body) Object.assign(update, { answer: body, answeredAt: now, answeredBy: CU.email || '' });
+                await setDoc(ref, update, { merge:true });
+                if (isSupport) await lpNotifyTechRequester(tk, `تم إضافة تعليق على تذكرة الدعم الفني #${lpTechTicketNo(tk)}`);
+                else await lpNotifyTechAdmins({ ...tk, subject: tk.subject || tk.question });
+                toast('تم إضافة التعليق');
+                await lpOpenTechTicket(id);
+                if (document.getElementById('trainer-tech-ticket-list')) lpRenderTrainerTechTicketList();
+                if (document.getElementById('tab-tech-support') && !document.getElementById('tab-tech-support').classList.contains('hidden')) loadTechSupportPage?.();
+            }
+            async function lpUpdateTechTicketStatus(id) {
+                if (!lpTechSupportAgent()) return toast('ليست لديك صلاحية تعديل الحالة', 'warning');
+                const status = lpTechStatusKey(advVal('tech-ticket-status'));
+                const ref = doc(db, 'tech_support_tickets', id);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return;
+                const tk = { id, ...snap.data() };
+                const update = { status, updatedAt: Date.now() };
+                if (status === 'closed') Object.assign(update, { closedAt: Date.now(), closedBy: CU?.email || '' });
+                await setDoc(ref, update, { merge:true });
+                await lpNotifyTechRequester(tk, status === 'closed' ? `تم إغلاق تذكرة الدعم الفني #${lpTechTicketNo(tk)}` : `تم تحديث حالة تذكرة الدعم الفني #${lpTechTicketNo(tk)} إلى ${lpTechLabel(LP_TECH_STATUSES, status)}`);
+                toast('تم تحديث حالة التذكرة');
+                await lpOpenTechTicket(id);
+                loadTechSupportPage?.();
+            }
+            openTechSupportAnswer = function(id) {
+                return lpOpenTechTicket(id);
+            };
+            saveTechSupportAnswer = function(id) {
+                return lpSaveTechTicketReply(id);
+            };
+            closeTechTicket = async function(id) {
+                const ref = doc(db, 'tech_support_tickets', id);
+                const snap = await getDoc(ref);
+                const tk = snap.exists() ? { id, ...snap.data() } : {};
+                await setDoc(ref, { status:'closed', closedAt:Date.now(), closedBy:CU?.email || '', updatedAt:Date.now() }, { merge:true });
+                if (tk.trainerEmail || tk.requesterEmail) await lpNotifyTechRequester(tk, `تم إغلاق تذكرة الدعم الفني #${lpTechTicketNo(tk)}`);
+                loadTechSupportPage?.();
+            };
+            const lpPrevUpdateChatUnreadCount = typeof updateChatUnreadCount === 'function' ? updateChatUnreadCount : null;
+            updateChatUnreadCount = async function(...args) {
+                const out = await lpPrevUpdateChatUnreadCount?.(...args);
+                lpFilterUnreadByChatScope();
+                lpApplyUnreadTotals();
+                return out;
+            };
+            const lpPrevInitTrainee = typeof initTrainee === 'function' ? initTrainee : null;
+            initTrainee = function(...args) {
+                const out = lpPrevInitTrainee?.(...args);
+                setTimeout(lpApplyTraineeCommChrome, 180);
+                setTimeout(lpApplyTraineeCommChrome, 800);
+                return out;
+            };
+            const lpPrevShowTraineeTab = typeof showTraineeTab === 'function' ? showTraineeTab : null;
+            showTraineeTab = function(...args) {
+                const out = lpPrevShowTraineeTab?.(...args);
+                setTimeout(lpApplyTraineeCommChrome, 0);
+                return out;
+            };
+            const lpPrevApplyAcademyExtra = typeof applyAcademyExtra === 'function' ? applyAcademyExtra : null;
+            applyAcademyExtra = async function(...args) {
+                const out = await lpPrevApplyAcademyExtra?.(...args);
+                lpApplyTraineeCommChrome();
+                return out;
+            };
+            const lpPrevApplyTraineeSupportVisibility = typeof advApplyTraineeSupportVisibility === 'function' ? advApplyTraineeSupportVisibility : null;
+            advApplyTraineeSupportVisibility = async function(...args) {
+                const out = await lpPrevApplyTraineeSupportVisibility?.(...args);
+                lpApplyTraineeCommChrome();
+                return out;
+            };
+            if (!LP.commFabOutsideBound) {
+                LP.commFabOutsideBound = true;
+                document.addEventListener('click', event => {
+                    if (!event.target?.closest?.('#launch-comm-fab')) lpCloseLaunchCommFab();
+                });
+            }
+
+            const TEXT_REPLACEMENTS = [
+                [/User Activity/g, 'سجل النشاط'],
+                [/Tech Support/g, 'الدعم الفني'],
+                [/Conference Rooms/g, 'قاعات التدريب'],
+                [/Conference Room/g, 'قاعة تدريب'],
+                [/Offline Session/g, 'جلسة حضورية'],
+                [/Online Session/g, 'جلسة عن بعد'],
+                [/Meeting Link/g, 'رابط الاجتماع'],
+                [/FAQ/g, 'الأسئلة الشائعة'],
+                [/Utility/g, 'الأدوات'],
+                [/Rules النقاط/g, 'قواعد النقاط'],
+                [/\bRules\b/g, 'القواعد'],
+                [/History النقاط/g, 'سجل النقاط'],
+                [/History Excel/g, 'سجل Excel'],
+                [/\bHistory\b/g, 'السجل'],
+                [/Leaderboard/g, 'الترتيب'],
+                [/Mark Complete/g, 'اعتماد الإكمال'],
+                [/Course Content/g, 'محتوى الدورة'],
+                [/Training Academy/g, 'أكاديمية التدريب'],
+                [/رولز/g, 'صلاحيات'],
+                [/الرولز/g, 'الصلاحيات'],
+                [/يوزر/g, 'مستخدم'],
+                [/باكدجات/g, 'باقات'],
+                [/باكدج/g, 'باقة'],
+                [/السيشنز/g, 'الجلسات التدريبية'],
+                [/السيشن/g, 'الجلسة التدريبية'],
+                [/سيشنز/g, 'جلسات تدريبية'],
+                [/سيشن/g, 'جلسة تدريبية'],
+                [/سيرفاي/g, 'تقييم'],
+                [/فورم/g, 'نموذج']
+            ];
+            function lpReplaceTextValue(value) {
+                let out = String(value || '');
+                TEXT_REPLACEMENTS.forEach(([rx, to]) => out = out.replace(rx, to));
+                return out;
+            }
+            let lpPolishing = false;
+            function lpPolishText() {
+                if (lpPolishing || !document.body) return;
+                lpPolishing = true;
+                try {
+                    document.title = lpReplaceTextValue(document.title || 'Deraah Academy');
+                    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+                        acceptNode(node) {
+                            const p = node.parentElement;
+                            if (!p || ['SCRIPT','STYLE','TEXTAREA'].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+                            if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                    });
+                    const nodes = [];
+                    while (walker.nextNode()) nodes.push(walker.currentNode);
+                    nodes.forEach(node => {
+                        const next = lpReplaceTextValue(node.nodeValue);
+                        if (next !== node.nodeValue) node.nodeValue = next;
+                    });
+                    document.querySelectorAll('[title],[placeholder]').forEach(el => {
+                        ['title','placeholder'].forEach(attr => {
+                            if (!el.hasAttribute(attr)) return;
+                            const next = lpReplaceTextValue(el.getAttribute(attr));
+                            if (next !== el.getAttribute(attr)) el.setAttribute(attr, next);
+                        });
+                    });
+                    const greeting = document.getElementById('tr-greeting');
+                    if (greeting && CU) greeting.textContent = `أهلاً بك، ${CU.full_name || CU.email}`;
+                } finally {
+                    lpPolishing = false;
+                }
+            }
+            LP.polishText = lpPolishText;
+            let lpTextTimer = null;
+            try {
+                const mo = new MutationObserver(() => {
+                    if (lpPolishing) return;
+                    clearTimeout(lpTextTimer);
+                    lpTextTimer = setTimeout(() => {
+                        lpPolishText();
+                        try {
+                            lpApplyUserManagementChrome();
+                            lpApplyCoursePermissionChrome();
+                            lpApplyTraineeCommChrome();
+                        } catch(e) {}
+                    }, 80);
+                });
+                mo.observe(document.body, { childList:true, subtree:true, characterData:true });
+            } catch(e) {}
+
+            lpEnsureShell();
+            advApplyPermissions?.();
+            setTimeout(() => advApplyPermissions?.(), 120);
+            setTimeout(() => advApplyPermissions?.(), 700);
+            setTimeout(() => advApplyPermissions?.(), 1800);
+            setTimeout(lpPolishText, 100);
+            setTimeout(lpPolishText, 700);
+            setTimeout(lpApplyTraineeCommChrome, 200);
+            setTimeout(lpApplyTraineeCommChrome, 900);
+            Object.assign(window, {
+                loadPermissionsPage, saveRoleWidePermissions, saveUserRoleOverrides, openUserRoleModal,
+                adv2RenderRoleWidePermissions, adv15ShowPermMode, requestCourseEnrollment,
+                loadCourseEnrollmentRequestsPage: lpLoadCourseEnrollmentRequestsPage,
+                approveCourseEnrollmentRequest: lpApproveCourseEnrollmentRequest,
+                rejectCourseEnrollmentRequest: lpRejectCourseEnrollmentRequest,
+                renderCoursesGrid, submitAddCourse, openAddCourseModal, openCourseActions,
+                openCourseDetail, openCourseEditFromActions, openEditCourse,
+                deleteCourse, deleteCourseFromActions, saveCourseInfoSettings,
+                openCourseItemModal, saveCourseItem, courseDetailSub, showTab,
+                toggleLaunchCommFab, lpOpenFloatingQuestion, lpOpenFloatingChat,
+                lpOpenFloatingGroupChat, lpOpenFloatingRegionChat,
+                lpSwitchTraineeChatMode, lpRenderTraineeChatDirectory,
+                lpOpenAudienceChatFromTrainee, lpPermissionToggleChanged,
+                lpToggleChatScopeAll,
+                openTrainerTechTicket, submitTrainerTechTicket,
+                openTechSupportAnswer, saveTechSupportAnswer, closeTechTicket,
+                loadTechSupportPage, lpCreateTechTicket, lpOpenTechTicket,
+                lpSetTechStatusFilter, lpRenderTechTicketsTable,
+                lpSaveTechTicketReply, lpUpdateTechTicketStatus,
+                lpRenderTrainerTechTicketList,
+                openSupportChat, openChatWith, sendChatMessage, updateChatUnreadCount,
+                chatVisibleUsers, initTrainee, showTraineeTab, applyAcademyExtra,
+                advApplyTraineeSupportVisibility
+            });
+        })();
+        // ═════════ END LAUNCH POLISH HOTFIX ═════════
+
         console.log('✅ أكاديمية التدريب - النظام جاهز بالكامل');
     </script>
 
