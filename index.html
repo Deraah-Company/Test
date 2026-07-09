@@ -908,6 +908,34 @@
             position: absolute;
             inset: 0;
         }
+        .final-course-card .course-card-duplicate-btn {
+            position: absolute;
+            left: 12px;
+            top: 92px;
+            z-index: 6;
+            width: 38px;
+            height: 38px;
+            min-height: 38px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.74);
+            background: rgba(255,255,255,.94);
+            color: #12306f;
+            box-shadow: 0 10px 22px rgba(15,23,42,.18);
+            font-size: 0;
+        }
+        .final-course-card .course-card-duplicate-btn i {
+            font-size: 20px;
+            margin: 0;
+        }
+        .final-course-card .course-card-duplicate-btn:hover {
+            background: #eef4ff;
+            color: #0f2a66;
+            transform: translateY(-1px);
+        }
         .course-body {
             padding: 14px 16px;
         }
@@ -1483,10 +1511,11 @@
 
                     <!-- LEARNING PATHS -->
                     <div id="tab-paths" class="hidden">
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">المسارات التعليمية</div>
-                            <button class="primary" onclick="openLearningPathForm()"><i class="ti ti-plus"></i>مسار جديد</button>
                         </div>
+                        <button class="adv2-full-add" onclick="openLearningPathForm()"><i class="ti ti-plus"></i>إضافة مسار جديد</button>
+                        <div style="height:14px"></div>
                         <div id="paths-shell" class="form-shell form-closed">
                             <div id="path-form" class="card hidden">
                                 <input type="hidden" id="lp-id">
@@ -1534,7 +1563,6 @@
                             <button onclick="openAdminCourseContentPreview()"><i class="ti ti-eye"></i>معاينة المحتوى</button>
                             <button onclick="openEditCourse()"><i class="ti ti-edit"></i>تعديل الدورة</button>
                             <button class="danger" onclick="deleteCourse()"><i class="ti ti-trash"></i>حذف الدورة</button>
-                            <button onclick="openCourseItemModal('survey')"><i class="ti ti-clipboard-list"></i>إضافة سيرفاي</button>
                             <button onclick="exportCourseProgress()" style="background:#107c41;color:#fff;border-color:#107c41;"><i class="ti ti-file-download"></i>تصدير التقرير</button>
                             <button onclick="openEnrollModal()"><i class="ti ti-user-check"></i>تسجيل متدربين</button>
                         </div>
@@ -1586,18 +1614,21 @@
 
                     <!-- GROUPS -->
                     <div id="tab-groups" class="hidden">
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">إدارة الجروبات</div>
-                            <button class="primary" onclick="openModal('m-add-group')"><i class="ti ti-users-plus"></i>جروب جديد</button>
                         </div>
+                        <button class="adv2-full-add" onclick="openModal('m-add-group')"><i class="ti ti-users-plus"></i>إضافة جروب جديد</button>
+                        <div style="height:14px"></div>
                         <div id="groups-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
                     </div>
 
                     <!-- CERTS -->
                     <div id="tab-certs" class="hidden">
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;flex-wrap:wrap">
                             <div style="font-size:22px;font-weight:700;flex:1">سجل الشهادات المُصدرة</div>
-                            <button class="primary" onclick="openCertTemplateModal()"><i class="ti ti-certificate"></i>إنشاء قالب شهادة</button>
+                        </div>
+                        <button class="adv2-full-add" onclick="openCertTemplateModal()"><i class="ti ti-certificate"></i>إضافة قالب شهادة</button>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;margin:14px 0 1.5rem;flex-wrap:wrap">
                             <button onclick="openBulkIssueCertModal()"><i class="ti ti-certificate"></i>منح شهادة للمستخدمين</button>
                             <button onclick="exportCertificates()" style="background:#107c41;color:#fff;border-color:#107c41;"><i class="ti ti-file-download"></i>تصدير الشهادات</button>
                         </div>
@@ -2705,23 +2736,30 @@
 
         <!-- Survey Admin -->
         <div id="m-survey-admin" class="modal-wrap hidden">
-            <div class="modal" style="max-width:920px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-                    <div style="font-size:18px;font-weight:700"><i class="ti ti-clipboard-list"></i>سيرفاي الدورة</div>
+            <div class="modal survey-course-builder-modal" style="width:min(1060px,96vw);max-width:96vw;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <div id="survey-admin-modal-title" style="font-size:20px;font-weight:900"><i class="ti ti-clipboard-list"></i> إضافة تقييم</div>
                     <button class="icon-btn" onclick="closeModal('m-survey-admin')"><i class="ti ti-x"></i></button>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                            <strong>أسئلة السيرفاي</strong>
-                            <button class="sm" onclick="addSurveyQuestion()"><i class="ti ti-plus"></i>سؤال</button>
+                <div id="survey-content-title-field" class="field">
+                    <label>عنوان التقييم</label>
+                    <input id="survey-content-title" placeholder="مثال: تقييم تجربة الدورة">
+                </div>
+                <div class="survey-builder-grid" style="display:grid;grid-template-columns:minmax(260px,.75fr) minmax(420px,1.25fr);gap:16px;align-items:start;">
+                    <div class="card survey-builder-summary-card" style="margin:0;">
+                        <div style="font-weight:900;font-size:18px;margin-bottom:12px;display:flex;align-items:center;gap:8px;"><i class="ti ti-clipboard-list"></i> ملخص طرق الإجابة</div>
+                        <div id="survey-results" style="margin-top:10px;"></div>
+                    </div>
+                    <div class="card survey-builder-questions-card" style="margin:0;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                            <strong style="font-size:18px;">أسئلة التقييم</strong>
+                            <button class="sm primary" onclick="addSurveyQuestion()"><i class="ti ti-plus"></i> سؤال</button>
                         </div>
                         <div id="survey-admin-questions" style="display:grid;gap:10px;"></div>
-                        <button class="primary" style="width:100%;margin-top:12px;" onclick="saveSurveyAdmin()"><i class="ti ti-device-floppy"></i>حفظ السيرفاي</button>
-                    </div>
-                    <div>
-                        <strong>Dashboard / NPS</strong>
-                        <div id="survey-results" style="margin-top:10px;"></div>
+                        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;border-top:1px solid var(--color-border-tertiary);padding-top:14px;">
+                            <button onclick="closeModal('m-survey-admin')">إلغاء</button>
+                            <button class="primary" onclick="saveSurveyAdmin()"><i class="ti ti-device-floppy"></i> حفظ التقييم في الدورة</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2942,6 +2980,21 @@
 
         function esc(v) {
             return String(v ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+
+
+        // ترتيب ثابت لعناصر محتوى الدورة: أي عنصر جديد يضاف بعد آخر عنصر موجود مهما كان نوع الـ order القديم.
+        function nextContentOrder(existingOrItems) {
+            const items = Array.isArray(existingOrItems)
+                ? existingOrItems
+                : (existingOrItems && existingOrItems.success && Array.isArray(existingOrItems.videos) ? existingOrItems.videos : []);
+            const nums = (items || []).map(item => Number(item?.order)).filter(n => Number.isFinite(n));
+            return (nums.length ? Math.max(...nums) : (items || []).length) + 1;
+        }
+
+        function contentOrderValue(item, fallbackIndex = 0) {
+            const n = Number(item?.order);
+            return Number.isFinite(n) ? n : (fallbackIndex + 1);
         }
 
         function roleLabel(role) {
@@ -3936,20 +3989,45 @@
             renderLearningPathAudiencePickers();
         }
 
+        function parkLearningPathForm() {
+            const form = document.getElementById('path-form');
+            const shell = document.getElementById('paths-shell');
+            const list = document.getElementById('paths-list');
+            const wasInModal = form?.parentElement?.id === 'adv2-body';
+            if (form && shell && wasInModal) shell.insertBefore(form, list || null);
+            form?.classList.add('hidden');
+            shell?.classList.add('form-closed');
+            if (list) list.style.gridColumn = '1/-1';
+            return wasInModal;
+        }
+
+        function openLearningPathModal(title = 'المسار التعليمي') {
+            adv2EnsureModal();
+            const form = document.getElementById('path-form');
+            const body = document.getElementById('adv2-body');
+            const list = document.getElementById('paths-list');
+            if (!form || !body) return;
+            if (form.parentElement !== body) {
+                body.innerHTML = '';
+                body.appendChild(form);
+            }
+            document.getElementById('m-adv2-card').style.width = 'min(960px,96vw)';
+            document.getElementById('adv2-title').textContent = title;
+            form.classList.remove('hidden');
+            document.getElementById('paths-shell')?.classList.add('form-closed');
+            if (list) list.style.gridColumn = '1/-1';
+            openModal('m-adv2');
+        }
+
         function openLearningPathForm() {
             clearLearningPathForm();
-            document.getElementById('path-form')?.classList.remove('hidden');
-            document.getElementById('paths-shell')?.classList.remove('form-closed');
-            const list = document.getElementById('paths-list');
-            if (list) list.style.gridColumn = '';
+            openLearningPathModal('إضافة مسار جديد');
             populateLearningPathFormOptions();
         }
 
         function hideLearningPathForm() {
-            document.getElementById('path-form')?.classList.add('hidden');
-            document.getElementById('paths-shell')?.classList.add('form-closed');
-            const list = document.getElementById('paths-list');
-            if (list) list.style.gridColumn = '1/-1';
+            const wasInModal = parkLearningPathForm();
+            if (wasInModal) closeModal('m-adv2');
         }
 
         function clearLearningPathForm() {
@@ -4013,10 +4091,7 @@
             const useRegions = document.getElementById('lp-use-regions');
             if (useGroups) useGroups.checked = LP_SELECTED_GROUPS.length > 0;
             if (useRegions) useRegions.checked = LP_SELECTED_REGIONS.length > 0;
-            document.getElementById('path-form')?.classList.remove('hidden');
-            document.getElementById('paths-shell')?.classList.remove('form-closed');
-            const list = document.getElementById('paths-list');
-            if (list) list.style.gridColumn = '';
+            openLearningPathModal('تعديل المسار');
             await populateLearningPathFormOptions();
             togglePathAudience();
         }
@@ -5747,13 +5822,16 @@
             if (!CCI) return toast('افتح دورة أولا', 'warning');
             if (!isAdmin()) return toast('حذف الدورات متاح للأدمن فقط', 'warning');
             const c = CCACHE.find(x => x.course_id === CCI);
-            if (!confirm(`حذف الدورة "${c?.course_name || CCI}" بكل المحتوى والالتحاقات؟`)) return;
-            const r = await call({ action: 'deleteCourse', courseId: CCI });
-            if (r.success) {
-                toast('تم حذف الدورة');
-                CCI = null;
-                showTab('courses');
-            } else toast(r.error, 'error');
+            const runDelete = async () => {
+                const r = await call({ action: 'deleteCourse', courseId: CCI });
+                if (r.success) {
+                    toast('تم حذف الدورة');
+                    CCI = null;
+                    await loadCourses?.();
+                    showTab('courses');
+                } else toast(r.error, 'error');
+            };
+            return askConfirm('حذف الدورة', `هل تريد حذف الدورة "${c?.course_name || CCI}" بكل المحتوى والالتحاقات؟`, runDelete);
         }
 
         function openCourseItemModal(type) {
@@ -5862,7 +5940,7 @@
                 time_minutes: parseInt(val('ci-minutes')) || 0,
                 require_previous: val('ci-lock'),
                 progress_mode: 'manual',
-                order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now())
+                order: oldItem ? oldItem.order : (nextContentOrder(existing))
             };
             const r = EDITING_VIDEO_ID ?
                 await call({ action: 'updateVideo', videoId: EDITING_VIDEO_ID, updates: item }) :
@@ -6393,10 +6471,13 @@
         }
 
         async function doDeleteVideo(videoId) {
-            if (!confirm('حذف الفيديو؟')) return;
-            const r = await call({ action: 'deleteVideo', videoId });
-            if (r.success) { toast('تم الحذف');
-                openCourseDetail(CCI); } else toast(r.error, 'error');
+            const runDelete = async () => {
+                const r = await call({ action: 'deleteVideo', videoId });
+                if (r.success) { toast('تم الحذف');
+                    openCourseDetail(CCI); } else toast(r.error, 'error');
+            };
+            if (typeof askConfirm === 'function') return askConfirm('حذف المحتوى', 'هل تريد حذف هذا العنصر من الدورة؟', runDelete);
+            return runDelete();
         }
 
         async function editVideo(videoId) {
@@ -6469,7 +6550,7 @@
                 video_url: val('pdf-url'),
                 require_previous: val('pdf-lock'),
                 progress_mode: 'manual',
-                order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now())
+                order: oldItem ? oldItem.order : (nextContentOrder(existing))
             };
             if (!item.title || !item.file_url) return toast('العنوان ورفع ملف PDF مطلوبان', 'warning');
             const r = EDITING_VIDEO_ID ?
@@ -6493,7 +6574,7 @@
                 video_url: val('nv-url'),
                 require_previous: val('nv-lock'),
                 progress_mode: val('nv-progress-mode'),
-                order: existing.success ? existing.videos.length + 1 : Date.now()
+                order: nextContentOrder(existing)
             };
             if (!video.title || !video.video_url) return toast('العنوان ورفع الفيديو مطلوبان', 'warning');
             const r = await call({ action: 'addVideo', video });
@@ -8194,7 +8275,7 @@
                     time_minutes: 0,
                     require_previous: 'yes',
                     progress_mode: 'manual',
-                    order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now())
+                    order: oldItem ? oldItem.order : (nextContentOrder(existing))
                 };
                 const r = SURVEY_EDITING_ITEM_ID ?
                     await call({ action: 'updateVideo', videoId: SURVEY_EDITING_ITEM_ID, updates: item }) :
@@ -9749,7 +9830,7 @@
         async function saveSection() {
             const titleAr = val('sec-title-ar').trim(), titleEn = val('sec-title-en').trim(); if (!titleAr || !titleEn) return toast('اكتب اسم السيكشن عربي وإنجليزي', 'warning');
             const existing = await call({ action:'getVideos', courseId: CCI }); const id = val('sec-id'); const oldItem = existing.success && id ? existing.videos.find(x => x.video_id === id) : null;
-            const item = { course_id: CCI, content_type:'section', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('sec-desc-ar'), description_ar:val('sec-desc-ar'), description_en:val('sec-desc-en'), require_previous:'no', progress_mode:'manual', order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now()) };
+            const item = { course_id: CCI, content_type:'section', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('sec-desc-ar'), description_ar:val('sec-desc-ar'), description_en:val('sec-desc-en'), require_previous:'no', progress_mode:'manual', order: oldItem ? oldItem.order : (nextContentOrder(existing)) };
             const r = id ? await call({ action:'updateVideo', videoId:id, updates:item }) : await call({ action:'addVideo', video:item });
             if (r.success) { closeModal('m-section-editor'); toast('تم حفظ السيكشن'); openCourseDetail(CCI); } else toast(r.error, 'error');
         }
@@ -9784,21 +9865,21 @@
             const questions = collectCourseItemQuestions(); if (!questions.length) return toast('ضيف سؤال واحد على الأقل', 'warning');
             const existing = await call({ action:'getVideos', courseId: CCI }); const oldItem = existing.success && EDITING_VIDEO_ID ? existing.videos.find(x => x.video_id === EDITING_VIDEO_ID) : null;
             const titleAr = val('ci-name').trim(), titleEn = val('ci-name-en').trim(); if (!titleAr || !titleEn) return toast('اكتب العنوان عربي وإنجليزي', 'warning');
-            const item = { course_id: CCI, content_type: val('ci-type'), title:titleAr, title_ar:titleAr, title_en:titleEn, questions, pass_score: val('ci-type') === 'survey' ? 0 : Math.max(1, parseInt(val('ci-pass')) || 1), time_minutes: parseInt(val('ci-minutes')) || 0, require_previous: val('ci-lock'), progress_mode:'manual', section_id: val('ci-section') || '', order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now()) };
+            const item = { course_id: CCI, content_type: val('ci-type'), title:titleAr, title_ar:titleAr, title_en:titleEn, questions, pass_score: val('ci-type') === 'survey' ? 0 : Math.max(1, parseInt(val('ci-pass')) || 1), time_minutes: parseInt(val('ci-minutes')) || 0, require_previous: val('ci-lock'), progress_mode:'manual', section_id: val('ci-section') || '', order: oldItem ? oldItem.order : (nextContentOrder(existing)) };
             const r = EDITING_VIDEO_ID ? await call({ action:'updateVideo', videoId: EDITING_VIDEO_ID, updates:item }) : await call({ action:'addVideo', video:item });
             if (r.success) { closeModal('m-course-item'); EDITING_VIDEO_ID = null; toast('تم حفظ المحتوى'); openCourseDetail(CCI); } else toast(r.error,'error');
         };
         submitVideo = async function(close) {
             const titleAr = val('nv-title').trim(), titleEn = val('nv-title-en').trim(); if (!titleAr || !titleEn) return toast('اكتب عنوان الفيديو عربي وإنجليزي', 'warning');
             const existing = await call({ action:'getVideos', courseId: CCI });
-            const video = { course_id: CCI, content_type:'video', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('nv-desc'), description_ar:val('nv-desc'), description_en:val('nv-desc-en'), video_url:val('nv-url'), require_previous:val('nv-lock'), progress_mode:val('nv-progress-mode'), section_id:val('nv-section') || '', video_questions:[], order: existing.success ? existing.videos.length + 1 : Date.now() };
+            const video = { course_id: CCI, content_type:'video', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('nv-desc'), description_ar:val('nv-desc'), description_en:val('nv-desc-en'), video_url:val('nv-url'), require_previous:val('nv-lock'), progress_mode:val('nv-progress-mode'), section_id:val('nv-section') || '', video_questions:[], order: nextContentOrder(existing) };
             if (!video.video_url) return toast('رفع الفيديو مطلوب', 'warning');
             const r = await call({ action:'addVideo', video }); if (r.success) { toast('تم إضافة الفيديو'); ['nv-title','nv-title-en','nv-desc','nv-desc-en','nv-url'].forEach(id => set(id,'')); set('nv-lock','yes'); set('nv-progress-mode','auto'); set('nv-section',''); if (close) closeModal('m-add-video'); openCourseDetail(CCI); } else toast(r.error,'error');
         };
         submitPdfItem = async function() {
             const titleAr = val('pdf-title').trim(), titleEn = val('pdf-title-en').trim(); if (!titleAr || !titleEn) return toast('اكتب عنوان الملف عربي وإنجليزي', 'warning');
             const existing = await call({ action:'getVideos', courseId: CCI }); const oldItem = existing.success && EDITING_VIDEO_ID ? existing.videos.find(x => x.video_id === EDITING_VIDEO_ID) : null;
-            const item = { course_id: CCI, content_type:'pdf', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('pdf-desc'), description_ar:val('pdf-desc'), description_en:val('pdf-desc-en'), file_url:val('pdf-url'), video_url:val('pdf-url'), require_previous:val('pdf-lock'), section_id:val('pdf-section') || '', progress_mode:'manual', order: oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now()) };
+            const item = { course_id: CCI, content_type:'pdf', title:titleAr, title_ar:titleAr, title_en:titleEn, description:val('pdf-desc'), description_ar:val('pdf-desc'), description_en:val('pdf-desc-en'), file_url:val('pdf-url'), video_url:val('pdf-url'), require_previous:val('pdf-lock'), section_id:val('pdf-section') || '', progress_mode:'manual', order: oldItem ? oldItem.order : (nextContentOrder(existing)) };
             if (!item.file_url) return toast('رفع ملف PDF مطلوب', 'warning');
             const r = EDITING_VIDEO_ID ? await call({ action:'updateVideo', videoId: EDITING_VIDEO_ID, updates:item }) : await call({ action:'addVideo', video:item }); if (r.success) { closeModal('m-add-pdf'); EDITING_VIDEO_ID = null; toast('تم حفظ ملف PDF'); openCourseDetail(CCI); } else toast(r.error,'error');
         };
@@ -9907,7 +9988,7 @@
         // Survey builder bilingual
         addSurveyQuestion = function(q = {}) { const wrap = document.createElement('div'); wrap.className='glass-panel survey-q'; wrap.style.padding='10px'; wrap.innerHTML = `<div class="field-row"><div class="field"><label>السؤال بالعربي</label><input class="survey-q-text" value="${esc(q.text_ar || q.text || '')}"></div><div class="field"><label>Question in English</label><input class="survey-q-text-en" dir="ltr" style="text-align:left;" value="${esc(q.text_en || '')}"></div></div><div class="field-row"><div class="field"><label>${t('البند','Category')}</label><select class="survey-q-cat"><option value="course">${t('الدورة','Course')}</option><option value="content">${t('المحتوى','Content')}</option><option value="academy">${t('الأكاديمية / المنصة','Academy / Platform')}</option><option value="platform">${t('المنصة','Platform')}</option><option value="trainer">${t('المدرب','Trainer')}</option></select></div><div class="field"><label>${t('النوع','Type')}</label><select class="survey-q-type"><option value="nps">NPS 0-10</option><option value="text">${t('نص','Text')}</option></select></div></div><button class="sm danger" onclick="this.closest('.survey-q').remove()"><i class="ti ti-trash"></i>${t('حذف','Delete')}</button>`; document.getElementById('survey-admin-questions').appendChild(wrap); wrap.querySelector('.survey-q-cat').value = q.category || 'course'; wrap.querySelector('.survey-q-type').value = q.type || 'nps'; };
         collectSurveyQuestions = function() { return [...document.querySelectorAll('.survey-q')].map((el,i)=>({ id:`q_${i}`, text:el.querySelector('.survey-q-text').value.trim(), text_ar:el.querySelector('.survey-q-text').value.trim(), text_en:el.querySelector('.survey-q-text-en')?.value.trim() || '', category:el.querySelector('.survey-q-cat').value, type:el.querySelector('.survey-q-type').value })).filter(q=>q.text_ar || q.text_en); };
-        saveSurveyAdmin = async function() { const questions = collectSurveyQuestions(); if (SURVEY_ITEM_CONTEXT === 'content') { if (!questions.length) return toast('ضيف سؤال واحد على الأقل','warning'); const existing = await call({ action:'getVideos', courseId:CCI }); const oldItem = existing.success && SURVEY_EDITING_ITEM_ID ? existing.videos.find(x => x.video_id === SURVEY_EDITING_ITEM_ID) : null; const item = { course_id:CCI, content_type:'survey', title:'سيرفاي الدورة', title_ar:'سيرفاي الدورة', title_en:'Course Survey', questions, pass_score:0, time_minutes:0, require_previous:'yes', progress_mode:'manual', section_id: oldItem?.section_id || '', order:oldItem ? oldItem.order : (existing.success ? existing.videos.length + 1 : Date.now()) }; const r = SURVEY_EDITING_ITEM_ID ? await call({ action:'updateVideo', videoId:SURVEY_EDITING_ITEM_ID, updates:item }) : await call({ action:'addVideo', video:item }); if (r.success) { closeModal('m-survey-admin'); SURVEY_EDITING_ITEM_ID = null; toast('تم حفظ السيرفاي داخل محتوى الدورة'); openCourseDetail(CCI); } else toast(r.error,'error'); return; } const r = await call({ action:'saveCourseSurvey', courseId:CCI, questions }); if (r.success) toast('تم حفظ السيرفاي'); else toast(r.error,'error'); };
+        saveSurveyAdmin = async function() { const questions = collectSurveyQuestions(); if (SURVEY_ITEM_CONTEXT === 'content') { if (!questions.length) return toast('ضيف سؤال واحد على الأقل','warning'); const existing = await call({ action:'getVideos', courseId:CCI }); const oldItem = existing.success && SURVEY_EDITING_ITEM_ID ? existing.videos.find(x => x.video_id === SURVEY_EDITING_ITEM_ID) : null; const item = { course_id:CCI, content_type:'survey', title:'سيرفاي الدورة', title_ar:'سيرفاي الدورة', title_en:'Course Survey', questions, pass_score:0, time_minutes:0, require_previous:'yes', progress_mode:'manual', section_id: oldItem?.section_id || '', order:oldItem ? oldItem.order : (nextContentOrder(existing)) }; const r = SURVEY_EDITING_ITEM_ID ? await call({ action:'updateVideo', videoId:SURVEY_EDITING_ITEM_ID, updates:item }) : await call({ action:'addVideo', video:item }); if (r.success) { closeModal('m-survey-admin'); SURVEY_EDITING_ITEM_ID = null; toast('تم حفظ السيرفاي داخل محتوى الدورة'); openCourseDetail(CCI); } else toast(r.error,'error'); return; } const r = await call({ action:'saveCourseSurvey', courseId:CCI, questions }); if (r.success) toast('تم حفظ السيرفاي'); else toast(r.error,'error'); };
         openCourseSurveyIfNeeded = async function() { if (!CCI || !CU) return; const survey = await call({ action:'getCourseSurvey', courseId:CCI }); const questions = survey.success ? (survey.survey.questions || []) : []; if (!questions.length) return; const previous = await getDoc(doc(db,'survey_answers',`${CCI}_${CU.email.trim().toLowerCase()}`)); if (previous.exists()) return; html('survey-trainee-form', questions.map((q,i) => `<div class="field survey-answer" data-id="${q.id || `q_${i}`}" data-type="${q.type}" data-cat="${q.category}"><label>${esc(questionText(q))}</label>${q.type === 'text' ? `<textarea rows="3" class="survey-answer-value"></textarea>` : `<input type="range" min="0" max="10" value="8" class="survey-answer-value" oninput="this.nextElementSibling.textContent=this.value"><div style="font-weight:800;color:var(--color-text-info);">8</div>`}</div>`).join('')); openModal('m-survey-trainee'); };
         function installAcademyFinalEnhancements() {
             ensureLanguageSwitchers(); ensureBilingualFields(); ensureQuestionGroupPanel(); ensureExtraModals(); setLanguage(APP_LANG, true);
@@ -13900,6 +13981,7 @@
             document.getElementById('app')?.insertAdjacentHTML('beforeend', `<div id="m-adv2" class="modal-wrap hidden"><div class="modal" id="m-adv2-card" style="width:min(1040px,96vw);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><div id="adv2-title" style="font-size:19px;font-weight:900"></div><button class="icon-btn" onclick="closeModal('m-adv2')"><i class="ti ti-x"></i></button></div><div id="adv2-body"></div></div></div>`);
         }
         function adv2OpenModal(title, body, width = '1040px') {
+            if (typeof parkLearningPathForm === 'function') parkLearningPathForm();
             adv2EnsureModal();
             document.getElementById('m-adv2-card').style.width = `min(${width},96vw)`;
             document.getElementById('adv2-title').textContent = title;
@@ -14149,21 +14231,47 @@
             if (cr.success) CCACHE = cr.courses;
             advHtml('tab-coupons', `
                 <div class="adv-title"><i class="ti ti-ticket"></i> الكوبونات</div>
-                <div class="adv-grid">
-                    <div class="card">
-                        <input type="hidden" id="cpn-id">
-                        <div class="field-row"><div class="field"><label>كود الكوبون</label><input id="cpn-code" dir="ltr" style="text-align:left;"></div><div class="field"><label>نسبة الخصم %</label><input id="cpn-percent" type="number" min="0" max="100" value="10"></div></div>
-                        <div class="field-row"><div class="field"><label>أقصى خصم</label><input id="cpn-max" type="number" min="0" value="100"></div><div class="field"><label>عدد الاستخدامات</label><input id="cpn-limit" type="number" min="0" value="1"></div></div>
-                        <div class="field"><label>مرتبط بدورة / باكدج</label><select id="cpn-course"><option value="">أي دورة مدفوعة</option>${CCACHE.map(c => `<option value="${advEsc(c.course_id)}">${adv2CourseLabel(c)}</option>`).join('')}</select></div>
-                        <div class="field"><label>تخصيص لمستخدمين</label><input id="cpn-user-search" placeholder="بحث..." oninput="renderCouponUsers()"><div id="cpn-users" class="pick-list" style="max-height:220px;margin-top:8px;"></div><div class="adv-sub">لو اخترت مستخدمين، الكوبون يظهر لهم فقط في كوبونات الشراء.</div></div>
-                        <div class="adv-mini-row"><div><strong>نشط</strong></div>${adv2Switch('cpn-active', true)}</div>
-                        <button class="primary" onclick="saveCoupon()"><i class="ti ti-device-floppy"></i> حفظ الكوبون</button>
-                    </div>
-                    <div class="card"><div class="adv-table-wrap"><table><thead><tr><th>الكود</th><th>الخصم</th><th>المخصص لهم</th><th>الاستخدامات</th><th>الحالة</th><th></th></tr></thead><tbody>${rows.map(c => `<tr><td dir="ltr">${advEsc(c.code)}</td><td>${c.percent || 0}% حتى ${advMoney(c.maxDiscount || 0, c.currency || 'SAR')}</td><td>${(c.userEmails || []).length ? `${(c.userEmails || []).length} مستخدم` : 'عام'}</td><td>${c.used || 0}/${c.usageLimit || 0}</td><td>${c.active === false ? 'موقوف' : 'نشط'}</td><td style="display:flex;gap:6px;"><button class="sm" onclick="editCoupon('${advEsc(c.id)}')"><i class="ti ti-edit"></i></button><button class="sm danger" onclick="deleteCoupon('${advEsc(c.id)}')"><i class="ti ti-trash"></i></button></td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;">لا توجد كوبونات</td></tr>'}</tbody></table></div></div>
-                </div>
+                <button class="adv2-full-add" onclick="openCouponModal()"><i class="ti ti-plus"></i> إضافة كوبون</button>
+                <div style="height:14px"></div>
+                <div class="card"><div class="adv-table-wrap"><table><thead><tr><th>الكود</th><th>الخصم</th><th>المخصص لهم</th><th>الاستخدامات</th><th>الحالة</th><th></th></tr></thead><tbody>${rows.map(c => `<tr><td dir="ltr">${advEsc(c.code)}</td><td>${c.percent || 0}% حتى ${advMoney(c.maxDiscount || 0, c.currency || 'SAR')}</td><td>${(c.userEmails || []).length ? `${(c.userEmails || []).length} مستخدم` : 'عام'}</td><td>${c.used || 0}/${c.usageLimit || 0}</td><td>${c.active === false ? 'موقوف' : 'نشط'}</td><td style="display:flex;gap:6px;"><button class="sm" onclick="editCoupon('${advEsc(c.id)}')"><i class="ti ti-edit"></i></button><button class="sm danger" onclick="deleteCoupon('${advEsc(c.id)}')"><i class="ti ti-trash"></i></button></td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;">لا توجد كوبونات</td></tr>'}</tbody></table></div></div>
             `);
-            renderCouponUsers();
         };
+        function couponFormHtml() {
+            return `
+                <input type="hidden" id="cpn-id">
+                <input type="hidden" id="cpn-used" value="0">
+                <div class="field-row"><div class="field"><label>كود الكوبون</label><input id="cpn-code" dir="ltr" style="text-align:left;"></div><div class="field"><label>نسبة الخصم %</label><input id="cpn-percent" type="number" min="0" max="100" value="10"></div></div>
+                <div class="field-row"><div class="field"><label>أقصى خصم</label><input id="cpn-max" type="number" min="0" value="100"></div><div class="field"><label>عدد الاستخدامات</label><input id="cpn-limit" type="number" min="0" value="1"></div></div>
+                <div class="field"><label>مرتبط بدورة / باكدج</label><select id="cpn-course"><option value="">أي دورة مدفوعة</option>${CCACHE.map(c => `<option value="${advEsc(c.course_id)}">${adv2CourseLabel(c)}</option>`).join('')}</select></div>
+                <div class="field"><label>تخصيص لمستخدمين</label><input id="cpn-user-search" placeholder="بحث..." oninput="renderCouponUsers()"><div id="cpn-users" class="pick-list" style="max-height:220px;margin-top:8px;"></div><div class="adv-sub">لو اخترت مستخدمين، الكوبون يظهر لهم فقط في كوبونات الشراء.</div></div>
+                <div class="adv-mini-row"><div><strong>نشط</strong></div>${adv2Switch('cpn-active', true)}</div>
+                <div style="text-align:left"><button class="primary" onclick="saveCoupon()"><i class="ti ti-device-floppy"></i> حفظ الكوبون</button></div>
+            `;
+        }
+        async function openCouponModal(id = '') {
+            if (!UCACHE.length || !CCACHE.length) {
+                const [ur, cr] = await Promise.all([call({ action: 'getUsers' }), call({ action: 'getCourses' })]);
+                if (ur.success) UCACHE = ur.users || [];
+                if (cr.success) CCACHE = cr.courses || [];
+            }
+            let c = null;
+            if (id) {
+                const snap = await getDoc(doc(db, 'coupons', id));
+                if (!snap.exists()) return toast('الكوبون غير موجود', 'warning');
+                c = snap.data();
+            }
+            adv2OpenModal(id ? 'تعديل الكوبون' : 'إضافة كوبون', couponFormHtml(), '860px');
+            advSet('cpn-id', id || '');
+            advSet('cpn-code', c?.code || '');
+            advSet('cpn-percent', c?.percent ?? 10);
+            advSet('cpn-max', c?.maxDiscount ?? 100);
+            advSet('cpn-limit', c?.usageLimit ?? 1);
+            advSet('cpn-course', c?.courseId || '');
+            advSet('cpn-used', c?.used || 0);
+            const sw = document.getElementById('cpn-active');
+            if (sw) sw.checked = c?.active !== false;
+            renderCouponUsers(new Set((c?.userEmails || []).map(normalizeEmail)));
+        }
         function renderCouponUsers(selected = null) {
             const chosen = selected || new Set([...document.querySelectorAll('.cpn-user:checked')].map(x => normalizeEmail(x.value)));
             const q = (advVal('cpn-user-search') || '').toLowerCase();
@@ -14171,19 +14279,15 @@
             advHtml('cpn-users', rows.map(u => { const email = normalizeEmail(u.email); return `<label class="pick-chip"><input class="cpn-user" type="checkbox" value="${advEsc(email)}" ${chosen.has(email) ? 'checked' : ''} style="width:auto;">${advEsc(u.full_name || email)}<span class="adv-sub" dir="ltr">${advEsc(email)}</span></label>`; }).join('') || '<div class="adv-sub">لا يوجد مستخدمون.</div>');
         }
         async function editCoupon(id) {
-            const snap = await getDoc(doc(db, 'coupons', id));
-            if (!snap.exists()) return;
-            const c = snap.data();
-            advSet('cpn-id', id); advSet('cpn-code', c.code || ''); advSet('cpn-percent', c.percent || 0); advSet('cpn-max', c.maxDiscount || 0); advSet('cpn-limit', c.usageLimit || 0); advSet('cpn-course', c.courseId || '');
-            const sw = document.getElementById('cpn-active'); if (sw) sw.checked = c.active !== false;
-            renderCouponUsers(new Set((c.userEmails || []).map(normalizeEmail)));
+            await openCouponModal(id);
         }
         saveCoupon = async function() {
             const code = advVal('cpn-code').trim().toUpperCase();
             if (!code) return toast('اكتب الكود', 'warning');
             const userEmails = [...document.querySelectorAll('.cpn-user:checked')].map(x => normalizeEmail(x.value));
-            await advSave('coupons', advVal('cpn-id') || code, { code, percent: parseFloat(advVal('cpn-percent')) || 0, maxDiscount: parseFloat(advVal('cpn-max')) || 0, usageLimit: parseInt(advVal('cpn-limit')) || 0, courseId: advVal('cpn-course'), userEmails, active: document.getElementById('cpn-active')?.checked !== false, currency: 'SAR', used: 0, createdAt: Date.now(), updatedAt: Date.now() });
+            await advSave('coupons', advVal('cpn-id') || code, { code, percent: parseFloat(advVal('cpn-percent')) || 0, maxDiscount: parseFloat(advVal('cpn-max')) || 0, usageLimit: parseInt(advVal('cpn-limit')) || 0, courseId: advVal('cpn-course'), userEmails, active: document.getElementById('cpn-active')?.checked !== false, currency: 'SAR', used: parseInt(advVal('cpn-used')) || 0, createdAt: Date.now(), updatedAt: Date.now() });
             toast('تم حفظ الكوبون');
+            closeModal('m-adv2');
             loadCouponsPage();
         };
         deleteCoupon = async function(id) { await advDelete('coupons', id); loadCouponsPage(); };
@@ -14406,7 +14510,7 @@
         };
 
         Object.assign(window, {
-            renderCouponUsers, editCoupon, useCouponCode,
+            openCouponModal, renderCouponUsers, editCoupon, useCouponCode,
             adv2RenderTransfer, adv2MoveTransfer,
             openSessionWizard, openSessionWizardStep2, saveSessionWizard,
             openRoomWizard, openRoomWizardStep2, saveRoomWizard,
@@ -14420,7 +14524,7 @@
 
         loadSurveyLibraryPage = async function() {
             const rows = (await advDocs('survey_library')).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-            advHtml('tab-survey-library', `<div class="adv-title"><i class="ti ti-clipboard-list"></i> السيرفاي</div><button class="adv2-full-add" onclick="openSurveyLibraryBuilder()"><i class="ti ti-plus"></i> إضافة سيرفاي</button><div style="height:14px"></div><div class="adv-grid">${rows.map(s => `<div class="card"><div class="adv-title" style="font-size:18px;margin-bottom:6px;">${advEsc(s.title)}</div><div class="adv-sub">${(s.axes || []).length} محاور • ${(s.questions || []).length} أسئلة</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;"><button class="sm" onclick="openSurveyLibraryBuilder('${advEsc(s.id)}')"><i class="ti ti-edit"></i> تعديل</button><button class="sm" onclick="viewSurveyTemplateResults('${advEsc(s.id)}')"><i class="ti ti-chart-bar"></i> النتائج</button><button class="sm danger" onclick="deleteSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-trash"></i></button></div></div>`).join('') || '<div class="card adv-sub">لا يوجد سيرفاي محفوظ.</div>'}</div>`);
+            advHtml('tab-survey-library', `<div class="adv-title"><i class="ti ti-clipboard-list"></i> السيرفاي</div><button class="adv2-full-add" onclick="openSurveyLibraryBuilder()"><i class="ti ti-plus"></i> إضافة سيرفاي</button><div style="height:14px"></div><div class="adv-grid">${rows.map(s => `<div class="card"><div class="adv-title" style="font-size:18px;margin-bottom:6px;">${advEsc(s.title)}</div><div class="adv-sub">${(s.axes || []).length} محاور • ${(s.questions || []).length} أسئلة</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;"><button class="sm" onclick="openSurveyLibraryBuilder('${advEsc(s.id)}')"><i class="ti ti-edit"></i> تعديل</button><button class="sm" onclick="duplicateSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-copy"></i> دبلكيت</button><button class="sm" onclick="viewSurveyTemplateResults('${advEsc(s.id)}')"><i class="ti ti-chart-bar"></i> النتائج</button><button class="sm danger" onclick="deleteSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-trash"></i></button></div></div>`).join('') || '<div class="card adv-sub">لا يوجد سيرفاي محفوظ.</div>'}</div>`);
         };
         async function openSurveyLibraryBuilder(id = '') {
             let item = { title: '', axes: [{ title: 'المحور الأول', questions: [] }] };
@@ -16645,16 +16749,57 @@
                 </div>
             </div>`;
         };
+        function packageFormHtml() {
+            return `
+                <input type="hidden" id="pkg-id">
+                <div class="field"><label>اسم الباكدج</label><input id="pkg-title"></div>
+                <div class="field"><label>الوصف والتفاصيل</label><textarea id="pkg-desc" rows="4"></textarea></div>
+                ${adv2UploadField('صورة الباكدج', 'pkg-thumb', 'pkg-thumb-preview')}
+                <div class="field-row"><div class="field"><label>السعر</label><input id="pkg-price" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>العملة</label><select id="pkg-currency"><option>SAR</option><option>USD</option><option>EGP</option><option>AED</option></select></div></div>
+                <div class="field"><label>الدورات داخل الباكدج</label><div class="pick-list" style="max-height:340px;">${(CCACHE || []).map(c => `<button type="button" class="sm pick-chip" data-pkg-course="${advEsc(c.course_id)}" onclick="togglePackageCourse('${advEsc(c.course_id)}')"><i class="ti ti-circle"></i><span>${advEsc(adv9CourseTitle(c))}</span>${adv9PricingBadge(c)}</button>`).join('') || '<div class="adv-sub">لا توجد دورات للاختيار.</div>'}</div></div>
+                <div class="field"><label>الحالة</label><select id="pkg-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;"><button onclick="clearPackageForm()">تفريغ</button><button class="primary" onclick="savePackage()"><i class="ti ti-device-floppy"></i> حفظ الباكدج</button></div>
+            `;
+        }
+        function syncPackageCourseButtons() {
+            document.querySelectorAll('[data-pkg-course]').forEach(btn => {
+                const on = ADV_SELECTED_PACKAGE_COURSES.has(btn.dataset.pkgCourse);
+                btn.classList.toggle('selected', on);
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = `ti ${on ? 'ti-circle-check' : 'ti-circle'}`;
+            });
+        }
+        async function openPackageModal(id = '') {
+            if (!CCACHE.length) {
+                const cr = await call({ action: 'getCourses' });
+                if (cr.success) CCACHE = cr.courses || [];
+            }
+            let pkg = null;
+            if (id) {
+                const snap = await getDoc(doc(db, 'paid_packages', id));
+                if (!snap.exists()) return toast('الباكدج غير موجود', 'warning');
+                pkg = snap.data();
+            }
+            adv2OpenModal(id ? 'تعديل الباكدج' : 'إضافة باكدج', packageFormHtml(), '960px');
+            clearPackageForm();
+            if (!pkg) return;
+            advSet('pkg-id', id);
+            advSet('pkg-title', pkg.title || '');
+            advSet('pkg-desc', pkg.description || '');
+            advSet('pkg-thumb', pkg.thumbnail_url || '');
+            advSet('pkg-price', pkg.price || 0);
+            advSet('pkg-currency', pkg.currency || 'SAR');
+            advSet('pkg-status', pkg.status || 'published');
+            ADV_SELECTED_PACKAGE_COURSES = new Set(pkg.courseIds || []);
+            syncPackageCourseButtons();
+            adv2ImagePreview('pkg-thumb','pkg-thumb-preview');
+        }
         clearPackageForm = function() {
             ['pkg-id','pkg-title','pkg-desc','pkg-price','pkg-thumb'].forEach(id => advSet(id, ''));
             advSet('pkg-currency', 'SAR');
             advSet('pkg-status', 'published');
             ADV_SELECTED_PACKAGE_COURSES.clear();
-            document.querySelectorAll('[data-pkg-course]').forEach(btn => {
-                btn.classList.remove('selected');
-                const icon = btn.querySelector('i');
-                if (icon) icon.className = 'ti ti-circle';
-            });
+            syncPackageCourseButtons();
             adv2ImagePreview('pkg-thumb','pkg-thumb-preview');
         };
         savePackage = async function() {
@@ -16674,29 +16819,12 @@
             });
             await logActivity('save_paid_package', { id, title, courseCount: ADV_SELECTED_PACKAGE_COURSES.size });
             toast('تم حفظ الباكدج');
+            closeModal('m-adv2');
             clearPackageForm();
             loadPackagesPage();
         };
         editPackage = async function(id) {
-            const snap = await getDoc(doc(db, 'paid_packages', id));
-            if (!snap.exists()) return;
-            const pkg = snap.data();
-            advSet('pkg-id', id);
-            advSet('pkg-title', pkg.title || '');
-            advSet('pkg-desc', pkg.description || '');
-            advSet('pkg-thumb', pkg.thumbnail_url || '');
-            advSet('pkg-price', pkg.price || 0);
-            advSet('pkg-currency', pkg.currency || 'SAR');
-            advSet('pkg-status', pkg.status || 'published');
-            ADV_SELECTED_PACKAGE_COURSES = new Set(pkg.courseIds || []);
-            document.querySelectorAll('[data-pkg-course]').forEach(btn => {
-                const on = ADV_SELECTED_PACKAGE_COURSES.has(btn.dataset.pkgCourse);
-                btn.classList.toggle('selected', on);
-                const icon = btn.querySelector('i');
-                if (icon) icon.className = `ti ${on ? 'ti-circle-check' : 'ti-circle'}`;
-            });
-            adv2ImagePreview('pkg-thumb','pkg-thumb-preview');
-            document.getElementById('pkg-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            await openPackageModal(id);
         };
         async function previewPackageAdmin(id) {
             const snap = await getDoc(doc(db, 'paid_packages', id));
@@ -17836,22 +17964,17 @@
             ADV14_PAID_COURSES = (CCACHE || []).filter(c => (typeof adv9CoursePricing === 'function' ? adv9CoursePricing(c).isPaid : Number(c.price || 0) > 0));
             advHtml('tab-packages', `
                 <div class="adv-title"><i class="ti ti-package"></i> الباكدج والدورات المدفوعة</div>
+                <button class="adv2-full-add" onclick="openPackageModal()"><i class="ti ti-plus"></i> إضافة باكدج</button>
+                <div style="height:14px"></div>
                 <div class="adv14-toolbar"><div class="right"><input id="pkg-admin-search" placeholder="بحث في المدفوع..." oninput="renderPaidAdminCatalog()" style="min-width:240px;"></div></div>
-                <div class="adv-grid" style="grid-template-columns:minmax(340px,.85fr) minmax(420px,1.15fr);">
-                    <div class="card">
-                        <input type="hidden" id="pkg-id">
-                        <div class="field"><label>اسم الباكدج</label><input id="pkg-title"></div>
-                        <div class="field"><label>الوصف والتفاصيل</label><textarea id="pkg-desc" rows="4"></textarea></div>
-                        ${adv2UploadField('صورة الباكدج', 'pkg-thumb', 'pkg-thumb-preview')}
-                        <div class="field-row"><div class="field"><label>السعر</label><input id="pkg-price" type="number" min="0" step="0.01" value="0"></div><div class="field"><label>العملة</label><select id="pkg-currency"><option>SAR</option><option>USD</option><option>EGP</option><option>AED</option></select></div></div>
-                        <div class="field"><label>الدورات داخل الباكدج</label><div class="pick-list" style="max-height:340px;">${(CCACHE || []).map(c => `<button type="button" class="sm pick-chip" data-pkg-course="${advEsc(c.course_id)}" onclick="togglePackageCourse('${advEsc(c.course_id)}')"><i class="ti ti-circle"></i><span>${advEsc(adv9CourseTitle(c))}</span>${adv9PricingBadge(c)}</button>`).join('') || '<div class="adv-sub">لا توجد دورات للاختيار.</div>'}</div></div>
-                        <div class="field"><label>الحالة</label><select id="pkg-status"><option value="published">منشور</option><option value="draft">مسودة</option></select></div>
-                        <div style="display:flex;gap:8px;justify-content:flex-end;"><button onclick="clearPackageForm()">تفريغ</button><button class="primary" onclick="savePackage()"><i class="ti ti-device-floppy"></i> حفظ الباكدج</button></div>
-                    </div>
-                    <div id="paid-admin-catalog"></div>
-                </div>`);
+                <div id="paid-admin-catalog"></div>`);
             renderPaidAdminCatalog();
         };
+
+        Object.assign(window, {
+            loadPackagesPage, renderPaidAdminCatalog,
+            openPackageModal, editPackage, savePackage, clearPackageForm, togglePackageCourse, deletePackage
+        });
 
         loadPermissionsPage = async function(selectedEmail = '') {
             await ensureUsersCache();
@@ -19990,7 +20113,7 @@
                 const approveBtn = isAdmin() && pending ? `<button class="final-course-approve" title="اعتماد الدورة" onclick="event.stopPropagation();if(typeof finalApproveCourse==='function') finalApproveCourse('${finalSafeEsc(c.course_id)}'); else toast('افتح الدورة للاعتماد')"><i class="ti ti-check"></i></button>` : '';
                 const trainer = finalDirectTrainerLabel(c);
                 const pkgMarker = finalPaidPackageMarker(c);
-                return `<div class="course-card final-course-card" style="position:relative;" onclick="openCourseActions('${finalSafeEsc(c.course_id)}')">${approveBtn}${pkgMarker.startsWith('<span title=') ? pkgMarker.split('</span>')[0] + '</span>' : ''}<div class="course-thumb">${c.thumbnail_url ? `<img src="${finalSafeEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i></div><div class="course-body"><div class="course-name">${finalSafeEsc(title)}</div><div class="course-desc">${finalSafeEsc(desc || 'لا يوجد وصف')}</div>${typeof courseCountPills === 'function' ? courseCountPills(c) : ''}<div class="course-meta-row"><span><i class="ti ti-calendar-play"></i> ${finalSafeEsc(c.start_date || 'بدون بداية')}</span><span><i class="ti ti-calendar-off"></i> ${finalSafeEsc(c.end_date || 'بدون نهاية')}</span><span><i class="ti ti-users"></i> ${c._enrolled_count || 0} مسجل</span></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">${finalDirectPricingBadge(c)}<span class="badge badge-${status === 'active' ? 'active' : 'suspended'}">${status === 'active' ? 'مفتوحة' : 'مسودة'}</span><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>${pending ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد المراجعة</span>' : (typeof approvalBadge === 'function' ? approvalBadge(c) : '')}${trainer ? `<span class="badge" style="background:#eef2ff;color:#3730a3;"><i class="ti ti-chalkboard"></i> ${finalSafeEsc(trainer)}</span>` : ''}${finalPackagesForCourse(c.course_id, { paidOnly:true }).length ? `<span class="badge" style="background:#fce8e6;color:#b3261e;"><i class="ti ti-package"></i> داخل باكدج مدفوع</span>` : ''}${hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}</div></div></div>`;
+                return `<div class="course-card final-course-card" style="position:relative;" onclick="openCourseActions('${finalSafeEsc(c.course_id)}')">${approveBtn}${pkgMarker.startsWith('<span title=') ? pkgMarker.split('</span>')[0] + '</span>' : ''}<div class="course-thumb">${c.thumbnail_url ? `<img src="${finalSafeEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i></div><div class="course-body"><div class="course-name">${finalSafeEsc(title)}</div><div class="course-desc">${finalSafeEsc(desc || 'لا يوجد وصف')}</div>${typeof courseCountPills === 'function' ? courseCountPills(c) : ''}<div class="course-meta-row"><span><i class="ti ti-calendar-play"></i> ${finalSafeEsc(c.start_date || 'بدون بداية')}</span><span><i class="ti ti-calendar-off"></i> ${finalSafeEsc(c.end_date || 'بدون نهاية')}</span><span><i class="ti ti-users"></i> ${c._enrolled_count || 0} مسجل</span></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">${finalDirectPricingBadge(c)}<span class="badge badge-${status === 'active' ? 'active' : 'suspended'}">${status === 'active' ? 'مفتوحة' : 'مسودة'}</span><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>${pending ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد المراجعة</span>' : (typeof approvalBadge === 'function' ? approvalBadge(c) : '')}${trainer ? `<span class="badge" style="background:#eef2ff;color:#3730a3;"><i class="ti ti-chalkboard"></i> ${finalSafeEsc(trainer)}</span>` : ''}${finalPackagesForCourse(c.course_id, { paidOnly:true }).length ? `<span class="badge" style="background:#fce8e6;color:#b3261e;"><i class="ti ti-package"></i> داخل باكدج مدفوع</span>` : ''}${hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}</div>${(typeof isAdmin === 'function' && isAdmin()) ? `<button class="course-card-duplicate-btn" onclick="event.stopPropagation(); duplicateCourse('${finalSafeEsc(c.course_id)}')"><i class="ti ti-copy"></i> دبلكيت الدورة</button>` : ''}</div></div>`;
             }).join('');
         };
         const finalPkgBaseShowTab = showTab;
@@ -21700,6 +21823,9 @@
                 style.id = 'launch-polish-style';
                 style.textContent = `
                     .final-course-card .course-thumb,.launch-course-card .course-thumb{position:relative}
+                    .final-course-card .course-card-duplicate-btn{position:absolute;left:12px;top:92px;z-index:6;width:38px;height:38px;min-height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgba(255,255,255,.74);background:rgba(255,255,255,.94);color:#12306f;box-shadow:0 10px 22px rgba(15,23,42,.18);font-size:0}
+                    .final-course-card .course-card-duplicate-btn i{font-size:20px;margin:0}
+                    .final-course-card .course-card-duplicate-btn:hover{background:#eef4ff;color:#0f2a66;transform:translateY(-1px)}
                     .launch-course-approve{position:absolute;right:12px;bottom:12px;z-index:5;display:inline-flex;align-items:center;gap:6px;border:0;background:#15803d;color:#fff;box-shadow:0 10px 20px rgba(21,128,61,.28);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:900;min-height:36px}
                     .launch-course-approve:hover{background:#166534;transform:translateY(-1px)}
                     .launch-creator-badge{background:#eef2ff!important;color:#3730a3!important}
@@ -22595,7 +22721,7 @@
                 const approveBtn = (lpIsAdminUser() || lpCan('content.courses.approve')) && pending ? `<button class="launch-course-approve" title="اعتماد الدورة" onclick="event.stopPropagation();finalApproveCourse('${lpEsc(id)}', this)"><i class="ti ti-check"></i><span>اعتماد</span></button>` : '';
                 const pkgMarker = typeof finalPaidPackageMarker === 'function' ? finalPaidPackageMarker(c) : '';
                 const pkgTop = pkgMarker && pkgMarker.startsWith('<span title=') ? pkgMarker.split('</span>')[0] + '</span>' : '';
-                return `<div class="course-card final-course-card launch-course-card" style="position:relative;" onclick="openCourseActions('${lpEsc(id)}')">${pkgTop}<div class="course-thumb">${c.thumbnail_url ? `<img src="${lpEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i>${approveBtn}</div><div class="course-body"><div class="course-name">${lpEsc(title)}</div><div class="course-desc">${lpEsc(desc || 'لا يوجد وصف')}</div>${typeof courseCountPills === 'function' ? courseCountPills(c) : ''}<div class="course-meta-row"><span><i class="ti ti-calendar-play"></i> ${lpEsc(c.start_date || 'بدون بداية')}</span><span><i class="ti ti-calendar-off"></i> ${lpEsc(c.end_date || 'بدون نهاية')}</span><span><i class="ti ti-users"></i> ${Number(c._enrolled_count || 0)} مسجل</span></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">${lpPricingBadge(c)}<span class="badge badge-${status === 'active' ? 'active' : 'suspended'}">${status === 'active' ? 'مفتوحة' : 'مسودة'}</span><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>${pending ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد المراجعة</span>' : (typeof approvalBadge === 'function' ? approvalBadge(c) : '')}${creator ? `<span class="badge launch-creator-badge"><i class="ti ti-user-edit"></i> منشئ الدورة: ${lpEsc(creator)}</span>` : ''}${typeof finalPackagesForCourse === 'function' && finalPackagesForCourse(id, { paidOnly:true }).length ? `<span class="badge" style="background:#fce8e6;color:#b3261e;"><i class="ti ti-package"></i> داخل باقة مدفوعة</span>` : ''}${typeof hasCourseCertificate === 'function' && hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}</div></div></div>`;
+                return `<div class="course-card final-course-card launch-course-card" style="position:relative;" onclick="openCourseActions('${lpEsc(id)}')">${pkgTop}<div class="course-thumb">${c.thumbnail_url ? `<img src="${lpEsc(c.thumbnail_url)}" onerror="this.style.display='none'">` : ''}<i class="ti ti-book" style="font-size:48px;color:rgba(0,0,0,.1);position:relative;z-index:1;"></i>${approveBtn}</div><div class="course-body"><div class="course-name">${lpEsc(title)}</div><div class="course-desc">${lpEsc(desc || 'لا يوجد وصف')}</div>${typeof courseCountPills === 'function' ? courseCountPills(c) : ''}<div class="course-meta-row"><span><i class="ti ti-calendar-play"></i> ${lpEsc(c.start_date || 'بدون بداية')}</span><span><i class="ti ti-calendar-off"></i> ${lpEsc(c.end_date || 'بدون نهاية')}</span><span><i class="ti ti-users"></i> ${Number(c._enrolled_count || 0)} مسجل</span></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">${lpPricingBadge(c)}<span class="badge badge-${status === 'active' ? 'active' : 'suspended'}">${status === 'active' ? 'مفتوحة' : 'مسودة'}</span><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${c.visibility === 'public' ? 'عام' : 'خاص'}</span>${pending ? '<span class="badge" style="background:#fff3cd;color:#8a5a00;"><i class="ti ti-hourglass"></i> قيد المراجعة</span>' : (typeof approvalBadge === 'function' ? approvalBadge(c) : '')}${creator ? `<span class="badge launch-creator-badge"><i class="ti ti-user-edit"></i> منشئ الدورة: ${lpEsc(creator)}</span>` : ''}${typeof finalPackagesForCourse === 'function' && finalPackagesForCourse(id, { paidOnly:true }).length ? `<span class="badge" style="background:#fce8e6;color:#b3261e;"><i class="ti ti-package"></i> داخل باقة مدفوعة</span>` : ''}${typeof hasCourseCertificate === 'function' && hasCourseCertificate(c) ? '<span class="badge badge-cert"><i class="ti ti-certificate"></i> شهادة</span>' : ''}</div>${(typeof isAdmin === 'function' && isAdmin()) ? `<button class="course-card-duplicate-btn" title="دبلكيت الدورة" aria-label="دبلكيت الدورة" onclick="event.stopPropagation(); duplicateCourse('${lpEsc(id)}')"><i class="ti ti-copy"></i> دبلكيت الدورة</button>` : ''}</div></div>`;
             }
             renderCoursesGrid = function() {
                 if (LP.renderingCoursesGrid) return;
@@ -23958,6 +24084,1733 @@
             });
         })();
         // ═════════ END LAUNCH POLISH HOTFIX ═════════
+
+
+
+        // ═════════ FINAL HOTFIX: manual progress persistence + content order + distinct movable sections ═════════
+        (function(){
+            if (window.__DERAAH_PROGRESS_ORDER_SECTION_HOTFIX__) return;
+            window.__DERAAH_PROGRESS_ORDER_SECTION_HOTFIX__ = true;
+
+            const style = document.createElement('style');
+            style.id = 'progress-order-section-hotfix-style';
+            style.textContent = `
+                #cd-videos .content-section-shell{
+                    background:#f3f4f6!important;
+                    border:1px solid #d1d5db!important;
+                    border-radius:18px!important;
+                    padding:14px!important;
+                    margin:14px 0!important;
+                    box-shadow:0 10px 24px rgba(15,23,42,.07)!important;
+                }
+                #cd-videos .content-section-header{
+                    background:#e5e7eb!important;
+                    border:1px solid #d1d5db!important;
+                    border-radius:14px!important;
+                    padding:14px 12px!important;
+                    margin-bottom:12px!important;
+                    box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+                }
+                #cd-videos .content-section-header .content-type-badge{
+                    background:#d1d5db!important;
+                    color:#374151!important;
+                    width:34px!important;
+                    height:34px!important;
+                    border-radius:10px!important;
+                }
+                #cd-videos .content-section-title{
+                    font-size:16px!important;
+                    font-weight:900!important;
+                    color:#111827!important;
+                }
+                #cd-videos .content-section-subtitle{
+                    color:#6b7280!important;
+                    font-size:12px!important;
+                    margin-top:3px!important;
+                }
+                #cd-videos .content-section-shell .content-item-card{
+                    background:#fff!important;
+                    margin-inline-start:12px!important;
+                    border-color:#e5e7eb!important;
+                }
+                body.dark-mode #cd-videos .content-section-shell{
+                    background:rgba(55,65,81,.55)!important;
+                    border-color:rgba(156,163,175,.32)!important;
+                }
+                body.dark-mode #cd-videos .content-section-header{
+                    background:rgba(75,85,99,.65)!important;
+                    border-color:rgba(156,163,175,.25)!important;
+                }
+                body.dark-mode #cd-videos .content-section-title{color:#f9fafb!important;}
+            `;
+            document.head.appendChild(style);
+
+            const cleanEmail = v => String(v || '').trim().toLowerCase();
+            const cleanId = v => String(v || '').trim();
+            const isDoneProgress = p => p && (p.completed === 'yes' || p.completed === true || Number(p.progressPercent ?? p.progress_percent ?? 0) >= 100);
+            const isSection = item => String(item?.content_type || '').toLowerCase() === 'section';
+            const playableItems = items => (items || []).filter(item => !isSection(item));
+            const sortByOrder = items => (items || []).map((item, idx) => ({ item, idx })).sort((a,b) => {
+                const ao = Number(a.item?.order), bo = Number(b.item?.order);
+                const av = Number.isFinite(ao) ? ao : a.idx + 1;
+                const bv = Number.isFinite(bo) ? bo : b.idx + 1;
+                return av - bv || a.idx - b.idx;
+            }).map(x => x.item);
+            const progressDocId = (email, videoId) => `${cleanEmail(email)}_${cleanId(videoId)}`;
+
+            async function fixedSaveProgressPayload(p = {}) {
+                if (typeof authReady !== 'undefined') await authReady;
+                const email = cleanEmail(p.userEmail || p.email);
+                const courseId = cleanId(p.courseId || p.course_id);
+                const videoId = cleanId(p.videoId || p.video_id);
+                if (!email || !courseId || !videoId) return { success:false, error:'بيانات التقدم غير مكتملة' };
+                const pct = Math.max(0, Math.min(100, Number(p.progressPercent ?? p.progress_percent ?? 0)));
+                const now = Date.now();
+                const payload = {
+                    userEmail: email,
+                    email,
+                    courseId,
+                    course_id: courseId,
+                    videoId,
+                    video_id: videoId,
+                    progressPercent: pct,
+                    progress_percent: pct,
+                    completed: pct >= 100 ? 'yes' : 'no',
+                    last_updated: now,
+                    updatedAt: now
+                };
+                if (p.quizPassed === true) payload.quizPassed = true;
+                if (p.manual === true) {
+                    payload.manual_completed = true;
+                    payload.manual_completed_by = cleanEmail(CU?.email || 'admin');
+                    payload.manual_completed_at = now;
+                }
+                await setDoc(doc(db, 'progress', progressDocId(email, videoId)), payload, { merge:true });
+                return { success:true, progress:payload };
+            }
+
+            async function fixedReadProgressRows() {
+                const snap = await getDocs(collection(db, 'progress'));
+                return snap.docs.map(d => ({ ...d.data(), _id:d.id }));
+            }
+
+            async function fixedGetProgress(p = {}) {
+                if (typeof authReady !== 'undefined') await authReady;
+                const email = cleanEmail(p.userEmail || p.email);
+                const courseId = cleanId(p.courseId || p.course_id);
+                const rows = await fixedReadProgressRows();
+                const progress = {};
+                rows.forEach(row => {
+                    const rowEmail = cleanEmail(row.userEmail || row.email);
+                    const rowCourse = cleanId(row.courseId || row.course_id);
+                    const videoId = cleanId(row.videoId || row.video_id);
+                    if (!email || rowEmail !== email || !videoId) return;
+                    if (courseId && courseId !== '_all' && rowCourse !== courseId) return;
+                    const pct = Math.max(0, Math.min(100, Number(row.progressPercent ?? row.progress_percent ?? 0)));
+                    const normalized = {
+                        ...row,
+                        userEmail: rowEmail,
+                        email: rowEmail,
+                        courseId: rowCourse,
+                        course_id: rowCourse,
+                        videoId,
+                        video_id: videoId,
+                        progressPercent: pct,
+                        progress_percent: pct,
+                        completed: (row.completed === 'yes' || row.completed === true || pct >= 100) ? 'yes' : 'no'
+                    };
+                    const old = progress[videoId];
+                    if (!old || Number(normalized.last_updated || normalized.updatedAt || 0) >= Number(old.last_updated || old.updatedAt || 0)) progress[videoId] = normalized;
+                });
+                return { success:true, progress };
+            }
+
+            async function fixedCourseProgress(courseId) {
+                if (typeof authReady !== 'undefined') await authReady;
+                const cid = cleanId(courseId);
+                const [enrSnap, usersSnap, videosSnap, progressRows] = await Promise.all([
+                    getDocs(query(collection(db, 'enrollments'), where('courseId', '==', cid))),
+                    getDocs(collection(db, 'users')),
+                    getDocs(query(collection(db, 'videos'), where('course_id', '==', cid))),
+                    fixedReadProgressRows()
+                ]);
+                const enrolled = [...new Set(enrSnap.docs.map(d => cleanEmail(d.data().userEmail)).filter(Boolean))];
+                const users = {};
+                usersSnap.docs.forEach(d => {
+                    const u = d.data();
+                    const email = cleanEmail(u.email || d.id);
+                    if (email && u.status !== 'deleted') users[email] = { ...u, email };
+                });
+                const playable = [];
+                videosSnap.docs.forEach((d, idx) => {
+                    const v = { ...d.data(), video_id: d.data().video_id || d.id };
+                    if (!isSection(v)) playable.push(v);
+                });
+                const playableIds = new Set(playable.map(v => cleanId(v.video_id)).filter(Boolean));
+                const doneByUser = {};
+                progressRows.forEach(row => {
+                    const rowCourse = cleanId(row.courseId || row.course_id);
+                    const email = cleanEmail(row.userEmail || row.email);
+                    const videoId = cleanId(row.videoId || row.video_id);
+                    if (rowCourse !== cid || !email || !playableIds.has(videoId)) return;
+                    if (!doneByUser[email]) doneByUser[email] = new Set();
+                    if (isDoneProgress(row)) doneByUser[email].add(videoId);
+                });
+                const total = playableIds.size;
+                return { success:true, progress: enrolled.map(email => {
+                    const u = users[email] || { email };
+                    const done = doneByUser[email] ? doneByUser[email].size : 0;
+                    return {
+                        email,
+                        full_name: u.full_name || u.name || email,
+                        region: u.region || '',
+                        branch: u.branch || '',
+                        group: u.group || '',
+                        supervisor: u.supervisor || '',
+                        completed_videos: done,
+                        total_videos: total,
+                        progress_percent: total ? (done / total) * 100 : 100,
+                        completed: total === 0 || done >= total
+                    };
+                }) };
+            }
+
+            async function fixedAllProgress() {
+                if (typeof authReady !== 'undefined') await authReady;
+                const [usersSnap, coursesSnap, videosSnap, enrollSnap, progressRows] = await Promise.all([
+                    getDocs(collection(db, 'users')),
+                    getDocs(collection(db, 'courses')),
+                    getDocs(collection(db, 'videos')),
+                    getDocs(collection(db, 'enrollments')),
+                    fixedReadProgressRows()
+                ]);
+                const users = {}, courses = {}, playableIdsByCourse = {}, doneByUserCourse = {};
+                usersSnap.docs.forEach(d => {
+                    const u = d.data();
+                    const email = cleanEmail(u.email || d.id);
+                    if (email && u.status !== 'deleted') users[email] = { ...u, email };
+                });
+                coursesSnap.docs.forEach(d => {
+                    const c = d.data();
+                    courses[d.id] = c.course_name || c.course_name_ar || c.title || d.id;
+                });
+                videosSnap.docs.forEach(d => {
+                    const v = { ...d.data(), video_id: d.data().video_id || d.id };
+                    if (isSection(v)) return;
+                    const cid = cleanId(v.course_id || v.courseId);
+                    if (!cid) return;
+                    if (!playableIdsByCourse[cid]) playableIdsByCourse[cid] = new Set();
+                    playableIdsByCourse[cid].add(cleanId(v.video_id));
+                });
+                progressRows.forEach(row => {
+                    const cid = cleanId(row.courseId || row.course_id);
+                    const email = cleanEmail(row.userEmail || row.email);
+                    const vid = cleanId(row.videoId || row.video_id);
+                    if (!cid || !email || !vid || !playableIdsByCourse[cid]?.has(vid) || !isDoneProgress(row)) return;
+                    const key = `${email}_${cid}`;
+                    if (!doneByUserCourse[key]) doneByUserCourse[key] = new Set();
+                    doneByUserCourse[key].add(vid);
+                });
+                const rows = [];
+                enrollSnap.docs.forEach(d => {
+                    const e = d.data();
+                    const email = cleanEmail(e.userEmail || e.email);
+                    const cid = cleanId(e.courseId || e.course_id);
+                    if (!email || !cid || !users[email]) return;
+                    const total = playableIdsByCourse[cid]?.size || 0;
+                    const done = doneByUserCourse[`${email}_${cid}`]?.size || 0;
+                    const u = users[email];
+                    rows.push({
+                        email,
+                        full_name: u.full_name || u.name || email,
+                        course_id: cid,
+                        course_name: courses[cid] || cid,
+                        region: u.region || '',
+                        branch: u.branch || '',
+                        group: u.group || '',
+                        supervisor: u.supervisor || '',
+                        completed_videos: done,
+                        total_videos: total,
+                        progress_percent: total ? (done / total) * 100 : 100,
+                        completed: total === 0 || done >= total
+                    });
+                });
+                return { success:true, progress: rows };
+            }
+
+            const previousCall = call;
+            call = async function(p = {}) {
+                try {
+                    if (p.action === 'saveProgress') return await fixedSaveProgressPayload(p);
+                    if (p.action === 'getProgress') return await fixedGetProgress(p);
+                    if (p.action === 'getCourseProgress') return await fixedCourseProgress(p.courseId || p.course_id);
+                    if (p.action === 'getAllProgress') return await fixedAllProgress();
+                } catch (e) {
+                    console.warn('progress hotfix fallback', e);
+                }
+                return previousCall(p);
+            };
+
+            function renderFixedContentItemCard(v, number, sections) {
+                const type = v.content_type || 'video';
+                const attemptsBtn = ['exam','survey','question'].includes(type) ? `<button class="icon-btn sm" title="${t('المشاركات','Attempts')}" onclick="openContentResults('${v.video_id}')"><i class="ti ti-list-check"></i></button>` : '';
+                const gateBtn = type === 'video' ? `<button class="icon-btn sm" title="${t('أسئلة الفيديو','Video questions')}" onclick="openVideoGateEditor('${v.video_id}')"><i class="ti ti-clock-question"></i></button>` : '';
+                const sectionOptions = (sections || []).map(s => `<option value="${esc(s.video_id)}" ${v.section_id === s.video_id ? 'selected' : ''}>${esc(itemTitle(s))}</option>`).join('');
+                const select = `<select onchange="setContentSection('${v.video_id}', this.value)"><option value="">${t('خارج السيكشن','Outside section')}</option>${sectionOptions}</select>`;
+                return `<div class="content-item-card">
+                    <span class="content-type-badge"><i class="ti ${contentTypeIcon(v)}"></i></span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${number}. ${esc(itemTitle(v))}</div>
+                        <div class="mini-note">${contentTypeLabel(v)}${itemDesc(v) ? ` - ${esc(itemDesc(v))}` : ''}${v.pass_score ? ` - ${t('النجاح','Pass')}: ${v.pass_score}/${(v.questions || []).length || 1}` : ''}${v.time_minutes ? ` - ${v.time_minutes} ${t('دقيقة','min')}` : ''}</div>
+                    </div>
+                    ${select}${attemptsBtn}${gateBtn}
+                    <button class="icon-btn sm" title="${t('رفع','Move up')}" onclick="moveContentItem('${v.video_id}', -1)"><i class="ti ti-arrow-up"></i></button>
+                    <button class="icon-btn sm" title="${t('تنزيل','Move down')}" onclick="moveContentItem('${v.video_id}', 1)"><i class="ti ti-arrow-down"></i></button>
+                    <button class="icon-btn sm" style="background:#e8f0fe;color:#1a73e8;" onclick="editVideo('${v.video_id}')"><i class="ti ti-edit"></i></button>
+                    <button class="icon-btn sm danger" onclick="doDeleteVideo('${v.video_id}')"><i class="ti ti-trash"></i></button>
+                </div>`;
+            }
+
+            renderContentTree = function(items = []) {
+                const ordered = sortByOrder(items);
+                if (!ordered.length) return `<div style="color:var(--color-text-secondary);font-size:14px;padding:16px;text-align:center;background:var(--color-background-tertiary);border-radius:8px;">${t('لا يوجد محتوى','No content')}</div>`;
+                const sections = ordered.filter(isSection);
+                const sectionIds = new Set(sections.map(s => s.video_id));
+                const childrenBySection = {};
+                ordered.filter(v => !isSection(v) && v.section_id && sectionIds.has(v.section_id)).forEach(v => {
+                    if (!childrenBySection[v.section_id]) childrenBySection[v.section_id] = [];
+                    childrenBySection[v.section_id].push(v);
+                });
+                const topLevel = ordered.filter(v => isSection(v) || !v.section_id || !sectionIds.has(v.section_id));
+                let number = 0;
+                const htmlParts = topLevel.map(item => {
+                    if (!isSection(item)) return renderFixedContentItemCard(item, ++number, sections);
+                    const children = childrenBySection[item.video_id] || [];
+                    const childrenHtml = children.length
+                        ? children.map(v => renderFixedContentItemCard(v, ++number, sections)).join('')
+                        : `<div class="mini-note" style="padding:12px 10px;">${t('لا يوجد محتوى داخل هذا القسم حالياً','No content in this section yet')}</div>`;
+                    return `<div class="content-section-shell">
+                        <div class="content-section-header">
+                            <span class="content-type-badge"><i class="ti ti-layout-list"></i></span>
+                            <div style="flex:1;min-width:0;">
+                                <div class="content-section-title">${esc(itemTitle(item))}</div>
+                                <div class="content-section-subtitle">${itemDesc(item) ? esc(itemDesc(item)) : t('سيكشن تنظيمي للمحتوى','Content section')} • ${children.length} ${t('عنصر','item')}</div>
+                            </div>
+                            <button class="icon-btn sm" title="${t('رفع السيكشن','Move section up')}" onclick="moveContentItem('${item.video_id}', -1)"><i class="ti ti-arrow-up"></i></button>
+                            <button class="icon-btn sm" title="${t('تنزيل السيكشن','Move section down')}" onclick="moveContentItem('${item.video_id}', 1)"><i class="ti ti-arrow-down"></i></button>
+                            <button class="icon-btn sm" onclick="openSectionModal('${item.video_id}')"><i class="ti ti-edit"></i></button>
+                            <button class="icon-btn sm danger" onclick="doDeleteVideo('${item.video_id}')"><i class="ti ti-trash"></i></button>
+                        </div>
+                        ${childrenHtml}
+                    </div>`;
+                });
+                return htmlParts.join('') || `<div style="color:var(--color-text-secondary);font-size:14px;padding:16px;text-align:center;background:var(--color-background-tertiary);border-radius:8px;">${t('لا يوجد محتوى','No content')}</div>`;
+            };
+
+            moveContentItem = async function(videoId, dir) {
+                const vr = await call({ action:'getVideos', courseId: CCI });
+                if (!vr.success) return;
+                const all = sortByOrder(vr.videos || []);
+                const target = all.find(x => x.video_id === videoId);
+                if (!target) return;
+                const sectionIds = new Set(all.filter(isSection).map(s => s.video_id));
+                let scope;
+                if (isSection(target) || !target.section_id || !sectionIds.has(target.section_id)) {
+                    scope = all.filter(x => isSection(x) || !x.section_id || !sectionIds.has(x.section_id));
+                } else {
+                    scope = all.filter(x => !isSection(x) && x.section_id === target.section_id);
+                }
+                scope = sortByOrder(scope);
+                const i = scope.findIndex(x => x.video_id === videoId);
+                const j = i + Number(dir || 0);
+                if (i < 0 || j < 0 || j >= scope.length) return;
+                const a = scope[i], b = scope[j];
+                const orderA = contentOrderValue(a, all.findIndex(x => x.video_id === a.video_id));
+                const orderB = contentOrderValue(b, all.findIndex(x => x.video_id === b.video_id));
+                await Promise.all([
+                    call({ action:'updateVideo', videoId:a.video_id, updates:{ order: orderB } }),
+                    call({ action:'updateVideo', videoId:b.video_id, updates:{ order: orderA } })
+                ]);
+                openCourseDetail(CCI);
+            };
+
+            markCourseCompleteForUser = async function(email, courseId) {
+                const oldCourse = CCI;
+                CCI = courseId;
+                const vr = await call({ action:'getVideos', courseId: CCI });
+                if (!vr.success || !vr.videos.length) {
+                    CCI = oldCourse || courseId;
+                    return toast('لا يوجد محتوى في الدورة', 'warning');
+                }
+                const items = playableItems(vr.videos || []);
+                for (const item of items) {
+                    await call({ action:'saveProgress', userEmail: email, courseId: CCI, videoId: item.video_id, progressPercent: 100, manual: true });
+                }
+                const [courseRes, usersRes] = await Promise.all([call({ action:'getCourse', courseId: CCI }), call({ action:'getUsers' })]);
+                const course = courseRes.success ? courseRes.course : CCACHE.find(c => c.course_id === CCI);
+                const user = usersRes.success ? usersRes.users.find(u => cleanEmail(u.email) === cleanEmail(email)) : { email };
+                if (course) await issueAutoCertificatesForUser(course, user || { email });
+                await issueCompletedPathCertificatesForUser(user || { email });
+                await logActivity('manual_complete_course', { email: cleanEmail(email), courseId: CCI, items: items.length });
+                CCI = oldCourse || courseId;
+            };
+
+            openManualProgressModal = async function() {
+                if (!isAdmin()) return toast('التقدم اليدوي متاح للأدمن فقط', 'warning');
+                CCI = COURSE_ACTION_ID || CCI;
+                if (!CCI) return toast('افتح دورة الأول', 'warning');
+                const pr = await call({ action:'getCourseProgress', courseId: CCI });
+                const sel = document.getElementById('manual-progress-user');
+                const rows = pr.success ? pr.progress : [];
+                sel.innerHTML = rows.length
+                    ? rows.map(p => `<option value="${esc(p.email)}">${esc(p.full_name || p.email)} - ${Math.round(p.progress_percent || 0)}%</option>`).join('')
+                    : '<option value="">لا يوجد متدربين مسجلين</option>';
+                closeModal('m-course-actions');
+                openModal('m-manual-progress');
+            };
+
+            markManualCourseComplete = async function() {
+                const email = val('manual-progress-user');
+                if (!email) return toast('اختر متدرب أولا', 'warning');
+                await markCourseCompleteForUser(email, CCI);
+                closeModal('m-manual-progress');
+                toast('تم اعتماد إكمال الدورة للمتدرب وحفظ التقدم');
+                await openCourseDetail(CCI);
+                if (typeof loadAllProgress === 'function' && !document.getElementById('tab-progress')?.classList.contains('hidden')) await loadAllProgress();
+            };
+
+            Object.assign(window, { call, renderContentTree, moveContentItem, markCourseCompleteForUser, openManualProgressModal, markManualCourseComplete });
+        })();
+        // ═════════ END FINAL HOTFIX ═════════
+
+
+
+        // ═════════ HESHAM SURVEY LIBRARY + 5 POINT SCALE FIX ═════════
+        // يجعل استدعاء السيرفاي من المكتبة يضاف لمحتوى الدورة مباشرة،
+        // ويضيف نوع إجابة 1-5 بجانب 0-10 والنص في سيرفاي الدورة والمكتبة.
+        let ADV_SURVEY_LAST_IMPORTED_TEMPLATE = '';
+
+        function advSurveyNormalizeType(q = {}) {
+            const raw = String(q.type || '').toLowerCase();
+            const max = Number(q.scaleMax ?? q.scale_max ?? q.max ?? q.maxValue ?? 0);
+            if (raw === 'text' || raw === 'textarea') return 'text';
+            if (raw === 'scale5' || raw === 'rating5' || raw === 'five' || raw === '5' || max === 5) return 'scale5';
+            return 'nps';
+        }
+        function advSurveyScaleMeta(q = {}) {
+            const type = advSurveyNormalizeType(q);
+            if (type === 'text') return { type, scaleMin: null, scaleMax: null, label: adv6Lang ? adv6Lang('نص', 'Text') : 'نص' };
+            if (type === 'scale5') return { type, scaleMin: 1, scaleMax: 5, label: adv6Lang ? adv6Lang('مقياس 1-5', 'Scale 1-5') : 'مقياس 1-5' };
+            return { type: 'nps', scaleMin: 0, scaleMax: 10, label: adv6Lang ? adv6Lang('مقياس 0-10', 'Scale 0-10') : 'مقياس 0-10' };
+        }
+        function advSurveyNormalizeQuestion(q = {}, index = 0, axisTitle = '') {
+            const meta = advSurveyScaleMeta(q);
+            const textAr = String(q.text_ar || q.text || q.question_ar || q.question || '').trim();
+            const textEn = String(q.text_en || q.question_en || '').trim();
+            const out = {
+                ...q,
+                id: q.id || `q_${index}`,
+                text: textAr || textEn,
+                text_ar: textAr,
+                text_en: textEn,
+                category: q.category || q.axisCategory || 'course',
+                axisTitle: q.axisTitle || axisTitle || '',
+                type: meta.type
+            };
+            if (meta.type !== 'text') {
+                out.scaleMin = meta.scaleMin;
+                out.scaleMax = meta.scaleMax;
+            } else {
+                delete out.scaleMin;
+                delete out.scaleMax;
+            }
+            return out;
+        }
+        function advSurveyTemplateQuestions(data = {}) {
+            const fromQuestions = Array.isArray(data.questions) ? data.questions : [];
+            const fromAxes = Array.isArray(data.axes)
+                ? data.axes.flatMap((ax, ai) => (ax.questions || []).map((q, qi) => ({ ...q, axisTitle: ax.title || '', id: q.id || `q_${ai}_${qi}` })))
+                : [];
+            const raw = fromQuestions.length ? fromQuestions : fromAxes;
+            return raw.map((q, i) => advSurveyNormalizeQuestion(q, i, q.axisTitle || '')).filter(q => q.text_ar || q.text_en || q.text);
+        }
+        function advSurveyTypeSelectHtml(current) {
+            const t0 = advSurveyNormalizeType({ type: current });
+            return `<option value="nps" ${t0 === 'nps' ? 'selected' : ''}>0 - 10</option><option value="scale5" ${t0 === 'scale5' ? 'selected' : ''}>1 - 5</option><option value="text" ${t0 === 'text' ? 'selected' : ''}>نص</option>`;
+        }
+        function advSurveyQuestionLabel(q = {}) {
+            const meta = advSurveyScaleMeta(q);
+            if (meta.type === 'scale5') return '1 أسوأ حاجة → 5 أحسن حاجة';
+            if (meta.type === 'nps') return '0 أقل تقييم → 10 أعلى تقييم';
+            return 'إجابة نصية مفتوحة';
+        }
+
+        addSurveyQuestion = function(q = {}) {
+            const nq = advSurveyNormalizeQuestion(q, document.querySelectorAll('.survey-q').length, q.axisTitle || '');
+            const wrap = document.createElement('div');
+            wrap.className = 'glass-panel survey-q';
+            wrap.style.padding = '10px';
+            const showLang = !!nq.text_en;
+            wrap.innerHTML = `
+                <div class="field"><label>${t ? t('السؤال', 'Question') : 'السؤال'}</label><input class="survey-q-text" value="${esc(nq.text_ar || nq.text || '')}"></div>
+                <button type="button" class="sm inline-lang-btn" style="margin-bottom:8px;" onclick="toggleInlineQuestionTranslation(this.closest('.survey-q'))"><i class="ti ti-language"></i>${t ? t('إضافة لغة أخرى', 'Add another language') : 'إضافة لغة أخرى'}</button>
+                <div class="inline-lang-extra optional-lang-box ${showLang ? '' : 'hidden'}"><div class="field" style="margin-bottom:0;"><label>Question in English</label><input class="survey-q-text-en" dir="ltr" style="text-align:left;" value="${esc(nq.text_en || '')}"></div></div>
+                <div class="field-row">
+                    <div class="field"><label>${t ? t('البند / المحور', 'Category / Axis') : 'البند / المحور'}</label><select class="survey-q-cat"><option value="course">${t ? t('الدورة', 'Course') : 'الدورة'}</option><option value="content">${t ? t('المحتوى', 'Content') : 'المحتوى'}</option><option value="academy">${t ? t('الأكاديمية / المنصة', 'Academy / Platform') : 'الأكاديمية / المنصة'}</option><option value="platform">${t ? t('المنصة', 'Platform') : 'المنصة'}</option><option value="trainer">${t ? t('المدرب', 'Trainer') : 'المدرب'}</option></select></div>
+                    <div class="field"><label>${t ? t('طريقة الإجابة', 'Answer type') : 'طريقة الإجابة'}</label><select class="survey-q-type" onchange="this.closest('.survey-q').querySelector('.survey-scale-note').textContent = advSurveyQuestionLabel({type:this.value})">${advSurveyTypeSelectHtml(nq.type)}</select><div class="mini-note survey-scale-note">${advSurveyQuestionLabel(nq)}</div></div>
+                </div>
+                <button class="sm danger" onclick="this.closest('.survey-q').remove()"><i class="ti ti-trash"></i>${t ? t('حذف', 'Delete') : 'حذف'}</button>`;
+            document.getElementById('survey-admin-questions')?.appendChild(wrap);
+            wrap.querySelector('.survey-q-cat').value = nq.category || 'course';
+            wrap.querySelector('.survey-q-type').value = nq.type || 'nps';
+            toggleInlineQuestionTranslation?.(wrap, showLang);
+        };
+        collectSurveyQuestions = function() {
+            return [...document.querySelectorAll('.survey-q')].map((el, i) => {
+                const type = el.querySelector('.survey-q-type')?.value || 'nps';
+                return advSurveyNormalizeQuestion({
+                    id: `q_${i}`,
+                    text: el.querySelector('.survey-q-text')?.value.trim() || '',
+                    text_ar: el.querySelector('.survey-q-text')?.value.trim() || '',
+                    text_en: el.querySelector('.survey-q-text-en')?.value.trim() || '',
+                    category: el.querySelector('.survey-q-cat')?.value || 'course',
+                    type
+                }, i);
+            }).filter(q => q.text_ar || q.text_en);
+        };
+
+        openSurveyItemEditor = async function(item = null) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            SURVEY_ITEM_CONTEXT = 'content';
+            SURVEY_EDITING_ITEM_ID = item?.video_id || null;
+            ADV_SURVEY_LAST_IMPORTED_TEMPLATE = item?.surveyTemplateId || '';
+            html('survey-admin-questions', '');
+            const qs = item?.questions?.length ? item.questions : defaultSurveyQuestions();
+            qs.map((q, i) => advSurveyNormalizeQuestion(q, i)).forEach(addSurveyQuestion);
+            const snaps = item?.video_id ? await getDocs(query(collection(db, 'survey_answers'), where('courseId', '==', CCI), where('videoId', '==', item.video_id))) : { docs: [] };
+            renderSurveyResults(snaps.docs.map(d => d.data()));
+            openModal('m-survey-admin');
+        };
+
+        saveSurveyAdmin = async function() {
+            const questions = collectSurveyQuestions();
+            if (SURVEY_ITEM_CONTEXT === 'content') {
+                if (!questions.length) return toast('ضيف سؤال واحد على الأقل', 'warning');
+                const existing = await call({ action:'getVideos', courseId:CCI });
+                const oldItem = existing.success && SURVEY_EDITING_ITEM_ID ? existing.videos.find(x => x.video_id === SURVEY_EDITING_ITEM_ID) : null;
+                const title = oldItem?.title || oldItem?.title_ar || (ADV_SURVEY_LAST_IMPORTED_TEMPLATE ? 'تقييم من المكتبة' : 'سيرفاي الدورة');
+                const item = {
+                    course_id: CCI,
+                    content_type: 'survey',
+                    title,
+                    title_ar: title,
+                    title_en: oldItem?.title_en || 'Course Survey',
+                    questions,
+                    surveyTemplateId: ADV_SURVEY_LAST_IMPORTED_TEMPLATE || oldItem?.surveyTemplateId || '',
+                    pass_score: 0,
+                    time_minutes: 0,
+                    require_previous: 'yes',
+                    progress_mode: 'manual',
+                    section_id: oldItem?.section_id || '',
+                    order: oldItem ? oldItem.order : (nextContentOrder(existing))
+                };
+                const r = SURVEY_EDITING_ITEM_ID ? await call({ action:'updateVideo', videoId:SURVEY_EDITING_ITEM_ID, updates:item }) : await call({ action:'addVideo', video:item });
+                if (r.success) {
+                    closeModal('m-survey-admin');
+                    SURVEY_EDITING_ITEM_ID = null;
+                    ADV_SURVEY_LAST_IMPORTED_TEMPLATE = '';
+                    toast('تم حفظ التقييم داخل محتوى الدورة');
+                    openCourseDetail(CCI);
+                } else toast(r.error, 'error');
+                return;
+            }
+            const r = await call({ action:'saveCourseSurvey', courseId:CCI, questions });
+            if (r.success) toast('تم حفظ سيرفاي الدورة'); else toast(r.error, 'error');
+        };
+
+        loadSurveyLibraryPage = async function() {
+            const rows = (await advDocs('survey_library')).sort((a,b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+            advHtml('tab-survey-library', `<div class="adv-title"><i class="ti ti-clipboard-list"></i> مكتبة التقييمات / السيرفاي</div><button class="adv2-full-add" onclick="openSurveyLibraryBuilder()"><i class="ti ti-plus"></i> إضافة تقييم</button><div style="height:14px"></div><div class="adv-grid">${rows.map(s => { const qs = advSurveyTemplateQuestions(s); const c5 = qs.filter(q => q.type === 'scale5').length; const c10 = qs.filter(q => q.type === 'nps').length; const txt = qs.filter(q => q.type === 'text').length; return `<div class="card"><div class="adv-title" style="font-size:18px;margin-bottom:6px;">${advEsc(s.title || 'تقييم')}</div><div class="adv-sub">${qs.length} سؤال • ${c10} من 10 • ${c5} من 5 • ${txt} نص</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;"><button class="sm" onclick="openSurveyLibraryBuilder('${advEsc(s.id)}')"><i class="ti ti-edit"></i> تعديل</button><button class="sm" onclick="duplicateSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-copy"></i> دبلكيت</button><button class="sm" onclick="viewSurveyTemplateResults('${advEsc(s.id)}')"><i class="ti ti-chart-bar"></i> النتائج</button><button class="sm danger" onclick="deleteSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-trash"></i></button></div></div>`; }).join('') || '<div class="card adv-sub">لا يوجد تقييم محفوظ.</div>'}</div>`);
+        };
+        openSurveyLibraryBuilder = async function(id = '') {
+            let item = { title: '', questions: [] };
+            if (id) { const snap = await getDoc(doc(db, 'survey_library', id)); if (snap.exists()) item = { ...snap.data(), id }; }
+            const questions = advSurveyTemplateQuestions(item);
+            ADV2_SURVEY_BUILDER = { id, title: item.title || '', questions: questions.length ? questions : [] };
+            window.ADV2_SURVEY_BUILDER = ADV2_SURVEY_BUILDER;
+            adv4RenderSurveyBuilder();
+        };
+        adv4SetSurveyQuestionType = function(i, value) {
+            if (!ADV2_SURVEY_BUILDER.questions?.[i]) return;
+            const meta = advSurveyScaleMeta({ type: value });
+            ADV2_SURVEY_BUILDER.questions[i].type = meta.type;
+            if (meta.type !== 'text') {
+                ADV2_SURVEY_BUILDER.questions[i].scaleMin = meta.scaleMin;
+                ADV2_SURVEY_BUILDER.questions[i].scaleMax = meta.scaleMax;
+            } else {
+                delete ADV2_SURVEY_BUILDER.questions[i].scaleMin;
+                delete ADV2_SURVEY_BUILDER.questions[i].scaleMax;
+            }
+        };
+        adv4SurveyQuestionHtml = function(q, i) {
+            const nq = advSurveyNormalizeQuestion(q, i);
+            return `<div class="adv2-rule-card is-open"><div class="adv2-rule-head"><strong>السؤال ${i + 1}</strong><button class="sm danger" onclick="adv4RemoveSurveyQuestion(${i})"><i class="ti ti-trash"></i> حذف</button></div><div class="adv2-rule-body"><div class="field"><label>السؤال</label><input value="${advEsc(nq.text_ar || nq.text || '')}" oninput="adv4SetSurveyQuestionText(${i},this.value)"></div><div class="field-row"><div class="field"><label>البند / المحور</label><select onchange="adv4SetSurveyQuestionCategory(${i},this.value)"><option value="course" ${nq.category === 'course' ? 'selected' : ''}>الدورة</option><option value="content" ${nq.category === 'content' ? 'selected' : ''}>المحتوى</option><option value="academy" ${nq.category === 'academy' ? 'selected' : ''}>الأكاديمية / المنصة</option><option value="platform" ${nq.category === 'platform' ? 'selected' : ''}>المنصة</option><option value="trainer" ${nq.category === 'trainer' ? 'selected' : ''}>المدرب</option></select></div><div class="field"><label>طريقة الإجابة</label><select onchange="adv4SetSurveyQuestionType(${i},this.value); adv4RenderSurveyBuilder();">${advSurveyTypeSelectHtml(nq.type)}</select><div class="mini-note">${advSurveyQuestionLabel(nq)}</div></div></div></div></div>`;
+        };
+        adv4AddSurveyQuestion = function() {
+            ADV2_SURVEY_BUILDER.questions = ADV2_SURVEY_BUILDER.questions || [];
+            ADV2_SURVEY_BUILDER.questions.push({ id: `q_${Date.now()}`, text: '', text_ar: '', category: 'course', type: 'nps', scaleMin: 0, scaleMax: 10 });
+            adv4RenderSurveyBuilder();
+        };
+        adv4RenderSurveyBuilder = function() {
+            const questions = (ADV2_SURVEY_BUILDER.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i));
+            const nps = questions.filter(q => q.type === 'nps').length;
+            const scale5 = questions.filter(q => q.type === 'scale5').length;
+            const text = questions.filter(q => q.type === 'text').length;
+            adv2OpenModal(ADV2_SURVEY_BUILDER.id ? 'تعديل التقييم' : 'إضافة تقييم', `
+                <div class="field"><label>عنوان التقييم</label><input id="svb-title" value="${advEsc(ADV2_SURVEY_BUILDER.title || '')}" oninput="adv4SetSurveyTitle(this.value)"></div>
+                <div style="display:grid;grid-template-columns:minmax(260px,.7fr) minmax(360px,1.3fr);gap:16px;align-items:start;">
+                    <div class="card" style="margin:0;"><div class="adv-title" style="font-size:18px;">ملخص طرق الإجابة</div><div class="adv-grid" style="grid-template-columns:1fr;gap:10px;"><div class="stat-card" style="margin:0;"><div class="stat-num">${nps}</div><div class="stat-label">أسئلة من 10</div></div><div class="stat-card" style="margin:0;"><div class="stat-num">${scale5}</div><div class="stat-label">أسئلة من 5</div></div><div class="stat-card" style="margin:0;"><div class="stat-num">${text}</div><div class="stat-label">أسئلة نصية</div></div></div><div class="mini-note" style="margin-top:12px;">مقياس 1-5: رقم 1 أسوأ حاجة، ورقم 5 أحسن حاجة.</div></div>
+                    <div class="card" style="margin:0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><div class="adv-title" style="font-size:18px;margin:0;flex:1;">أسئلة التقييم</div><button class="sm primary" onclick="adv4AddSurveyQuestion()"><i class="ti ti-plus"></i> سؤال</button></div><div id="svb-question-list" style="display:grid;gap:10px;">${questions.map((q,i) => adv4SurveyQuestionHtml(q,i)).join('') || '<div class="adv-sub">اضغط + سؤال لإضافة أول سؤال.</div>'}</div><div style="text-align:left;margin-top:12px;"><button class="primary" onclick="saveSurveyTemplate()"><i class="ti ti-device-floppy"></i> حفظ التقييم</button></div></div>
+                </div>`, '980px');
+        };
+        saveSurveyTemplate = async function() {
+            const title = (ADV2_SURVEY_BUILDER.title || advVal('svb-title') || '').trim();
+            const questions = (ADV2_SURVEY_BUILDER.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i)).filter(q => q.text_ar || q.text_en || q.text);
+            if (!title || !questions.length) return toast('اكتب عنوان واضف سؤال واحد على الأقل', 'warning');
+            const axes = [{ title: 'أسئلة التقييم', questions }];
+            await advSave('survey_library', ADV2_SURVEY_BUILDER.id || '', { title, axes, questions, createdAt: ADV2_SURVEY_BUILDER.createdAt || Date.now(), updatedAt: Date.now() });
+            closeModal('m-adv2');
+            toast('تم حفظ التقييم');
+            loadSurveyLibraryPage();
+        };
+
+        startSurveyFromLibrary = async function() {
+            closeModal('m-content-source');
+            const rows = await advDocs('survey_library');
+            adv2OpenModal('استدعاء من مكتبة التقييمات', `<div class="adv-sub" style="margin-bottom:10px;">اختار التقييم، وسيتم إضافته مباشرة في آخر محتوى الدورة.</div><div class="pick-list">${rows.map(s => { const qs = advSurveyTemplateQuestions(s); return `<button class="pick-chip" onclick="useSurveyTemplate('${advEsc(s.id)}')"><i class="ti ti-clipboard-list"></i>${advEsc(s.title || 'تقييم')}<span class="adv-sub">${qs.length} سؤال</span></button>`; }).join('') || '<div class="adv-sub">لا يوجد تقييم محفوظ.</div>'}</div>`, '720px');
+        };
+        useSurveyTemplate = async function(id) {
+            if (!CCI) return toast('افتح دورة الأول', 'warning');
+            const snap = await getDoc(doc(db, 'survey_library', id));
+            if (!snap.exists()) return toast('التقييم غير موجود في المكتبة', 'error');
+            const data = snap.data() || {};
+            const questions = advSurveyTemplateQuestions(data);
+            if (!questions.length) return toast('التقييم المحفوظ لا يحتوي على أسئلة', 'warning');
+            const existing = await call({ action:'getVideos', courseId: CCI });
+            const title = data.title || 'تقييم من المكتبة';
+            const item = {
+                course_id: CCI,
+                content_type: 'survey',
+                title,
+                title_ar: title,
+                title_en: data.title_en || 'Survey',
+                questions,
+                surveyTemplateId: id,
+                pass_score: 0,
+                time_minutes: 0,
+                require_previous: 'yes',
+                progress_mode: 'manual',
+                section_id: '',
+                order: nextContentOrder(existing)
+            };
+            const r = await call({ action:'addVideo', video:item });
+            if (r.success) {
+                closeModal('m-adv2');
+                closeModal('m-session-detail');
+                toast('تم استدعاء التقييم وإضافته للدورة');
+                await openCourseDetail(CCI);
+            } else toast(r.error || 'تعذر إضافة التقييم للدورة', 'error');
+        };
+
+        function advSurveyAnswerHtml(q, qi, done = false) {
+            const nq = advSurveyNormalizeQuestion(q, qi);
+            if (nq.type === 'text') return `<textarea class="survey-answer" data-index="${qi}" rows="3" style="width:100%;" ${done ? 'disabled' : ''}></textarea>`;
+            const min = Number(nq.scaleMin ?? (nq.type === 'scale5' ? 1 : 0));
+            const max = Number(nq.scaleMax ?? (nq.type === 'scale5' ? 5 : 10));
+            return `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">${Array.from({ length: max - min + 1 }, (_, k) => min + k).map(n => `<label class="quiz-option" style="width:auto;padding:8px 10px;"><input type="radio" name="survey-${qi}" value="${n}" ${done ? 'disabled' : ''}><span>${n}</span></label>`).join('')}</div><div class="mini-note" style="margin-top:4px;">${nq.type === 'scale5' ? '1 أسوأ حاجة — 5 أحسن حاجة' : '0 أقل تقييم — 10 أعلى تقييم'}</div>`;
+        }
+        renderSurveyItem = function(item, savedProgress) {
+            const done = savedProgress && savedProgress.completed === 'yes';
+            const questions = (item.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i));
+            return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--color-background-tertiary);overflow:auto;"><div class="quiz-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><span class="content-type-badge"><i class="ti ${contentTypeIcon(item)}"></i></span><div style="flex:1;"><div style="font-size:20px;font-weight:800;">${esc(itemTitle ? itemTitle(item) : (item.title || 'تقييم'))}</div><div class="mini-note">تقييم سريع ضمن ترتيب محتوى الدورة</div></div>${done ? '<span class="badge badge-active">تم الإرسال</span>' : ''}</div>${questions.map((q,qi) => `<div style="margin-bottom:18px;"><div style="font-weight:700;margin-bottom:8px;">${qi+1}. ${esc(questionText ? questionText(q) : (q.text_ar || q.text || ''))}</div>${advSurveyAnswerHtml(q, qi, done)}</div>`).join('')}<button class="primary" style="width:100%;" onclick="submitSurveyItem()" ${done ? 'disabled' : ''}><i class="ti ti-send"></i>إرسال التقييم</button></div></div>`;
+        };
+        submitSurveyItem = async function() {
+            const item = CVV[CVI];
+            if (!item) return;
+            const questions = (item.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i));
+            const answers = questions.map((q, qi) => {
+                if (q.type === 'text') return { question: q.text_ar || q.text || '', category: q.category || 'course', type: 'text', value: document.querySelector(`.survey-answer[data-index="${qi}"]`)?.value || '' };
+                const checked = document.querySelector(`input[name="survey-${qi}"]:checked`);
+                return { question: q.text_ar || q.text || '', category: q.category || 'course', type: q.type || 'nps', scaleMin: q.scaleMin, scaleMax: q.scaleMax, value: checked ? checked.value : '' };
+            });
+            if (answers.some(a => a.value === '')) return toast('جاوب كل أسئلة التقييم أولا', 'warning');
+            const now = new Date();
+            await setDoc(doc(db, 'survey_answers', `${CCI}_${CU.email.trim().toLowerCase()}_${item.video_id}`), {
+                courseId: CCI,
+                videoId: item.video_id,
+                surveyTemplateId: item.surveyTemplateId || '',
+                userEmail: CU.email.trim().toLowerCase(),
+                userName: CU.full_name || CU.email,
+                answers,
+                submittedAt: now.toISOString(),
+                submittedAtMs: now.getTime(),
+                submittedAtText: now.toLocaleString('ar-EG', { timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })
+            }, { merge: true });
+            await call({ action: 'saveProgress', userEmail: CU.email, courseId: CCI, videoId: item.video_id, progressPercent: 100 });
+            toast('تم إرسال التقييم');
+            const pr = await call({ action: 'getProgress', userEmail: CU.email, courseId: CCI });
+            const prog = pr.success ? pr.progress : {};
+            renderPlaylist(prog);
+            updateCoursePBar(prog);
+            const allDone = CVV.every(vi => prog[vi.video_id] && prog[vi.video_id].completed === 'yes');
+            if (allDone) await showCourseCompletePopup();
+            playAt(CVI, prog);
+        };
+
+        function advCourseSurveyControl(q, i) {
+            const nq = advSurveyNormalizeQuestion(q, i);
+            if (nq.type === 'text') return `<textarea rows="3" class="survey-answer-value"></textarea>`;
+            const min = Number(nq.scaleMin ?? (nq.type === 'scale5' ? 1 : 0));
+            const max = Number(nq.scaleMax ?? (nq.type === 'scale5' ? 5 : 10));
+            const val0 = Math.round((min + max) / 2);
+            return `<input type="range" min="${min}" max="${max}" value="${val0}" class="survey-answer-value" oninput="this.nextElementSibling.textContent=this.value"><div style="font-weight:800;color:var(--color-text-info);">${val0}</div><div class="mini-note">${nq.type === 'scale5' ? '1 أسوأ حاجة — 5 أحسن حاجة' : '0 أقل تقييم — 10 أعلى تقييم'}</div>`;
+        }
+        openCourseSurveyIfNeeded = async function() {
+            if (!CCI || !CU) return;
+            const survey = await call({ action: 'getCourseSurvey', courseId: CCI });
+            const questions = survey.success ? (survey.survey.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i)) : [];
+            if (!questions.length) return;
+            const previous = await getDoc(doc(db, 'survey_answers', `${CCI}_${CU.email.trim().toLowerCase()}`));
+            if (previous.exists()) return;
+            html('survey-trainee-form', questions.map((q, i) => `<div class="field survey-answer" data-id="${q.id || `q_${i}`}" data-type="${q.type}" data-cat="${q.category}" data-min="${q.scaleMin ?? ''}" data-max="${q.scaleMax ?? ''}"><label>${esc(q.text_ar || q.text || '')}</label>${advCourseSurveyControl(q, i)}</div>`).join(''));
+            openModal('m-survey-trainee');
+        };
+        submitCourseSurvey = async function() {
+            const answers = [...document.querySelectorAll('#survey-trainee-form .survey-answer')].map(el => ({
+                id: el.dataset.id,
+                type: el.dataset.type,
+                category: el.dataset.cat,
+                scaleMin: el.dataset.min === '' ? null : Number(el.dataset.min),
+                scaleMax: el.dataset.max === '' ? null : Number(el.dataset.max),
+                value: el.querySelector('.survey-answer-value')?.value || ''
+            }));
+            if (answers.some(a => a.value === '')) return toast('جاوب كل أسئلة التقييم أولا', 'warning');
+            const r = await call({ action: 'submitCourseSurvey', courseId: CCI, userEmail: CU.email, userName: CU.full_name || CU.email, answers });
+            if (r.success) { closeModal('m-survey-trainee'); toast('شكرا على تقييمك'); } else toast(r.error, 'error');
+        };
+
+        renderSurveySummary = function(rows, questions = []) {
+            const metaByText = new Map((questions || []).map((q, i) => [String(q.text_ar || q.text || '').trim(), advSurveyNormalizeQuestion(q, i)]));
+            const numeric = [];
+            rows.forEach(row => (row.answers || []).forEach((a, i) => {
+                if ((a.type || 'nps') === 'text') return;
+                const meta = metaByText.get(String(a.question || '').trim()) || advSurveyNormalizeQuestion(a, i);
+                const val = Number(a.value);
+                if (!Number.isNaN(val)) numeric.push({ ...meta, ...a, value: val, type: advSurveyNormalizeType(meta.type ? meta : a) });
+            }));
+            const npsVals = numeric.filter(a => advSurveyNormalizeType(a) === 'nps').map(a => a.value).filter(v => v >= 0 && v <= 10);
+            const scale5Vals = numeric.filter(a => advSurveyNormalizeType(a) === 'scale5').map(a => a.value).filter(v => v >= 1 && v <= 5);
+            const avg = (arr) => arr.length ? (arr.reduce((s,v) => s + v, 0) / arr.length).toFixed(1) : '0.0';
+            const nps = npsStats(npsVals);
+            if (!npsVals.length && !scale5Vals.length) return '<div class="glass-panel" style="padding:14px;margin-bottom:14px;color:var(--color-text-secondary);">لا توجد إجابات رقمية لحساب الإحصائيات.</div>';
+            return `<div style="margin-bottom:16px;"><div style="font-weight:900;font-size:16px;margin-bottom:10px;">ملخص التقييم</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;">${npsVals.length ? `<div class="stat-card" style="text-align:right;padding:14px;"><div style="font-size:13px;font-weight:800;color:var(--color-text-secondary);margin-bottom:8px;">أسئلة 0-10</div><div class="stat-num">${nps.nps}</div><div class="stat-label">NPS • متوسط ${nps.avg}/10 • ${nps.total} رد</div></div>` : ''}${scale5Vals.length ? `<div class="stat-card" style="text-align:right;padding:14px;"><div style="font-size:13px;font-weight:800;color:var(--color-text-secondary);margin-bottom:8px;">أسئلة 1-5</div><div class="stat-num">${avg(scale5Vals)}</div><div class="stat-label">متوسط من 5 • ${scale5Vals.length} رد</div></div>` : ''}</div></div>`;
+        };
+
+        Object.assign(window, {
+            advSurveyNormalizeType, advSurveyScaleMeta, advSurveyNormalizeQuestion, advSurveyTemplateQuestions, advSurveyQuestionLabel,
+            addSurveyQuestion, collectSurveyQuestions, openSurveyItemEditor, saveSurveyAdmin,
+            loadSurveyLibraryPage, openSurveyLibraryBuilder, adv4SetSurveyQuestionType, adv4SurveyQuestionHtml, adv4AddSurveyQuestion, adv4RenderSurveyBuilder, saveSurveyTemplate,
+            startSurveyFromLibrary, useSurveyTemplate,
+            renderSurveyItem, submitSurveyItem, openCourseSurveyIfNeeded, submitCourseSurvey, renderSurveySummary
+        });
+        // ═════════ END HESHAM SURVEY LIBRARY + 5 POINT SCALE FIX ═════════
+
+        // ═════════ FINAL SURVEY RESULTS + LIBRARY REVIEW + PERMISSIONS FIX ═════════
+        // توحيد إنشاء/استدعاء/نتائج التقييمات، وتفعيل تصدير Excel، واحترام صلاحيات السيرفاي.
+        window.ADV_SURVEY_IMPORTED_TITLE = window.ADV_SURVEY_IMPORTED_TITLE || '';
+
+        function advSurveyCanManage() {
+            try {
+                if (typeof isAdmin === 'function' && isAdmin()) return true;
+                if (typeof advCan === 'function') return advCan('content.surveys.manage') === true;
+            } catch (e) {}
+            return true;
+        }
+        function advSurveyDeny() {
+            return toast('صلاحية إدارة التقييم/السيرفاي على عناصر الدورة غير مفعّلة لهذا المستخدم', 'warning');
+        }
+        function advSurveyCategoryOrder() {
+            return ['course', 'content', 'academy', 'platform', 'trainer'];
+        }
+        function advSurveyCategoryLabel2(category) {
+            if (typeof surveyCategoryLabel === 'function') return surveyCategoryLabel(category);
+            const key = String(category || 'course').toLowerCase();
+            return ({ course:'الدورة', content:'المحتوى', academy:'الأكاديمية / المنصة', platform:'المنصة', trainer:'المدرب' })[key] || category || 'الدورة';
+        }
+        function advSurveyTypeLabel2(type) {
+            const t0 = typeof advSurveyNormalizeType === 'function' ? advSurveyNormalizeType({ type }) : String(type || 'nps');
+            if (t0 === 'text') return 'نص';
+            if (t0 === 'scale5') return '1-5';
+            return '0-10';
+        }
+        function advSurveyClassification(answer = {}) {
+            const type = typeof advSurveyNormalizeType === 'function' ? advSurveyNormalizeType(answer) : (answer.type || 'nps');
+            if (type === 'text') return '';
+            const v = Number(answer.value);
+            if (Number.isNaN(v)) return '';
+            if (type === 'scale5') {
+                if (v >= 5) return 'Promoter';
+                if (v >= 4) return 'Passive';
+                return 'Detractor';
+            }
+            if (v >= 9) return 'Promoter';
+            if (v >= 7) return 'Passive';
+            return 'Detractor';
+        }
+        function advSurveyQuestionMaps(questions = []) {
+            const byId = new Map();
+            const byText = new Map();
+            (questions || []).forEach((q, i) => {
+                const nq = typeof advSurveyNormalizeQuestion === 'function' ? advSurveyNormalizeQuestion(q, i) : q;
+                const id = String(nq.id || `q_${i}`);
+                byId.set(id, nq);
+                [nq.text_ar, nq.text, nq.question, nq.question_ar].filter(Boolean).forEach(txt => byText.set(String(txt).trim(), nq));
+            });
+            return { byId, byText };
+        }
+        function advSurveyRowsToAnswers(rows = [], questions = []) {
+            const maps = advSurveyQuestionMaps(questions);
+            const out = [];
+            (rows || []).forEach(row => {
+                (row.answers || []).forEach((a, i) => {
+                    const meta = maps.byId.get(String(a.id || '')) || maps.byText.get(String(a.question || '').trim()) || (questions[i] ? (typeof advSurveyNormalizeQuestion === 'function' ? advSurveyNormalizeQuestion(questions[i], i) : questions[i]) : {});
+                    const merged = {
+                        ...meta,
+                        ...a,
+                        id: a.id || meta.id || `q_${i}`,
+                        question: a.question || meta.text_ar || meta.text || '',
+                        category: a.category || meta.category || 'course',
+                        type: typeof advSurveyNormalizeType === 'function' ? advSurveyNormalizeType(a.type ? a : meta) : (a.type || meta.type || 'nps')
+                    };
+                    if (merged.type !== 'text' && merged.scaleMax == null && meta.scaleMax != null) merged.scaleMax = meta.scaleMax;
+                    if (merged.type !== 'text' && merged.scaleMin == null && meta.scaleMin != null) merged.scaleMin = meta.scaleMin;
+                    out.push(merged);
+                });
+            });
+            return out;
+        }
+        function advSurveyStats2(items = []) {
+            const numeric = items.filter(a => a.type !== 'text').map(a => {
+                const type = typeof advSurveyNormalizeType === 'function' ? advSurveyNormalizeType(a) : (a.type || 'nps');
+                const min = Number(a.scaleMin ?? (type === 'scale5' ? 1 : 0));
+                const max = Number(a.scaleMax ?? (type === 'scale5' ? 5 : 10));
+                const value = Number(a.value);
+                return { ...a, type, min, max, value };
+            }).filter(a => !Number.isNaN(a.value));
+            const total = numeric.length;
+            const promoters = numeric.filter(a => advSurveyClassification(a) === 'Promoter').length;
+            const passives = numeric.filter(a => advSurveyClassification(a) === 'Passive').length;
+            const detractors = numeric.filter(a => advSurveyClassification(a) === 'Detractor').length;
+            const pct = n => total ? Math.round((n / total) * 100) : 0;
+            const normalizedScores = numeric.map(a => {
+                const range = Math.max(1, a.max - a.min);
+                return Math.max(0, Math.min(100, ((a.value - a.min) / range) * 100));
+            });
+            const avgPct = total ? Math.round(normalizedScores.reduce((s, v) => s + v, 0) / total) : 0;
+            const avgRawByType = {};
+            ['nps', 'scale5'].forEach(type => {
+                const vals = numeric.filter(a => a.type === type).map(a => a.value);
+                avgRawByType[type] = vals.length ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : '';
+            });
+            return { total, promoters, passives, detractors, promotersPct:pct(promoters), passivesPct:pct(passives), detractorsPct:pct(detractors), score: pct(promoters) - pct(detractors), avgPct, avgRawByType };
+        }
+        function advSurveyStatsCard(label, stats, featured = false) {
+            return `<div class="stat-card" style="text-align:right;padding:14px;border-color:${featured ? 'var(--color-text-info)' : 'var(--color-border-tertiary)'};">
+                <div style="font-size:13px;font-weight:900;color:var(--color-text-secondary);margin-bottom:8px;">${esc(label)}</div>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:10px;">
+                    <div><div class="stat-num" style="font-size:30px;color:var(--color-text-info);">${stats.avgPct}%</div><div class="stat-label">نسبة الرضا</div></div>
+                    <div style="font-size:12px;color:var(--color-text-secondary);text-align:left;"><div>${stats.total} رد رقمي</div>${stats.avgRawByType.nps ? `<div>متوسط 0-10: ${stats.avgRawByType.nps}</div>` : ''}${stats.avgRawByType.scale5 ? `<div>متوسط 1-5: ${stats.avgRawByType.scale5}</div>` : ''}<div>NPS: ${stats.score}</div></div>
+                </div>
+                <div style="display:grid;gap:6px;font-size:12px;">
+                    <div style="display:flex;justify-content:space-between;"><span>Promoters</span><strong style="color:var(--color-text-success);">${stats.promoters} / ${stats.promotersPct}%</strong></div>
+                    <div style="display:flex;justify-content:space-between;"><span>Passives</span><strong style="color:var(--color-text-warning);">${stats.passives} / ${stats.passivesPct}%</strong></div>
+                    <div style="display:flex;justify-content:space-between;"><span>Detractors</span><strong style="color:var(--color-text-danger);">${stats.detractors} / ${stats.detractorsPct}%</strong></div>
+                </div>
+            </div>`;
+        }
+        renderSurveySummary = function(rows, questions = []) {
+            const answers = advSurveyRowsToAnswers(rows, questions);
+            const numeric = answers.filter(a => a.type !== 'text' && !Number.isNaN(Number(a.value)));
+            if (!numeric.length) return '<div class="glass-panel" style="padding:14px;margin-bottom:14px;color:var(--color-text-secondary);">لا توجد إجابات رقمية لحساب الإحصائيات.</div>';
+            const grouped = {};
+            numeric.forEach(a => { const cat = a.category || 'course'; (grouped[cat] ||= []).push(a); });
+            const ordered = advSurveyCategoryOrder().filter(k => grouped[k]?.length).concat(Object.keys(grouped).filter(k => !advSurveyCategoryOrder().includes(k)));
+            const questionGrouped = {};
+            numeric.forEach(a => { const key = a.question || a.id || 'سؤال'; (questionGrouped[key] ||= []).push(a); });
+            return `<div style="padding-bottom:14px;">
+                <div style="font-weight:900;font-size:16px;margin-bottom:10px;">ملخص التقييم حسب المحاور</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:14px;">
+                    ${advSurveyStatsCard('الإجمالي العام', advSurveyStats2(numeric), true)}
+                    ${ordered.map(cat => advSurveyStatsCard(advSurveyCategoryLabel2(cat), advSurveyStats2(grouped[cat]))).join('')}
+                </div>
+                <div class="glass-panel" style="padding:12px;overflow:auto;">
+                    <div style="font-weight:900;margin-bottom:8px;">تفصيل الأسئلة</div>
+                    <table style="min-width:760px;"><thead><tr><th>السؤال</th><th>المحور</th><th>النوع</th><th>نسبة الرضا</th><th>Promoters</th><th>Passives</th><th>Detractors</th><th>عدد الردود</th></tr></thead><tbody>
+                        ${Object.entries(questionGrouped).map(([question, arr]) => { const st = advSurveyStats2(arr); return `<tr><td>${esc(question)}</td><td>${esc(advSurveyCategoryLabel2(arr[0]?.category))}</td><td>${esc(advSurveyTypeLabel2(arr[0]?.type))}</td><td>${st.avgPct}%</td><td>${st.promoters}</td><td>${st.passives}</td><td>${st.detractors}</td><td>${st.total}</td></tr>`; }).join('')}
+                    </tbody></table>
+                </div>
+            </div>`;
+        };
+        renderSurveyResults = function(rows = []) {
+            const questions = typeof collectSurveyQuestions === 'function' ? collectSurveyQuestions() : [];
+            if (SURVEY_ITEM_CONTEXT === 'content') {
+                if (typeof ultimateUpdateSurveyEditorSummary === 'function') ultimateUpdateSurveyEditorSummary();
+                return;
+            }
+            html('survey-results', renderSurveySummary(rows, questions));
+        };
+
+        function advSurveyEnsureCourseEditorTitle(title = '') {
+            const host = document.getElementById('survey-admin-questions');
+            if (!host) return;
+            let field = document.getElementById('survey-content-title-field');
+            if (!field) {
+                host.insertAdjacentHTML('beforebegin', `<div id="survey-content-title-field" class="field"><label>عنوان التقييم داخل الدورة</label><input id="survey-content-title" placeholder="مثال: تقييم تجربة الدورة"></div>`);
+                field = document.getElementById('survey-content-title-field');
+            }
+            const isContent = SURVEY_ITEM_CONTEXT === 'content';
+            field.classList.toggle('hidden', !isContent);
+            if (isContent && title) document.getElementById('survey-content-title').value = title;
+            const modalTitle = document.getElementById('survey-admin-modal-title') || document.querySelector('#m-survey-admin .modal > div:first-child > div');
+            if (modalTitle) modalTitle.innerHTML = isContent ? '<i class="ti ti-clipboard-list"></i> إضافة تقييم داخل الدورة' : '<i class="ti ti-clipboard-list"></i> سيرفاي الدورة';
+        }
+
+        openSurveyItemEditor = async function(item = null) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            if (!advSurveyCanManage()) return advSurveyDeny();
+            SURVEY_ITEM_CONTEXT = 'content';
+            SURVEY_EDITING_ITEM_ID = item?.video_id || null;
+            ADV_SURVEY_LAST_IMPORTED_TEMPLATE = item?.surveyTemplateId || '';
+            window.ADV_SURVEY_IMPORTED_TITLE = item?.title || item?.title_ar || '';
+            html('survey-admin-questions', '');
+            const qs = item?.questions?.length ? item.questions : defaultSurveyQuestions();
+            qs.map((q, i) => advSurveyNormalizeQuestion(q, i)).forEach(addSurveyQuestion);
+            advSurveyEnsureCourseEditorTitle(item?.title || item?.title_ar || 'سيرفاي الدورة');
+            const snaps = item?.video_id ? await getDocs(query(collection(db, 'survey_answers'), where('courseId', '==', CCI), where('videoId', '==', item.video_id))) : { docs: [] };
+            renderSurveyResults(snaps.docs.map(d => d.data()));
+            openModal('m-survey-admin');
+        };
+
+        saveSurveyAdmin = async function() {
+            const questions = collectSurveyQuestions();
+            if (SURVEY_ITEM_CONTEXT === 'content') {
+                if (!advSurveyCanManage()) return advSurveyDeny();
+                if (!questions.length) return toast('ضيف سؤال واحد على الأقل', 'warning');
+                const existing = await call({ action:'getVideos', courseId:CCI });
+                const oldItem = existing.success && SURVEY_EDITING_ITEM_ID ? existing.videos.find(x => x.video_id === SURVEY_EDITING_ITEM_ID) : null;
+                const title = (document.getElementById('survey-content-title')?.value || oldItem?.title || oldItem?.title_ar || window.ADV_SURVEY_IMPORTED_TITLE || 'سيرفاي الدورة').trim();
+                const item = {
+                    course_id: CCI,
+                    content_type: 'survey',
+                    title,
+                    title_ar: title,
+                    title_en: oldItem?.title_en || 'Course Survey',
+                    questions,
+                    surveyTemplateId: ADV_SURVEY_LAST_IMPORTED_TEMPLATE || oldItem?.surveyTemplateId || '',
+                    pass_score: 0,
+                    time_minutes: 0,
+                    require_previous: 'yes',
+                    progress_mode: 'manual',
+                    section_id: oldItem?.section_id || '',
+                    order: oldItem ? oldItem.order : (nextContentOrder(existing))
+                };
+                const r = SURVEY_EDITING_ITEM_ID ? await call({ action:'updateVideo', videoId:SURVEY_EDITING_ITEM_ID, updates:item }) : await call({ action:'addVideo', video:item });
+                if (r.success) {
+                    closeModal('m-survey-admin');
+                    SURVEY_EDITING_ITEM_ID = null;
+                    ADV_SURVEY_LAST_IMPORTED_TEMPLATE = '';
+                    window.ADV_SURVEY_IMPORTED_TITLE = '';
+                    toast('تم حفظ التقييم وتحديث محتوى الدورة');
+                    await openCourseDetail(CCI);
+                } else toast(r.error || 'تعذر حفظ التقييم', 'error');
+                return;
+            }
+            const r = await call({ action:'saveCourseSurvey', courseId:CCI, questions });
+            if (r.success) toast('تم حفظ سيرفاي الدورة'); else toast(r.error, 'error');
+        };
+
+        function advSurveySafeCloseModal(id) {
+            if (document.getElementById(id)) closeModal(id);
+        }
+        window.ADV_SURVEY_LIBRARY_ROWS = window.ADV_SURVEY_LIBRARY_ROWS || [];
+        window.ADV_SURVEY_LIBRARY_PICK = window.ADV_SURVEY_LIBRARY_PICK || '';
+        function surveyLibraryPickerHtml(rows = []) {
+            return rows.map(s => {
+                const sid = String(s.id || '');
+                const selected = sid === String(window.ADV_SURVEY_LIBRARY_PICK || '');
+                const qs = advSurveyTemplateQuestions(s);
+                return `<button type="button" class="pick-chip ${selected ? 'selected' : ''}" onclick='selectSurveyTemplateFromLibrary(${JSON.stringify(sid)})'><i class="ti ${selected ? 'ti-circle-check' : 'ti-circle'}"></i><span style="flex:1;">${advEsc(s.title || 'تقييم')}</span><span class="adv-sub">${qs.length} سؤال</span></button>`;
+            }).join('') || '<div class="adv-sub">لا يوجد تقييم محفوظ.</div>';
+        }
+        function selectSurveyTemplateFromLibrary(id) {
+            window.ADV_SURVEY_LIBRARY_PICK = String(id || '');
+            advHtml('survey-library-picker-list', surveyLibraryPickerHtml(window.ADV_SURVEY_LIBRARY_ROWS || []));
+        }
+        async function confirmSurveyTemplateFromLibrary() {
+            const id = String(window.ADV_SURVEY_LIBRARY_PICK || '').trim();
+            if (!id) return toast('اختار تقييم الأول', 'warning');
+            await useSurveyTemplate(id);
+        }
+
+        startSurveyFromLibrary = async function() {
+            if (!advSurveyCanManage()) return advSurveyDeny();
+            advSurveySafeCloseModal('m-content-source');
+            const rows = (await advDocs('survey_library')).sort((a,b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+            window.ADV_SURVEY_LIBRARY_ROWS = rows;
+            window.ADV_SURVEY_LIBRARY_PICK = rows[0]?.id || '';
+            adv2OpenModal('استدعاء من مكتبة التقييمات', `<div class="adv-sub" style="margin-bottom:10px;">اختار التقييم، اضغط موافق لمراجعته، ثم احفظه داخل الدورة بدون ريفريش يدوي.</div><div id="survey-library-picker-list" class="pick-list">${surveyLibraryPickerHtml(rows)}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;border-top:1px solid var(--color-border-tertiary);padding-top:14px;"><button type="button" onclick="closeModal('m-adv2')">إلغاء</button><button type="button" class="primary" onclick="confirmSurveyTemplateFromLibrary()"><i class="ti ti-check"></i> موافق</button></div>`, '720px');
+        };
+        useSurveyTemplate = async function(id) {
+            if (!CCI) return toast('افتح دورة الأول', 'warning');
+            if (!advSurveyCanManage()) return advSurveyDeny();
+            const sid = String(id || '').trim();
+            if (!sid) return toast('اختار تقييم الأول', 'warning');
+            const snap = await getDoc(doc(db, 'survey_library', sid));
+            if (!snap.exists()) return toast('التقييم غير موجود في المكتبة', 'error');
+            const data = snap.data() || {};
+            const questions = advSurveyTemplateQuestions(data);
+            if (!questions.length) return toast('التقييم المحفوظ لا يحتوي على أسئلة', 'warning');
+            advSurveySafeCloseModal('m-adv2');
+            advSurveySafeCloseModal('m-session-detail');
+            advSurveySafeCloseModal('m-content-source');
+            SURVEY_ITEM_CONTEXT = 'content';
+            SURVEY_EDITING_ITEM_ID = null;
+            ADV_SURVEY_LAST_IMPORTED_TEMPLATE = sid;
+            window.ADV_SURVEY_IMPORTED_TITLE = data.title || 'تقييم من المكتبة';
+            html('survey-admin-questions', '');
+            questions.map((q, i) => advSurveyNormalizeQuestion(q, i)).forEach(addSurveyQuestion);
+            advSurveyEnsureCourseEditorTitle(window.ADV_SURVEY_IMPORTED_TITLE);
+            renderSurveyResults([]);
+            openModal('m-survey-admin');
+            toast('راجع التقييم واضغط حفظ لإضافته للدورة', 'info');
+        };
+
+        function advSurveyBuildExportRows(rows = [], questions = []) {
+            return (rows || []).map(r => {
+                const out = {
+                    'المتدرب': r.userName || r.userEmail || '',
+                    'الإيميل': r.userEmail || '',
+                    'الدورة': r.courseName || r.courseId || '',
+                    'معرف الدورة': r.courseId || '',
+                    'معرف المحتوى': r.videoId || '',
+                    'معرف قالب التقييم': r.surveyTemplateId || '',
+                    'وقت الإرسال': r.submittedAtText || r.submittedAt || ''
+                };
+                const answers = advSurveyRowsToAnswers([r], questions);
+                answers.forEach((a, i) => {
+                    const p = `س${i + 1}`;
+                    out[`${p} - السؤال`] = a.question || '';
+                    out[`${p} - المحور`] = advSurveyCategoryLabel2(a.category);
+                    out[`${p} - النوع`] = advSurveyTypeLabel2(a.type);
+                    out[`${p} - الإجابة`] = a.value ?? '';
+                    out[`${p} - التصنيف`] = advSurveyClassification(a);
+                });
+                return out;
+            });
+        }
+
+        openContentResults = async function(videoId) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            const vr = await call({ action:'getVideos', courseId: CCI });
+            if (!vr.success) return toast('تعذر تحميل محتوى الدورة', 'error');
+            const item = vr.videos.find(v => v.video_id === videoId);
+            if (!item) return toast('المحتوى غير موجود', 'error');
+            document.getElementById('content-results-title').textContent = `${t ? t('نتائج:', 'Results:') : 'نتائج:'} ${itemTitle ? itemTitle(item) : (item.title || '')}`;
+            CONTENT_RESULTS_ROWS = [];
+            if ((item.content_type || '') === 'survey') {
+                const snaps = await getDocs(collection(db, 'survey_answers'));
+                const rows = snaps.docs.map(d => ({ ...d.data(), _id:d.id })).filter(r => r.courseId === CCI && r.videoId === videoId);
+                CONTENT_RESULTS_ROWS = advSurveyBuildExportRows(rows, item.questions || []);
+                const table = typeof renderResultRowsWithActions === 'function'
+                    ? renderResultRowsWithActions(CONTENT_RESULTS_ROWS, r => `<button class="sm danger" onclick="deleteParticipantAttempt('${videoId}','${esc(r['الإيميل'])}','survey')"><i class="ti ti-trash"></i>حذف مشاركة</button>`)
+                    : renderResultRows(CONTENT_RESULTS_ROWS);
+                html('content-results-body', `<div style="padding:14px;">${renderSurveySummary(rows, item.questions || [])}</div>${table}`);
+                openModal('m-content-results');
+                return;
+            }
+            const snaps = await getDocs(collection(db,'assessment_attempts'));
+            const attempts = snaps.docs.map(d => ({...d.data(), _id:d.id})).filter(r => r.courseId === CCI && r.videoId === videoId);
+            const grouped = new Map();
+            attempts.forEach(a => { const email = normalizeEmail(a.userEmail); if (!grouped.has(email)) grouped.set(email, []); grouped.get(email).push(a); });
+            CONTENT_RESULTS_ROWS = [...grouped.entries()].map(([email,list]) => { list.sort((a,b)=>(a.submittedAt||0)-(b.submittedAt||0)); const last = list[list.length-1] || {}; const best = list.reduce((m,a)=>Math.max(m,parseInt(a.score)||0),0); const total = last.total || item.questions?.length || 0; const passScore = last.passScore || item.pass_score || total; return { 'المتدرب':last.userName || email, 'الإيميل':email, 'نوع المحتوى':contentTypeLabel(item), 'عدد المحاولات':list.length, 'مرات الرسوب':list.filter(a=>!a.passed).length, 'أعلى درجة':`${best}/${total}`, 'آخر درجة':`${last.score || 0}/${total}`, 'درجة النجاح':`${passScore}/${total}`, 'الحالة':list.some(a=>a.passed) ? 'اجتاز' : 'لم يجتز', 'آخر محاولة':last.submittedAtText || '' }; });
+            html('content-results-body', typeof renderResultRowsWithActions === 'function' ? renderResultRowsWithActions(CONTENT_RESULTS_ROWS, r => `<button class="sm danger" onclick="deleteParticipantAttempt('${videoId}','${esc(r['الإيميل'])}','assessment')"><i class="ti ti-trash"></i>حذف مشاركة</button>`) : renderResultRows(CONTENT_RESULTS_ROWS));
+            openModal('m-content-results');
+        };
+
+        viewSurveyTemplateResults = async function(id) {
+            const [svSnap, answers] = await Promise.all([getDoc(doc(db,'survey_library',id)), advDocs('survey_answers')]);
+            const sv = svSnap.exists() ? { ...svSnap.data(), id } : { title:'التقييم', questions:[] };
+            const questions = advSurveyTemplateQuestions(sv);
+            const rows = answers.filter(a => a.surveyTemplateId === id || (a.answers || []).some(x => x.surveyTemplateId === id));
+            CONTENT_RESULTS_ROWS = advSurveyBuildExportRows(rows, questions);
+            adv2OpenModal(`نتائج التقييم: ${advEsc(sv.title || 'التقييم')}`, `<div style="padding:4px 0 14px;">${renderSurveySummary(rows, questions)}</div>${renderResultRows(CONTENT_RESULTS_ROWS)}<div style="text-align:left;margin-top:12px;"><button class="primary" onclick="exportSurveyTemplateResults('${advEsc(id)}')"><i class="ti ti-file-spreadsheet"></i>تصدير Excel</button></div>`, '1080px');
+        };
+        exportSurveyTemplateResults = async function(id) {
+            const [svSnap, answers] = await Promise.all([getDoc(doc(db,'survey_library',id)), advDocs('survey_answers')]);
+            const sv = svSnap.exists() ? { ...svSnap.data(), id } : { title:'survey', questions:[] };
+            const questions = advSurveyTemplateQuestions(sv);
+            const rows = answers.filter(a => a.surveyTemplateId === id || (a.answers || []).some(x => x.surveyTemplateId === id));
+            const exportRows = advSurveyBuildExportRows(rows, questions);
+            if (!exportRows.length) return toast('لا توجد نتائج للتصدير', 'warning');
+            exportRowsToExcel(exportRows, 'survey_results', `survey_results_${(sv.title || id).replace(/[\\/:*?"<>|]+/g, '_')}.xlsx`);
+        };
+
+        submitSurveyItem = async function() {
+            const item = CVV[CVI];
+            if (!item) return;
+            const questions = (item.questions || []).map((q, i) => advSurveyNormalizeQuestion(q, i));
+            const answers = questions.map((q, qi) => {
+                if (q.type === 'text') return { id:q.id || `q_${qi}`, question:q.text_ar || q.text || '', category:q.category || 'course', type:'text', surveyTemplateId:item.surveyTemplateId || '', value:document.querySelector(`.survey-answer[data-index="${qi}"]`)?.value || '' };
+                const checked = document.querySelector(`input[name="survey-${qi}"]:checked`);
+                return { id:q.id || `q_${qi}`, question:q.text_ar || q.text || '', category:q.category || 'course', type:q.type || 'nps', scaleMin:q.scaleMin, scaleMax:q.scaleMax, surveyTemplateId:item.surveyTemplateId || '', value:checked ? checked.value : '' };
+            });
+            if (answers.some(a => a.value === '')) return toast('جاوب كل أسئلة التقييم أولا', 'warning');
+            const now = new Date();
+            await setDoc(doc(db, 'survey_answers', `${CCI}_${CU.email.trim().toLowerCase()}_${item.video_id}`), {
+                courseId: CCI,
+                videoId: item.video_id,
+                surveyTemplateId: item.surveyTemplateId || '',
+                userEmail: CU.email.trim().toLowerCase(),
+                userName: CU.full_name || CU.email,
+                answers,
+                submittedAt: now.toISOString(),
+                submittedAtMs: now.getTime(),
+                submittedAtText: now.toLocaleString('ar-EG', { timeZone: 'Asia/Riyadh', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:true })
+            }, { merge:true });
+            await call({ action:'saveProgress', userEmail:CU.email, courseId:CCI, videoId:item.video_id, progressPercent:100 });
+            toast('تم إرسال التقييم');
+            const pr = await call({ action:'getProgress', userEmail:CU.email, courseId:CCI });
+            const prog = pr.success ? pr.progress : {};
+            renderPlaylist(prog);
+            updateCoursePBar(prog);
+            const allDone = CVV.every(vi => prog[vi.video_id] && prog[vi.video_id].completed === 'yes');
+            if (allDone) await showCourseCompletePopup();
+            playAt(CVI, prog);
+        };
+
+        function advSurveyApplyPermissionUi() {
+            if (advSurveyCanManage()) return;
+            const tab = document.getElementById('tab-course-detail');
+            if (!tab) return;
+            tab.querySelectorAll('button').forEach(btn => {
+                const txt = (btn.textContent || '').trim();
+                const action = btn.getAttribute('onclick') || '';
+                if (action.includes("openCourseItemModal('survey')") || action.includes('openCourseItemModal("survey")') || action.includes('startSurveyFromLibrary') || txt.includes('سيرفاي') || txt.includes('تقييم')) btn.style.display = 'none';
+            });
+        }
+        const advSurveyPrevOpenCourseItemModal = openCourseItemModal;
+        openCourseItemModal = function(type) {
+            if (type === 'survey' && !advSurveyCanManage()) return advSurveyDeny();
+            return advSurveyPrevOpenCourseItemModal(type);
+        };
+        const advSurveyPrevOpenContentSourceModal = typeof openContentSourceModal === 'function' ? openContentSourceModal : null;
+        if (advSurveyPrevOpenContentSourceModal) {
+            openContentSourceModal = function(type) {
+                if (type === 'survey' && !advSurveyCanManage()) return advSurveyDeny();
+                return advSurveyPrevOpenContentSourceModal(type);
+            };
+        }
+        const advSurveyPrevStartNewContentItem = typeof startNewContentItem === 'function' ? startNewContentItem : null;
+        if (advSurveyPrevStartNewContentItem) {
+            startNewContentItem = function(type) {
+                if (type === 'survey' && !advSurveyCanManage()) return advSurveyDeny();
+                return advSurveyPrevStartNewContentItem(type);
+            };
+        }
+        const advSurveyPrevStartBankContentItem = typeof startBankContentItem === 'function' ? startBankContentItem : null;
+        if (advSurveyPrevStartBankContentItem) {
+            startBankContentItem = function(type, mode) {
+                if (type === 'survey' && !advSurveyCanManage()) return advSurveyDeny();
+                return advSurveyPrevStartBankContentItem(type, mode);
+            };
+        }
+        const advSurveyPrevEnhanceCourseDetail = typeof advEnhanceCourseDetail === 'function' ? advEnhanceCourseDetail : null;
+        if (advSurveyPrevEnhanceCourseDetail) {
+            advEnhanceCourseDetail = function() {
+                const out = advSurveyPrevEnhanceCourseDetail();
+                setTimeout(advSurveyApplyPermissionUi, 0);
+                return out;
+            };
+        }
+        Object.assign(window, { renderSurveySummary, renderSurveyResults, openSurveyItemEditor, saveSurveyAdmin, startSurveyFromLibrary, useSurveyTemplate, selectSurveyTemplateFromLibrary, confirmSurveyTemplateFromLibrary, openContentResults, viewSurveyTemplateResults, exportSurveyTemplateResults, submitSurveyItem, openCourseItemModal, advSurveyApplyPermissionUi });
+        // ═════════ END FINAL SURVEY RESULTS + LIBRARY REVIEW + PERMISSIONS FIX ═════════
+
+
+
+        // ═════════ CLEAN SURVEY RESULTS DISPLAY FIX ═════════
+        // إخفاء المعرفات التقنية من نتائج التقييم، وترجمة معرف الدورة/المحتوى/القالب لأسماء واضحة في العرض وExcel.
+        function advCleanSurveyTemplateId(row = {}) {
+            return row.surveyTemplateId || (row.answers || []).find(a => a?.surveyTemplateId)?.surveyTemplateId || '';
+        }
+        function advCleanCourseTitle(course = {}, fallback = '') {
+            return course.course_name || course.name || course.title || course.title_ar || fallback || '';
+        }
+        function advCleanContentTitle(item = {}, fallback = '') {
+            return item.title || item.title_ar || item.name || item.video_title || fallback || '';
+        }
+        async function advCleanSurveyLookupMaps(rows = []) {
+            const maps = { courses:new Map(), videos:new Map(), templates:new Map() };
+            try {
+                if (Array.isArray(CCACHE) && CCACHE.length) {
+                    CCACHE.forEach(c => maps.courses.set(c.course_id || c.id, c));
+                }
+                const missingCourse = (rows || []).some(r => r.courseId && !maps.courses.has(r.courseId));
+                if (missingCourse || !maps.courses.size) {
+                    const cr = await call({ action:'getCourses' }).catch(() => ({ success:false, courses:[] }));
+                    if (cr.success) {
+                        CCACHE = cr.courses || CCACHE || [];
+                        (cr.courses || []).forEach(c => maps.courses.set(c.course_id || c.id, c));
+                    }
+                }
+                const courseIds = [...new Set((rows || []).map(r => r.courseId).filter(Boolean))];
+                await Promise.all(courseIds.map(async cid => {
+                    const vr = await call({ action:'getVideos', courseId:cid }).catch(() => ({ success:false, videos:[] }));
+                    if (vr.success) (vr.videos || []).forEach(v => maps.videos.set(v.video_id || v.id, v));
+                }));
+                const lib = typeof advDocs === 'function' ? await advDocs('survey_library').catch(() => []) : [];
+                (lib || []).forEach(tpl => maps.templates.set(tpl.id || tpl.templateId, tpl));
+            } catch (e) {
+                console.warn('survey lookup maps failed', e);
+            }
+            return maps;
+        }
+        function advCleanSurveyBuildRows(rows = [], questions = [], maps = null) {
+            return (rows || []).map(r => {
+                const course = maps?.courses?.get(r.courseId) || {};
+                const item = maps?.videos?.get(r.videoId) || {};
+                const templateId = advCleanSurveyTemplateId(r);
+                const template = maps?.templates?.get(templateId) || {};
+                const out = {
+                    'المتدرب': r.userName || r.userEmail || '',
+                    'الإيميل': r.userEmail || '',
+                    'الدورة': r.courseName || advCleanCourseTitle(course, r.courseId || ''),
+                    'التقييم / المحتوى': r.contentTitle || advCleanContentTitle(item, r.videoId || 'تقييم الدورة'),
+                    'قالب التقييم': r.surveyTemplateTitle || template.title || template.name || (templateId ? 'قالب من المكتبة' : ''),
+                    'وقت الإرسال': r.submittedAtText || r.submittedAt || ''
+                };
+                const answers = advSurveyRowsToAnswers([r], questions);
+                answers.forEach((a, i) => {
+                    const p = `س${i + 1}`;
+                    out[`${p} - السؤال`] = a.question || '';
+                    out[`${p} - المحور`] = advSurveyCategoryLabel2(a.category);
+                    out[`${p} - النوع`] = advSurveyTypeLabel2(a.type);
+                    out[`${p} - الإجابة`] = a.value ?? '';
+                    out[`${p} - التصنيف`] = advSurveyClassification(a);
+                });
+                return out;
+            });
+        }
+        async function advCleanSurveyBuildRowsAsync(rows = [], questions = []) {
+            const maps = await advCleanSurveyLookupMaps(rows);
+            return advCleanSurveyBuildRows(rows, questions, maps);
+        }
+        function advCleanResultRowsWithActions(rows, actionBuilder) {
+            if (!rows.length) return '<div style="padding:2rem;text-align:center;color:var(--color-text-secondary);">لا توجد ردود مسجلة حتى الآن</div>';
+            const cols = Object.keys(rows[0]).filter(c => !String(c).includes('معرف'));
+            return `<div class="table-scroll" style="max-width:100%;overflow:auto;"><table style="min-width:1100px;"><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}${actionBuilder ? '<th>إجراءات</th>' : ''}</tr></thead><tbody>
+                ${rows.map(r => `<tr>${cols.map(c => `<td style="font-size:13px;white-space:normal;min-width:${String(c).includes('السؤال') ? '210px' : '110px'};">${esc(r[c] ?? '')}</td>`).join('')}${actionBuilder ? `<td>${actionBuilder(r)}</td>` : ''}</tr>`).join('')}
+            </tbody></table></div>`;
+        }
+        advSurveyBuildExportRows = function(rows = [], questions = []) {
+            return advCleanSurveyBuildRows(rows, questions, null);
+        };
+        openContentResults = async function(videoId) {
+            if (!CCI) return toast('افتح دورة أولا', 'warning');
+            const vr = await call({ action:'getVideos', courseId: CCI });
+            if (!vr.success) return toast('تعذر تحميل محتوى الدورة', 'error');
+            const item = vr.videos.find(v => v.video_id === videoId);
+            if (!item) return toast('المحتوى غير موجود', 'error');
+            document.getElementById('content-results-title').textContent = `${typeof t === 'function' ? t('نتائج:', 'Results:') : 'نتائج:'} ${typeof itemTitle === 'function' ? itemTitle(item) : (item.title || '')}`;
+            CONTENT_RESULTS_ROWS = [];
+            if ((item.content_type || '') === 'survey') {
+                const snaps = await getDocs(collection(db, 'survey_answers'));
+                const rows = snaps.docs.map(d => ({ ...d.data(), _id:d.id })).filter(r => r.courseId === CCI && r.videoId === videoId);
+                CONTENT_RESULTS_ROWS = await advCleanSurveyBuildRowsAsync(rows, item.questions || []);
+                html('content-results-body', `<div style="padding:14px;">${renderSurveySummary(rows, item.questions || [])}</div>${advCleanResultRowsWithActions(CONTENT_RESULTS_ROWS, r => `<button class="sm danger" onclick="deleteParticipantAttempt('${videoId}','${esc(r['الإيميل'])}','survey')"><i class="ti ti-trash"></i>حذف مشاركة</button>`)}`);
+                openModal('m-content-results');
+                return;
+            }
+            const snaps = await getDocs(collection(db,'assessment_attempts'));
+            const attempts = snaps.docs.map(d => ({...d.data(), _id:d.id})).filter(r => r.courseId === CCI && r.videoId === videoId);
+            const grouped = new Map();
+            attempts.forEach(a => { const email = normalizeEmail(a.userEmail); if (!grouped.has(email)) grouped.set(email, []); grouped.get(email).push(a); });
+            CONTENT_RESULTS_ROWS = [...grouped.entries()].map(([email,list]) => { list.sort((a,b)=>(a.submittedAt||0)-(b.submittedAt||0)); const last = list[list.length-1] || {}; const best = list.reduce((m,a)=>Math.max(m,parseInt(a.score)||0),0); const total = last.total || item.questions?.length || 0; const passScore = last.passScore || item.pass_score || total; return { 'المتدرب':last.userName || email, 'الإيميل':email, 'نوع المحتوى':contentTypeLabel(item), 'عدد المحاولات':list.length, 'مرات الرسوب':list.filter(a=>!a.passed).length, 'أعلى درجة':`${best}/${total}`, 'آخر درجة':`${last.score || 0}/${total}`, 'درجة النجاح':`${passScore}/${total}`, 'الحالة':list.some(a=>a.passed) ? 'اجتاز' : 'لم يجتز', 'آخر محاولة':last.submittedAtText || '' }; });
+            html('content-results-body', typeof renderResultRowsWithActions === 'function' ? renderResultRowsWithActions(CONTENT_RESULTS_ROWS, r => `<button class="sm danger" onclick="deleteParticipantAttempt('${videoId}','${esc(r['الإيميل'])}','assessment')"><i class="ti ti-trash"></i>حذف مشاركة</button>`) : renderResultRows(CONTENT_RESULTS_ROWS));
+            openModal('m-content-results');
+        };
+        viewSurveyTemplateResults = async function(id) {
+            const [svSnap, answers] = await Promise.all([getDoc(doc(db,'survey_library',id)), advDocs('survey_answers')]);
+            const sv = svSnap.exists() ? { ...svSnap.data(), id } : { title:'التقييم', questions:[] };
+            const questions = advSurveyTemplateQuestions(sv);
+            const rows = answers.filter(a => a.surveyTemplateId === id || (a.answers || []).some(x => x.surveyTemplateId === id));
+            CONTENT_RESULTS_ROWS = await advCleanSurveyBuildRowsAsync(rows, questions);
+            adv2OpenModal(`نتائج التقييم: ${advEsc(sv.title || 'التقييم')}`, `<div style="padding:4px 0 14px;">${renderSurveySummary(rows, questions)}</div>${advCleanResultRowsWithActions(CONTENT_RESULTS_ROWS)}<div style="text-align:left;margin-top:12px;"><button class="primary" onclick="exportSurveyTemplateResults('${advEsc(id)}')"><i class="ti ti-file-spreadsheet"></i>تصدير Excel</button></div>`, '1080px');
+        };
+        exportSurveyTemplateResults = async function(id) {
+            const [svSnap, answers] = await Promise.all([getDoc(doc(db,'survey_library',id)), advDocs('survey_answers')]);
+            const sv = svSnap.exists() ? { ...svSnap.data(), id } : { title:'survey', questions:[] };
+            const questions = advSurveyTemplateQuestions(sv);
+            const rows = answers.filter(a => a.surveyTemplateId === id || (a.answers || []).some(x => x.surveyTemplateId === id));
+            const exportRows = await advCleanSurveyBuildRowsAsync(rows, questions);
+            if (!exportRows.length) return toast('لا توجد نتائج للتصدير', 'warning');
+            exportRowsToExcel(exportRows, 'survey_results', `survey_results_${(sv.title || id).replace(/[\\/:*?"<>|]+/g, '_')}.xlsx`);
+        };
+        exportContentResults = function() {
+            if (!CONTENT_RESULTS_ROWS.length) return toast('لا توجد نتائج للتصدير', 'warning');
+            exportRowsToExcel(CONTENT_RESULTS_ROWS, 'content_results', 'deraah_content_results.xlsx');
+        };
+        Object.assign(window, { openContentResults, viewSurveyTemplateResults, exportSurveyTemplateResults, exportContentResults });
+        // ═════════ END CLEAN SURVEY RESULTS DISPLAY FIX ═════════
+
+
+
+
+
+
+        // ═════════ DIRECT REPAIR: working progress + working duplicates + platform delete modal ═════════
+        (function(){
+            if (window.__HESHAM_DIRECT_REPAIR_V3__) return;
+            window.__HESHAM_DIRECT_REPAIR_V3__ = true;
+
+            const fEsc = (v) => String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+            const fJs = (v) => JSON.stringify(String(v ?? ''));
+            const fId = (v) => String(v ?? '').trim();
+            const fMail = (v) => String(v ?? '').trim().toLowerCase();
+            const fNow = () => Date.now();
+            const fTitle = (c) => String((typeof courseName === 'function' ? courseName(c) : '') || c?.course_name || c?.course_name_ar || c?.title || c?.name || c?.course_id || c?.id || 'دورة');
+            const fCourseId = (c) => fId(c?.course_id || c?.courseId || c?.id || c?._id);
+            const fVideoId = (v) => fId(v?.video_id || v?.videoId || v?.id || v?._id);
+            const fVideoCourse = (v) => fId(v?.course_id || v?.courseId || v?.course);
+            const fIsSection = (v) => String(v?.content_type || v?.type || '').toLowerCase() === 'section';
+            const fIsDone = (p) => {
+                const pct = Number(p?.progressPercent ?? p?.progress_percent ?? p?.percent ?? p?.progress ?? 0);
+                return p?.completed === 'yes' || p?.completed === true || p?.done === true || p?.watched === true || p?.manual_completed === true || pct >= 100;
+            };
+            const fPrevIsAdmin = typeof isAdmin === 'function' ? isAdmin : null;
+            function fIsAdmin(){
+                try {
+                    const role = String(CU?.role || CU?.role_key || CU?.type || '').trim().toLowerCase();
+                    return CU?.isAdmin === true || CU?.is_admin === true || CU?.admin === true || role === 'admin' || role === 'administrator' || role === 'superadmin' || role.includes('admin') || role.includes('أدمن') || role.includes('ادمن') || (fPrevIsAdmin ? fPrevIsAdmin() : false);
+                } catch(e) { return false; }
+            }
+            try { isAdmin = fIsAdmin; window.isAdmin = fIsAdmin; } catch(e) {}
+
+            async function fAuth(){ try { if (typeof authReady !== 'undefined') await authReady; } catch(e) {} }
+            async function fDocs(col){
+                await fAuth();
+                try { const snap = await getDocs(collection(db, col)); return snap.docs.map(d => ({ id:d.id, _id:d.id, ...d.data() })); }
+                catch(e){ console.warn('docs failed', col, e); return []; }
+            }
+            async function fDoc(col, id){
+                await fAuth();
+                try { const s = await getDoc(doc(db, col, id)); return s.exists() ? { id:s.id, _id:s.id, ...s.data() } : null; }
+                catch(e){ return null; }
+            }
+            function fModal(title, body, yesText, onYes){
+                if (typeof askConfirm === 'function' && document.getElementById('m-confirm')) {
+                    return askConfirm(title || 'تأكيد', body || 'هل أنت متأكد؟', onYes);
+                }
+                document.getElementById('f-direct-confirm')?.remove();
+                const wrap = document.createElement('div');
+                wrap.id = 'f-direct-confirm';
+                wrap.className = 'modal-wrap';
+                wrap.innerHTML = `<div class="modal" style="width:520px;max-width:95vw"><h3>${fEsc(title || 'تأكيد')}</h3><div style="color:var(--color-text-secondary);line-height:1.8;margin-bottom:18px;">${fEsc(body || 'هل أنت متأكد؟')}</div><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" onclick="document.getElementById('f-direct-confirm')?.remove()">إلغاء</button><button type="button" class="danger" id="f-direct-confirm-yes"><i class="ti ti-check"></i>${fEsc(yesText || 'تأكيد')}</button></div></div>`;
+                document.body.appendChild(wrap);
+                wrap.querySelector('#f-direct-confirm-yes').onclick = async () => { wrap.remove(); if (typeof onYes === 'function') await onYes(); };
+            }
+
+            function fEnsureStyle(){
+                if (document.getElementById('h-direct-repair-style')) return;
+                const st = document.createElement('style');
+                st.id = 'h-direct-repair-style';
+                st.textContent = `
+                    #tab-course-detail button[onclick*="duplicateCourse"], #cd-videos button[onclick*="duplicateSurvey"], #cd-videos button[onclick*="duplicateSurveyTemplate"]{display:none!important;}
+                    .h-course-dup-btn{width:100%;margin-top:10px;justify-content:center;background:#fff;border:1px solid rgba(18,48,111,.25);color:#12306f;border-radius:10px;padding:9px 12px;font-weight:800;}
+                    .h-course-dup-btn:hover{background:#eef4ff;color:#0f2a66;}
+                    .h-survey-dup-btn{background:#fff;border-color:rgba(18,48,111,.25);color:#12306f;}
+                `;
+                document.head.appendChild(st);
+            }
+            fEnsureStyle();
+
+            function fEnrollEmail(e, courseIds){
+                const direct = fMail(e.userEmail || e.email || e.user_email || e.user || e.traineeEmail || e.trainee_email);
+                if (direct) return direct;
+                const id = fId(e.id || e._id);
+                for (const cid of courseIds || []) if (id.endsWith('_' + cid)) return fMail(id.slice(0, -cid.length - 1));
+                return '';
+            }
+            function fEnrollCourse(e, courseIds){
+                const direct = fId(e.courseId || e.course_id || e.course || e.courseID);
+                if (direct) return direct;
+                const id = fId(e.id || e._id);
+                for (const cid of courseIds || []) if (id.endsWith('_' + cid)) return cid;
+                return '';
+            }
+            function fUserMap(users){
+                const map = {};
+                (users || []).forEach(u => {
+                    const email = fMail(u.email || u.userEmail || u.user_email || u.id || u._id);
+                    if (email && String(u.status || '').toLowerCase() !== 'deleted') map[email] = { ...u, email };
+                });
+                return map;
+            }
+            function fCourseMap(courses){
+                const map = {};
+                (courses || []).forEach(c => { const cid = fCourseId(c); if (cid) map[cid] = { ...c, course_id:cid }; });
+                return map;
+            }
+            function fPlayableMap(videos){
+                const byCourse = {}, videoToCourse = {};
+                (videos || []).forEach(v => {
+                    if (fIsSection(v)) return;
+                    const cid = fVideoCourse(v);
+                    const vid = fVideoId(v);
+                    if (!cid || !vid) return;
+                    (byCourse[cid] ||= new Set()).add(vid);
+                    videoToCourse[vid] = cid;
+                });
+                return { byCourse, videoToCourse };
+            }
+            function fDoneMap(progressRows, videoToCourse){
+                const done = {};
+                (progressRows || []).forEach(p => {
+                    const email = fMail(p.userEmail || p.email || p.user_email || p.user);
+                    const vid = fId(p.videoId || p.video_id || p.video || p.id || p._id);
+                    const cid = fId(p.courseId || p.course_id || p.course || videoToCourse[vid]);
+                    if (!email || !cid || !vid || !fIsDone(p)) return;
+                    (done[`${email}__${cid}`] ||= new Set()).add(vid);
+                });
+                return done;
+            }
+            function fRowsFromData({users, courses, videos, enrollments, progress}){
+                const cMap = fCourseMap(courses);
+                const courseIds = Object.keys(cMap);
+                const uMap = fUserMap(users);
+                const { byCourse, videoToCourse } = fPlayableMap(videos);
+                const done = fDoneMap(progress, videoToCourse);
+                const pairs = new Map();
+                (enrollments || []).forEach(e => {
+                    const email = fEnrollEmail(e, courseIds);
+                    const cid = fEnrollCourse(e, courseIds);
+                    if (email && cid) pairs.set(`${email}__${cid}`, { email, cid });
+                });
+                (courses || []).forEach(c => {
+                    const cid = fCourseId(c);
+                    const arr = c.enrolled_users || c.enrolledUsers || c.participants || c.students || [];
+                    if (Array.isArray(arr)) arr.forEach(x => {
+                        const email = fMail(typeof x === 'string' ? x : (x.email || x.userEmail));
+                        if (email && cid) pairs.set(`${email}__${cid}`, { email, cid });
+                    });
+                });
+                return [...pairs.values()].map(({email, cid}) => {
+                    const u = uMap[email] || { email, full_name: email };
+                    const c = cMap[cid] || { course_id:cid, course_name:cid };
+                    const total = byCourse[cid]?.size || 0;
+                    const completed = done[`${email}__${cid}`]?.size || 0;
+                    const percent = total ? (completed / total) * 100 : 100;
+                    return {
+                        email,
+                        full_name: u.full_name || u.name || u.display_name || email,
+                        region: u.region || u.area || '',
+                        branch: u.branch || '',
+                        group: u.group || u.group_name || '',
+                        supervisor: u.supervisor || u.manager || '',
+                        course_id: cid,
+                        course_name: fTitle(c),
+                        completed_videos: completed,
+                        total_videos: total,
+                        progress_percent: percent,
+                        completed: total === 0 || completed >= total
+                    };
+                }).sort((a,b) => String(a.course_name).localeCompare(String(b.course_name),'ar') || String(a.full_name).localeCompare(String(b.full_name),'ar'));
+            }
+            async function fReadCourses(){
+                let courses = [];
+                try { const r = await (typeof call === 'function' ? call({ action:'getCourses' }) : Promise.resolve({success:false})); if (r?.success) courses = r.courses || []; } catch(e) {}
+                if (!courses.length) courses = await fDocs('courses');
+                return courses.map(c => ({ ...c, course_id:fCourseId(c) }));
+            }
+            async function fBuildProgressRows(){
+                const [users, courses, videos, enrollments, progress] = await Promise.all([fDocs('users'), fReadCourses(), fDocs('videos'), fDocs('enrollments'), fDocs('progress')]);
+                return { courses, rows:fRowsFromData({users, courses, videos, enrollments, progress}) };
+            }
+            async function fCourseProgress(courseId){
+                const { rows } = await fBuildProgressRows();
+                return rows.filter(r => r.course_id === fId(courseId));
+            }
+            const prevCall = typeof call === 'function' ? call : null;
+            if (prevCall) {
+                call = async function(p = {}){
+                    if (p?.action === 'getCourseProgress') {
+                        try { return { success:true, progress: await fCourseProgress(p.courseId || p.course_id) }; } catch(e) { console.warn(e); }
+                    }
+                    if (p?.action === 'getAllProgress') {
+                        try {
+                            const { rows } = await fBuildProgressRows();
+                            const byUser = {};
+                            rows.forEach(r => { (byUser[r.email] ||= { email:r.email, full_name:r.full_name, region:r.region, branch:r.branch, group:r.group, supervisor:r.supervisor, courses:[] }).courses.push({ course_id:r.course_id, course_name:r.course_name, progress_percent:r.progress_percent, completed:r.completed, completed_videos:r.completed_videos, total_videos:r.total_videos }); });
+                            return { success:true, summary:Object.values(byUser), progress:rows };
+                        } catch(e) { console.warn(e); }
+                    }
+                    return prevCall(p);
+                };
+                window.call = call;
+            }
+
+            function fFillProgressFilters(){
+                const fill = (id, values, label) => {
+                    const el = document.getElementById(id); if (!el) return;
+                    const cur = el.value;
+                    el.innerHTML = `<option value="">${fEsc(label)}</option>` + [...new Set(values.filter(Boolean))].sort().map(v => `<option value="${fEsc(v)}">${fEsc(v)}</option>`).join('');
+                    if ([...el.options].some(o => o.value === cur)) el.value = cur;
+                };
+                const courseSel = document.getElementById('progress-filter-course');
+                if (courseSel) {
+                    const cur = courseSel.value;
+                    courseSel.innerHTML = '<option value="">كل الدورات</option>' + (CCACHE || []).map(c => `<option value="${fEsc(fCourseId(c))}">${fEsc(fTitle(c))}</option>`).join('');
+                    if ([...courseSel.options].some(o => o.value === cur)) courseSel.value = cur;
+                }
+                fill('progress-filter-region', (ALL_PROGRESS_ROWS || []).map(r => r.region), 'كل الأقاليم');
+                fill('progress-filter-group', (ALL_PROGRESS_ROWS || []).map(r => r.group), 'كل الجروبات');
+                fill('progress-filter-supervisor', (ALL_PROGRESS_ROWS || []).map(r => r.supervisor), 'كل المشرفين');
+            }
+            renderAllProgressTable = function(){
+                const courseId = fId(document.getElementById('progress-filter-course')?.value);
+                const region = fId(document.getElementById('progress-filter-region')?.value);
+                const group = fId(document.getElementById('progress-filter-group')?.value);
+                const supervisor = fId(document.getElementById('progress-filter-supervisor')?.value);
+                const rows = (ALL_PROGRESS_ROWS || []).filter(r => (!courseId || r.course_id === courseId) && (!region || r.region === region) && (!group || r.group === group) && (!supervisor || r.supervisor === supervisor));
+                const body = document.getElementById('progress-tb');
+                if (!body) return;
+                body.innerHTML = rows.length ? rows.map(u => `<tr>
+                    <td><button class="icon-btn sm success" title="اعتماد التقدم اليدوي" onclick="confirmManualProgress(${fJs(u.email)},${fJs(u.course_id)})"><i class="ti ti-check"></i></button></td>
+                    <td style="font-weight:700;cursor:pointer;color:var(--color-text-info);" onclick="viewAdminProfile(${fJs(u.email)})">${fEsc(u.full_name || '—')}</td>
+                    <td style="font-size:12px;color:var(--color-text-secondary);direction:ltr;text-align:right;">${fEsc(u.email)}</td>
+                    <td>${fEsc(u.course_name || '—')}</td>
+                    <td style="font-size:13px;">${fEsc(u.region || '—')}</td>
+                    <td style="font-size:13px;">${fEsc(u.group || '—')}</td>
+                    <td style="font-size:13px;">${fEsc(u.supervisor || '—')}</td>
+                    <td><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(u.progress_percent || 0)}%;background:${u.completed ? '#0f9d58' : '#1a73e8'};"></div></div><div style="font-size:12px;font-weight:700;margin-top:4px;">${Math.round(u.progress_percent || 0)}% (${u.completed_videos || 0}/${u.total_videos || 0})</div></td>
+                    <td><span class="badge badge-${u.completed ? 'active' : 'suspended'}">${u.completed ? 'مكتمل' : 'قيد التقدم'}</span></td>
+                </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--color-text-secondary)">لا توجد بيانات تقدم بعد الفلترة. لو الدورة عليها متدربين تأكد أن الالتحاق محفوظ في enrollments.</td></tr>';
+            };
+            window.renderAllProgressTable = renderAllProgressTable;
+            loadAllProgress = async function(){
+                try {
+                    const built = await fBuildProgressRows();
+                    CCACHE = built.courses || [];
+                    ALL_PROGRESS_ROWS = built.rows || [];
+                    const grid = document.getElementById('progress-courses-grid');
+                    if (grid) { grid.innerHTML = ''; grid.style.display = 'none'; }
+                    fFillProgressFilters();
+                    renderAllProgressTable();
+                    const title = document.getElementById('progress-selected-title');
+                    if (title) { title.style.display = 'block'; title.innerHTML = '<i class="ti ti-chart-bar"></i> التقدم العام'; }
+                } catch(e) {
+                    console.error(e);
+                    toast('تعذر تحميل التقدم: ' + (e?.message || e), 'error');
+                }
+            };
+            window.loadAllProgress = loadAllProgress;
+            setProgressCourseFilter = function(courseId){
+                const el = document.getElementById('progress-filter-course'); if (el) el.value = courseId || '';
+                renderAllProgressTable();
+            };
+            window.setProgressCourseFilter = setProgressCourseFilter;
+
+            doDeleteVideo = async function(videoId){
+                const vid = fId(videoId); if (!vid) return;
+                let label = 'هذا العنصر';
+                try { const rows = await fDocs('videos'); const it = rows.find(v => fVideoId(v) === vid); label = (typeof itemTitle === 'function' ? itemTitle(it) : (it?.title || it?.title_ar || it?.video_title)) || label; } catch(e) {}
+                fModal('حذف المحتوى', `هل تريد حذف "${label}" من الدورة؟`, 'حذف', async () => {
+                    const r = await call({ action:'deleteVideo', videoId:vid });
+                    if (r?.success) { toast('تم حذف المحتوى'); if (typeof openCourseDetail === 'function') await openCourseDetail(CCI); }
+                    else toast(r?.error || 'تعذر حذف المحتوى', 'error');
+                });
+            };
+            window.doDeleteVideo = doDeleteVideo;
+
+            window.duplicateSurveyTemplate = async function(id){
+                const sid = fId(id); if (!sid) return toast('اختار تقييم الأول', 'warning');
+                try {
+                    await fAuth();
+                    const source = await fDoc('survey_library', sid);
+                    if (!source) return toast('التقييم غير موجود', 'error');
+                    const newRef = doc(collection(db, 'survey_library'));
+                    const questionsRaw = (typeof advSurveyTemplateQuestions === 'function' ? advSurveyTemplateQuestions(source) : (source.questions || []));
+                    const questions = (questionsRaw || []).map((q,i) => ({ ...q, id:`q_${fNow()}_${i}`, text:q.text || q.text_ar || q.question || '', text_ar:q.text_ar || q.text || q.question || '', category:q.category || 'course', type:q.type || (Number(q.scaleMax || q.scale_max || 0) === 5 ? 'scale5' : 'nps') }));
+                    const axes = source.axes && source.axes.length ? source.axes.map((ax, ai) => ({ ...ax, questions:(ax.questions || []).map((q, qi) => ({ ...q, id:`q_${fNow()}_${ai}_${qi}` })) })) : [{ title:'أسئلة التقييم', questions }];
+                    const copy = { ...source, title:`${source.title || 'تقييم'} - نسخة`, questions, axes, original_survey_id:sid, createdAt:fNow(), updatedAt:fNow() };
+                    ['id','_id'].forEach(k => delete copy[k]);
+                    await setDoc(newRef, copy);
+                    if (typeof loadSurveyLibraryPage === 'function') {
+                        try { await loadSurveyLibraryPage(); } catch(refreshErr) { console.warn('survey library refresh after duplicate failed', refreshErr); }
+                    }
+                    if (typeof openSurveyLibraryBuilder === 'function') {
+                        try { await openSurveyLibraryBuilder(newRef.id); } catch(openErr) { console.warn('open duplicated survey failed', openErr); }
+                    }
+                    toast('تم عمل دبلكيت للتقييم');
+                } catch(e) {
+                    console.error(e);
+                    toast('تعذر عمل دبلكيت للتقييم: ' + (e?.message || e), 'error');
+                }
+            };
+
+            window.duplicateCourse = async function(courseId){
+                if (!fIsAdmin()) return toast('دبلكيت الدورة متاح للأدمن فقط', 'warning');
+                const cid = fId(courseId || CCI || COURSE_ACTION_ID);
+                if (!cid) return toast('اختار دورة الأول', 'warning');
+                const allCourses = (CCACHE && CCACHE.length ? CCACHE : await fReadCourses());
+                const source = allCourses.find(c => fCourseId(c) === cid) || await fDoc('courses', cid);
+                if (!source) return toast('الدورة غير موجودة', 'error');
+                const runDuplicateCourse = async () => {
+                    try {
+                        await fAuth();
+                        const newRef = doc(collection(db, 'courses'));
+                        const newId = newRef.id;
+                        const copy = { ...source };
+                        ['id','_id','_enrolled_count','enrolled_count','participants','students','enrolled_users','enrolledUsers','results','progress','completed_users'].forEach(k => delete copy[k]);
+                        copy.course_id = newId; copy.courseId = newId;
+                        copy.course_name = `${fTitle(source)} - نسخة`;
+                        if (copy.course_name_ar) copy.course_name_ar = `${copy.course_name_ar} - نسخة`;
+                        if (copy.course_name_en) copy.course_name_en = `${copy.course_name_en} - Copy`;
+                        copy.status = 'draft';
+                        copy.approval_status = 'draft';
+                        copy.original_course_id = cid;
+                        copy.created_by = fMail(CU?.email || copy.created_by || '');
+                        copy.created_by_name = CU?.full_name || CU?.name || CU?.email || copy.created_by_name || '';
+                        copy.created_at = fNow(); copy.updated_at = fNow();
+                        await setDoc(newRef, copy);
+
+                        let oldItems = [];
+                        try {
+                            const vr = typeof call === 'function' ? await call({ action:'getVideos', courseId:cid }) : null;
+                            if (vr?.success) oldItems = vr.videos || [];
+                        } catch(e) {}
+                        if (!oldItems.length) oldItems = (await fDocs('videos')).filter(v => fVideoCourse(v) === cid);
+                        const idMap = new Map();
+                        oldItems.forEach(v => idMap.set(fVideoId(v), doc(collection(db, 'videos')).id));
+                        let batch = writeBatch(db), n = 0;
+                        for (const old of oldItems) {
+                            const oldId = fVideoId(old); const newVid = idMap.get(oldId);
+                            if (!oldId || !newVid) continue;
+                            const item = { ...old };
+                            ['id','_id'].forEach(k => delete item[k]);
+                            item.course_id = newId; item.courseId = newId; item.video_id = newVid; item.videoId = newVid; item.original_video_id = oldId;
+                            if (item.section_id) item.section_id = idMap.get(fId(item.section_id)) || '';
+                            batch.set(doc(db, 'videos', newVid), item);
+                            n++;
+                            if (n >= 400) { await batch.commit(); batch = writeBatch(db); n = 0; }
+                        }
+                        if (n) await batch.commit();
+                        toast('تم عمل دبلكيت للدورة');
+                        if (typeof loadCourses === 'function') {
+                            try { await loadCourses(); } catch(loadErr) { console.warn('courses reload after duplicate failed', loadErr); }
+                        }
+                        if (typeof renderCoursesGrid === 'function') {
+                            try { renderCoursesGrid(); } catch(renderErr) { console.warn('courses render after duplicate failed', renderErr); }
+                        }
+                        try { fEnsureCourseDuplicateButtons(); } catch(cleanErr) { console.warn('duplicate cleanup failed', cleanErr); }
+                    } catch(e) {
+                        console.error(e);
+                        toast('تعذر عمل دبلكيت للدورة: ' + (e?.message || e), 'error');
+                    }
+                };
+                await runDuplicateCourse();
+            };
+
+            function fEnsureCourseDuplicateButtons(){
+                const grid = document.getElementById('courses-grid'); if (!grid) return;
+                grid.querySelectorAll('.h-course-dup-btn').forEach(btn => btn.remove());
+            }
+            window.fEnsureCourseDuplicateButtons = fEnsureCourseDuplicateButtons;
+            const prevRenderCoursesGrid = typeof renderCoursesGrid === 'function' ? renderCoursesGrid : null;
+            if (prevRenderCoursesGrid) {
+                renderCoursesGrid = function(){
+                    const out = prevRenderCoursesGrid.apply(this, arguments);
+                    setTimeout(fEnsureCourseDuplicateButtons, 0);
+                    setTimeout(fEnsureCourseDuplicateButtons, 300);
+                    return out;
+                };
+                window.renderCoursesGrid = renderCoursesGrid;
+            }
+            const prevLoadCourses = typeof loadCourses === 'function' ? loadCourses : null;
+            if (prevLoadCourses) {
+                loadCourses = async function(){
+                    const out = await prevLoadCourses.apply(this, arguments);
+                    setTimeout(fEnsureCourseDuplicateButtons, 0);
+                    setTimeout(fEnsureCourseDuplicateButtons, 300);
+                    return out;
+                };
+                window.loadCourses = loadCourses;
+            }
+
+            function fEnsureSurveyDuplicateButtons(){
+                const root = document.getElementById('tab-survey-library'); if (!root) return;
+                root.querySelectorAll('.h-survey-dup-btn').forEach(btn => btn.remove());
+            }
+            window.fEnsureSurveyDuplicateButtons = fEnsureSurveyDuplicateButtons;
+            const prevSurveyLibrary = typeof loadSurveyLibraryPage === 'function' ? loadSurveyLibraryPage : null;
+            if (prevSurveyLibrary) {
+                loadSurveyLibraryPage = async function(){
+                    const out = await prevSurveyLibrary.apply(this, arguments);
+                    setTimeout(fEnsureSurveyDuplicateButtons, 0);
+                    setTimeout(fEnsureSurveyDuplicateButtons, 300);
+                    return out;
+                };
+                window.loadSurveyLibraryPage = loadSurveyLibraryPage;
+            }
+
+            const prevOpenCourseDetail = typeof openCourseDetail === 'function' ? openCourseDetail : null;
+            if (prevOpenCourseDetail) {
+                openCourseDetail = async function(){
+                    const out = await prevOpenCourseDetail.apply(this, arguments);
+                    setTimeout(() => {
+                        document.querySelectorAll('#tab-course-detail button').forEach(b => {
+                            const txt = (b.textContent || '').replace(/\s+/g,' ');
+                            const on = b.getAttribute('onclick') || '';
+                            if (txt.includes('دبلكيت الدورة') || on.includes('duplicateCourse')) b.remove();
+                        });
+                        document.querySelectorAll('#cd-videos button').forEach(b => {
+                            const txt = (b.textContent || '').replace(/\s+/g,' ');
+                            const on = b.getAttribute('onclick') || '';
+                            if (txt.includes('دبلكيت') || on.includes('duplicateSurvey')) b.remove();
+                        });
+                    }, 0);
+                    return out;
+                };
+                window.openCourseDetail = openCourseDetail;
+            }
+
+            const prevShowTab = typeof showTab === 'function' ? showTab : null;
+            if (prevShowTab) {
+                showTab = function(tab){
+                    const out = prevShowTab.apply(this, arguments);
+                    if (tab === 'progress') { setTimeout(loadAllProgress, 80); setTimeout(loadAllProgress, 650); }
+                    if (tab === 'courses') { setTimeout(fEnsureCourseDuplicateButtons, 80); setTimeout(fEnsureCourseDuplicateButtons, 650); }
+                    if (tab === 'survey-library') { setTimeout(fEnsureSurveyDuplicateButtons, 80); setTimeout(fEnsureSurveyDuplicateButtons, 650); }
+                    return out;
+                };
+                window.showTab = showTab;
+            }
+            setTimeout(() => {
+                fEnsureCourseDuplicateButtons();
+                fEnsureSurveyDuplicateButtons();
+                if (document.getElementById('tab-progress') && !document.getElementById('tab-progress').classList.contains('hidden')) loadAllProgress();
+            }, 700);
+        })();
+        // ═════════ END DIRECT REPAIR ═════════
 
         console.log('✅ أكاديمية التدريب - النظام جاهز بالكامل');
     </script>
